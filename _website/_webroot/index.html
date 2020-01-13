@@ -1,0 +1,69 @@
+<html>
+<head>
+    <link rel="image_src" href="img/screenshot.png" />
+    <meta name="description" content="A real-time interactive journey through the Apollo 11 mission. Relive every moment as it occurred in 1969." />
+
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <script type="text/javascript" src="lib/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="lib/webfontloader.js"></script>
+    <script type="text/javascript" src="index.js"></script>
+
+    <meta property="fb:app_id" content="2082429458513047" />
+    <meta property="og:title" content="Apollo in Real-time" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="img/screenshot.png" />
+    <meta property="og:url" content="https://apolloinrealtime.org/" />
+    <meta property="og:description" content="A real-time interactive journey through the Apollo missions. Relive every moment as it occurred." />
+    <meta property="og:site_name" content="Apollo in Real-time" />
+
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-37086725-6', 'auto');
+        ga('send', 'pageview');
+    </script>
+</head>
+<body>
+<div class="header">
+    <div class="content-wrapper">
+        <div class="patch"></div>
+        <div class="patch-right">
+            <div class="heading-wrapper">
+                <div class="heading">APOLLO</div>
+                <div class="heading-realtime">IN REAL TIME</div>
+            </div>
+            <div class="subheading1" style="margin-top: 1.1em;">A real-time journey through the Apollo missions.</div>
+            <div class="subheading2">This website consists entirely of original historical mission material</div>
+            <div class="subheading1" style="margin-top: 1em;">Select an available mission:</div>
+        </div>
+    </div>
+</div>
+<div class="outer-container">
+    <div class="container">
+        <div class="mission-grid">
+            <div class="mission" onclick="missionClick('./11')">
+                <img src="img/Apollo11.png">
+                <div class="mission-title">APOLLO 11</div>
+                <div class="mission-date">July 16, 1969</div>
+                <div class="mission-status"></div>
+            </div>
+            <div class="mission" onclick="missionClick('./13')">
+                <img src="img/Apollo13.png" class="coming-soon">
+                <div class="mission-title coming-soon-text">APOLLO 13</div>
+                <div class="mission-date coming-soon-text">April 11, 1970</div>
+                <div class="mission-status coming-soon-text">In Development</div>
+            </div>
+            <div class="mission" onclick="missionClick('https://apollo17.org')">
+                <img src="img/Apollo17.png">
+                <div class="mission-title">APOLLO 17</div>
+                <div class="mission-date">Dec 7, 1972</div>
+                <div class="mission-status"><span class="live-bullet">&#x25cf;</span> LIVE (50th Anniversary)</div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
