@@ -1,70 +1,74 @@
-*{margin:0;}
+* {
+  margin: 0;
+}
 
 body {
-    color: #999999;
-    background-color: #131313;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center top;
-    position: relative;
+  color: #999999;
+  background-color: #131313;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center top;
+  position: relative;
 
-    height: 100%;
-    background-image: url("img/background_1080_30percent.jpg");
+  height: 100%;
+  background-image: url("img/background_1080_30percent.jpg");
 }
 
-body, p, ul {
-    /*font-family: Arial;*/
-    font-size: 16px;
-    /*color: #222;*/
+body,
+p,
+ul {
+  /*font-family: Arial;*/
+  font-size: 16px;
+  /*color: #222;*/
 }
 img {
-    border: none;
-    vertical-align: middle;
+  border: none;
+  vertical-align: middle;
 }
 p {
-    margin: .4em 0 .5em 0;
-    line-height: 1.5em;
+  margin: 0.4em 0 0.5em 0;
+  line-height: 1.5em;
 }
 p img {
-    margin: 0;
+  margin: 0;
 }
 
 a:link {
-    color: #9ee9ff;
+  color: #9ee9ff;
 }
 
 a:visited {
-    color: #9ee9ff;
+  color: #9ee9ff;
 }
 
 h1 {
-    color: #FFFFFF;
-    font-size: 2em;
-    line-height: 1;
+  color: #ffffff;
+  font-size: 2em;
+  line-height: 1;
 }
 
 h2 {
-    color: #FFFFFF;
-    font-size: 1.6em;
-    margin-top: 1.75rem;
+  color: #ffffff;
+  font-size: 1.6em;
+  margin-top: 1.75rem;
 }
 
 h3 {
-    /*color: #84b8d9;*/
-    color: #FFFFFF;
-    font-weight: bold;
-    font-size: 1.1em;
-    margin-top: 1.75rem;
+  /*color: #84b8d9;*/
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-top: 1.75rem;
 }
 
 h4 {
-    /*color: #5E92A6;*/
-    /*color: #999999;*/
-    /*color: rgba(215, 160, 108, .9);*/
-    font-weight: bold;
-    font-size: 0.8em;
-    margin-top: 0.4em;
-    color: #5E92A6;
+  /*color: #5E92A6;*/
+  /*color: #999999;*/
+  /*color: rgba(215, 160, 108, .9);*/
+  font-weight: bold;
+  font-size: 0.8em;
+  margin-top: 0.4em;
+  color: #5e92a6;
 }
 
 /*font-family: 'Roboto Mono';*/
@@ -73,158 +77,164 @@ h4 {
 /*font-family: 'Oswald', sans-serif;*/
 
 .header {
-    position: relative;
-    /*background-color: rgba(255,255,255,.2);*/
-    /*width: 100%;               !* For old syntax, otherwise collapses. *!*/
-    flex: none;
-    padding: 2em 3em 0 2em;
-    float: left;
+  position: relative;
+  /*background-color: rgba(255,255,255,.2);*/
+  /*width: 100%;               !* For old syntax, otherwise collapses. *!*/
+  flex: none;
+  padding: 2em 3em 0 2em;
+  float: left;
 }
 
 .header .content-wrapper {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
 
-    position: relative;
-    padding-right: 3em;
+  position: relative;
+  padding-right: 3em;
 
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 1),1px 1px 9px rgba(0, 0, 0, 1)
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 1), 1px 1px 9px rgba(0, 0, 0, 1);
 }
 .header .content-wrapper:after {
-    content: " ";
-    clear: both;
-    display: block;
-    /*border-right: 1px solid #444;*/
-    position: absolute;
-    right: 0;
-    top: 1.55em;
-    bottom: 0;
-    width: 1px;
+  content: " ";
+  clear: both;
+  display: block;
+  /*border-right: 1px solid #444;*/
+  position: absolute;
+  right: 0;
+  top: 1.55em;
+  bottom: 0;
+  width: 1px;
 }
 .header .patch {
-    background-image: url("img/apollo_program_patch_200.png");
-    width: 7em;
-    height: 7em;
-    background-size: contain;
-    background-position: center center;
-    background-repeat: no-repeat;
-    flex: none;
-    margin-right: 20px;
+  background-image: url("img/apollo_program_patch_200.png");
+  width: 7em;
+  height: 7em;
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  flex: none;
+  margin-right: 20px;
 }
 
 .header .patch-right {
-    /*flex: none;*/
+  /*flex: none;*/
 }
 
 .header .heading-wrapper {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .header .heading {
-    font-family: 'Michroma', sans-serif;
-    font-size: 2.1em;
-    color: #FFF;
-    line-height: 1;
-    flex: none;
-    margin-bottom: 6px;
+  font-family: "Michroma", sans-serif;
+  font-size: 2.1em;
+  color: #fff;
+  line-height: 1;
+  flex: none;
+  margin-bottom: 6px;
 }
 
 .header .heading-realtime {
-    font-family: 'Michroma', sans-serif;
-    flex: none;
-    background-color: white;
-    color: black;
-    font-size: 1.0em;
-    font-weight: bold;
+  font-family: "Michroma", sans-serif;
+  flex: none;
+  background-color: white;
+  color: black;
+  font-size: 1em;
+  font-weight: bold;
 
-    padding: 2px 12px 4px 12px;
-    margin-left: 20px;
-    border-radius: 5px;
+  padding: 2px 12px 4px 12px;
+  margin-left: 20px;
+  border-radius: 5px;
 
-    text-shadow: none;
+  text-shadow: none;
 }
 
 .header .subheading1 {
-    font-family: 'Roboto Mono', sans-serif;
-    color: white;
-    font-size: 0.8em;
+  font-family: "Roboto Mono", sans-serif;
+  color: white;
+  font-size: 0.8em;
 }
 
 .header .subheading2 {
-    font-family: 'Roboto Mono', sans-serif;
-    color: #5E92A6;
-    font-size: 0.8em;
+  font-family: "Roboto Mono", sans-serif;
+  color: #5e92a6;
+  font-size: 0.8em;
 }
 
 .outer-container {
-    float: left;
-    width:100%;
-    text-align: center;
-    margin-top: 5em;
+  float: left;
+  width: 100%;
+  text-align: center;
+  margin-top: 5em;
 }
 .container {
-    display: inline-block;
+  display: inline-block;
 }
 .mission-grid {
-    display: flex;
-    flex-wrap: wrap
+  display: flex;
+  flex-wrap: wrap;
 }
 .mission {
-    margin-right: 20px;
-    margin-left: 20px;
-    flex: 1;
-    cursor: pointer;
+  margin-right: 20px;
+  margin-left: 20px;
+  flex: 1;
+  cursor: pointer;
 }
 
 .mission:hover {
-    filter: brightness(1.2);
+  filter: brightness(1.2);
 }
 
 .mission-title {
-    margin-top: 0.5em;
-    font-family: 'Michroma', sans-serif;
-    color: white;
-    font-size: 1.4em;
+  margin-top: 0.5em;
+  font-family: "Michroma", sans-serif;
+  color: white;
+  font-size: 1.4em;
 }
 
 .mission-date {
-    font-family: 'Roboto Mono', sans-serif;
-    color: #919191;
-    font-size: 0.9em;
+  font-family: "Roboto Mono", sans-serif;
+  color: #919191;
+  font-size: 0.9em;
 }
 
 .mission-description {
-    font-family: 'Roboto Mono', sans-serif;
-    color: #919191;
-    font-size: 0.9em;
+  font-family: "Roboto Mono", sans-serif;
+  color: #919191;
+  font-size: 0.9em;
 }
 
 .mission-status {
-    font-family: 'Roboto Mono', sans-serif;
-    color: #ffffff;
-    font-size: 1em;
-    margin-bottom: 2em;
+  font-family: "Roboto Mono", sans-serif;
+  color: #ffffff;
+  font-size: 1em;
+  margin-bottom: 2em;
 }
 
 .mission-status .live-bullet {
-    color: red;
-    font-size:1.4em;
+  color: red;
+  font-size: 1.4em;
+}
+
+.forum-section {
+  font-family: "Roboto Mono", sans-serif;
+  font-size: 0.8em;
+  margin-top: 2em;
 }
 
 .coming-soon {
-    /*opacity: 30%;*/
-    filter: brightness(0.2);
+  /*opacity: 30%;*/
+  filter: brightness(0.2);
 }
 
 .coming-soon-text {
-    opacity: 30%;
-    /*filter: brightness(0.3);*/
+  opacity: 30%;
+  /*filter: brightness(0.3);*/
 }
 
 /*@media (max-width: 400px) {*/
