@@ -1,6 +1,4 @@
 {
-  "liveServer.settings.root": "/_website/_webroot",
-  "liveServer.settings.port": 3002,
   "git.ignoreLimitWarning": true,
   "editor.formatOnSave": true,
   "editor.tabSize": 2,
@@ -18,9 +16,6 @@
   },
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
   },
   "cssModules.camelCase": true
 }
