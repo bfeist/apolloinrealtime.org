@@ -22,6 +22,10 @@ export default defineConfig({
       input: {
         landing: resolve(__dirname, "index.html"),
         a11: resolve(__dirname, "11/index.html"),
+        // a13: Phase 1 lift — index.html lives at project root,
+        // its assets live in public/13/ (lib/, styles.css, *.js,
+        // img/, indexes/, MOCRviz/, favicons/). Replaced by a typed
+        // entry in Phase 3 (unified shell).
         a13: resolve(__dirname, "13/index.html"),
         a17: resolve(__dirname, "17/index.html"),
       },
