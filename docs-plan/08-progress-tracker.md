@@ -7,19 +7,20 @@ Every agent session must read this first and update it before ending.
 
 ## ⏩ Resume here
 
-**Status:** Phases 1–3 complete (Ben confirmed Phase 3). Phase 4 in progress: three typed reference modules landed this session as additive ESM (legacy `index.js`/`ajax.js` not touched, per the wire-up lesson below):
+**Status:** Phases 1–3 complete (Ben confirmed Phase 3). Phase 4 in progress: four typed reference modules landed as additive ESM (legacy `index.js`/`ajax.js`/`navigator.js` not touched, per the wire-up lesson below):
 
 - `src/shell/clock.ts` + 28 unit tests
 - `src/data/csvLoader.ts` (pipe-delimited CSV parse + fetch + cache-bust) + 13 unit tests
 - `src/engines/ytplayer/index.ts` (typed YouTube IFrame API loader with promise + cache + chain-onto-existing-callback) + 3 unit tests
+- `src/engines/navigator/layout.ts` (pure tier layout + seconds<->x mapping per tier + nav box position/clamp + `tier{2,3}StartSeconds` derivation, no Paper.js, no DOM) + 23 unit tests
 
-45/45 tests green; `npm run check` green.
+68/68 tests green; `npm run check` green.
 
 **Browser dev harness:** `dev/index.html` + `src/dev/harness.ts` give a button-driven page at `http://localhost:5173/dev/` that imports each typed module directly and exercises it in the browser (clock conversions and round-trips; CSV loader against `/13/indexes/utteranceData.csv`; YouTube IFrame API load + cache). No legacy `index.js` is involved on this page — purely the Phase 4 modules. Use this to verify each module behaviorally in a real browser without touching mission pages. Confirmed all three URLs return 200 from the dev server.
 
 **Realistic path through remaining Phase 4 / 4.5 / 5 work (multi-session):**
 
-1. **Paper.js navigator** (~600 LOC in legacy `navigator.js` + Paper.js integration) — large, can land as a typed reference but tightly coupled to mission state.
+1. **Paper.js navigator rendering** — `layout.ts` (pure math) landed this session. Still to do: the Paper.js drawing layer (`drawTier1/2/3`, `drawCursor`, `drawNavCursor`, nav box rectangles, mouse handlers) as a separate `renderer.ts` that takes the `NavigatorLayout` from this module. That layer is tightly coupled to mission state + `paper.view` and is the natural Phase 5 entry point for navigator wire-up.
 2. **Audio scheduler** — inventory needed; not yet read.
 3. **Phase 4.5 MOCRviz** — iframe-to-ESM is inherently runtime-changing; needs Ben's verification gate before and after.
 4. **Phase 5 panels** (TOC, transcript, commentary, photos, telemetry, crew, dashboard, search) — each is its own conversion + jQuery removal + browser test. Plan declares Playwright visual diff blocking from this phase onward.
@@ -32,7 +33,7 @@ Every agent session must read this first and update it before ending.
 
 Phase 4 modules are parallel typed references; legacy callers stay on their inline copies until the caller itself converts to ESM in Phase 5.
 
-**Next action (agent):** Continue Phase 4 with Paper.js navigator extraction as a typed reference. Hold MOCRviz and panels until at least one full side-by-side verification of an engine reference module against legacy behavior.
+**Next action (agent):** Continue Phase 4 with audio scheduler inventory + extraction, OR begin the navigator Paper.js renderer layer on top of `layout.ts`. Hold MOCRviz and panels until at least one full side-by-side verification of an engine reference module against legacy behavior.
 
 **Notes from this session (Phase 3):**
 
@@ -56,7 +57,7 @@ Phase 4 modules are parallel typed references; legacy callers stay on their inli
 | 1 — Lift A13                     | done        | All three missions (A11, A13, A17) files lifted to `public/{N}/` and `legacy-src/{N}/`. Dev boots clean. Ben confirmed on all three.                                                                                                                     |
 | 2 — Mission config (typed)       | done        | Typed `{11,13,17}.config.ts`; `window.MISSION` wired; KeyCDN stripped. Ben confirmed all three.                                                                                                                                                          |
 | 3 — Unified entry + jQuery start | done        | Shared head builder + ESM entry + jQuery shim landed. `npm run check` + `npm run build` green. Ben confirmed head is correct, all 3 missions load clean.                                                                                                 |
-| 4 — Extract engines              | in-progress | Reference modules landed: `src/shell/clock.ts` (28 tests), `src/data/csvLoader.ts` (13 tests), `src/engines/ytplayer/index.ts` (3 tests). Still to do: Paper.js navigator, audio scheduler. Legacy `index.js`/`ajax.js` unchanged (consumed in Phase 5). |
+| 4 — Extract engines              | in-progress | Reference modules landed: `src/shell/clock.ts` (28 tests), `src/data/csvLoader.ts` (13 tests), `src/engines/ytplayer/index.ts` (3 tests), `src/engines/navigator/layout.ts` (23 tests — pure layout + coord math, no Paper.js). Still to do: navigator Paper.js renderer layer, audio scheduler. Legacy `index.js`/`ajax.js`/`navigator.js` unchanged (consumed in Phase 5). |
 | 4.5 — MOCRviz refactor           | not started |                                                                                                                                                                                                                                                          |
 | 5 — Panels + finish jQuery       | not started |                                                                                                                                                                                                                                                          |
 | 6 — CSS + responsive             | not started |                                                                                                                                                                                                                                                          |
