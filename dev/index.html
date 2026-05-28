@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>AiRT2 dev harness</title>
+    <style>
+      body {
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+        background: #111;
+        color: #eee;
+        margin: 0;
+        padding: 1.5rem;
+        line-height: 1.4;
+      }
+      h1 {
+        margin-top: 0;
+        font-size: 1.2rem;
+      }
+      h2 {
+        font-size: 1rem;
+        margin: 1.4rem 0 0.4rem;
+        color: #6cf;
+        border-bottom: 1px solid #333;
+        padding-bottom: 0.25rem;
+      }
+      .group {
+        margin-bottom: 1.2rem;
+      }
+      button {
+        background: #233;
+        color: #6cf;
+        border: 1px solid #355;
+        padding: 0.35rem 0.7rem;
+        margin: 0.15rem 0.25rem 0.15rem 0;
+        cursor: pointer;
+        font: inherit;
+      }
+      button:hover {
+        background: #344;
+      }
+      input,
+      select {
+        background: #222;
+        color: #eee;
+        border: 1px solid #444;
+        padding: 0.25rem 0.4rem;
+        font: inherit;
+        margin: 0.1rem 0;
+      }
+      pre {
+        background: #000;
+        border: 1px solid #333;
+        padding: 0.75rem;
+        margin: 0.4rem 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 22rem;
+        overflow: auto;
+      }
+      .ok {
+        color: #6f6;
+      }
+      .err {
+        color: #f66;
+      }
+      label {
+        display: inline-block;
+        min-width: 9rem;
+      }
+      .row {
+        margin: 0.3rem 0;
+      }
+      a {
+        color: #6cf;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AiRT2 dev harness</h1>
+    <p>
+      In-browser smoke tests for the Phase 4 typed modules. Modules are imported as ESM directly
+      from <code>src/</code>; no legacy <code>index.js</code> is loaded here. See
+      <a href="/11/">/11/</a> · <a href="/13/">/13/</a> · <a href="/17/">/17/</a> for the actual
+      mission pages.
+    </p>
+
+    <div class="group">
+      <h2>clock — src/shell/clock.ts</h2>
+      <div class="row">
+        <label for="clock-seconds">seconds → timeStr:</label>
+        <input id="clock-seconds" type="text" value="-18000" size="14" />
+        <button id="btn-s2t">convert</button>
+      </div>
+      <div class="row">
+        <label for="clock-timestr">timeStr → seconds:</label>
+        <input id="clock-timestr" type="text" value="100:23:09" size="14" />
+        <button id="btn-t2s">convert</button>
+      </div>
+      <div class="row">
+        <button id="btn-clock-roundtrip">round-trip a sample of GETs</button>
+      </div>
+      <pre id="out-clock">(idle)</pre>
+    </div>
+
+    <div class="group">
+      <h2>csvLoader — src/data/csvLoader.ts</h2>
+      <div class="row">
+        <label for="csv-url">CSV URL:</label>
+        <input id="csv-url" type="text" value="/13/indexes/utteranceData.csv" size="42" />
+        <label style="min-width: auto; margin-left: 1rem"
+          ><input id="csv-cachebust" type="checkbox" /> cache-bust</label
+        >
+        <button id="btn-csv-load">load + parse</button>
+      </div>
+      <pre id="out-csv">(idle)</pre>
+    </div>
+
+    <div class="group">
+      <h2>ytplayer — src/engines/ytplayer/index.ts</h2>
+      <div class="row">
+        <button id="btn-yt-load">load IFrame API</button>
+        <button id="btn-yt-load-2">load again (should be cached)</button>
+      </div>
+      <pre id="out-yt">(idle)</pre>
+    </div>
+
+    <script type="module" src="/src/dev/harness.ts"></script>
+  </body>
+</html>
