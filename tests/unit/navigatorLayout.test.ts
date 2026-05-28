@@ -13,8 +13,17 @@ import {
   computeTier2NavBoxX,
   tier2StartSecondsFromNavBoxX,
   tier3StartSecondsFromNavBoxX,
+  tierForY,
+  hitTestMouseMove,
+  hitTestMouseClick,
+  type NavigatorHit,
   type NavigatorLayoutInput,
 } from "../../src/engines/navigator/layout";
+
+function nonNull(hit: NavigatorHit | null): NavigatorHit {
+  if (hit === null) throw new Error("expected non-null NavigatorHit");
+  return hit;
+}
 
 // A13 desktop baseline viewport. Mission timing matches src/missions/13.config.ts.
 const A13: NavigatorLayoutInput = {
@@ -258,5 +267,143 @@ describe("computeTier2NavBoxX + tier3StartSecondsFromNavBoxX", () => {
     const xInTier3 = tier3SecondsToX(L, sec, t3Start);
     expect(xInTier3).toBeGreaterThanOrEqual(L.tier3.left - 1e-6);
     expect(xInTier3).toBeLessThanOrEqual(L.tier3.left + L.tier3.width + 1e-6);
+  });
+});
+
+describe("tierForY", () => {
+  const L = computeLayout(A13);
+  const tier1Bottom = L.tier1.top + L.tier1.height + L.tierSpacing;
+  const tier2Bottom = L.tier2.top + L.tier2.height + L.tierSpacing;
+
+  it("returns 1 for y inside tier 1", () => {
+    expect(tierForY(L, L.tier1.top)).toBe(1);
+    expect(tierForY(L, L.tier1.top + L.tier1.height / 2)).toBe(1);
+  });
+
+  it("returns 1 at the tier1 top edge (y=1)", () => {
+    expect(tierForY(L, 1)).toBe(1);
+  });
+
+  it("returns 2 at exactly tier1Bottom (legacy >= boundary)", () => {
+    expect(tierForY(L, tier1Bottom)).toBe(2);
+  });
+
+  it("returns 2 anywhere inside the tier 2 band", () => {
+    // tier2.top = tier1.height + tierSpacing, which is one less than tier1Bottom
+    // (because tier1.top = 1, not 0), so use tier2.top + 1 for "just inside tier 2".
+    expect(tierForY(L, L.tier2.top + 1)).toBe(2);
+    expect(tierForY(L, L.tier2.top + L.tier2.height / 2)).toBe(2);
+  });
+
+  it("returns null at exactly tier2Bottom (legacy gap)", () => {
+    expect(tierForY(L, tier2Bottom)).toBeNull();
+  });
+
+  it("returns 3 above tier2Bottom", () => {
+    expect(tierForY(L, tier2Bottom + 0.001)).toBe(3);
+    expect(tierForY(L, L.tier3.top + L.tier3.height / 2)).toBe(3);
+    expect(tierForY(L, L.height + 1000)).toBe(3);
+  });
+});
+
+describe("hitTestMouseMove", () => {
+  const L = computeLayout(A13);
+  const t2Start = 100_000;
+  const t3Start = 110_000;
+
+  it("returns tier 1 with seconds matching tier1XToSeconds inside the bounds", () => {
+    const x = L.tier1.left + L.tier1.width / 2;
+    const hit = nonNull(hitTestMouseMove(L, { x, y: L.tier1.top + 1 }, t2Start, t3Start));
+    expect(hit.tier).toBe(1);
+    expect(hit.seconds).toBeCloseTo(tier1XToSeconds(L, x), 6);
+  });
+
+  it("clamps tier 1 below to -countdownSeconds", () => {
+    const hit = nonNull(hitTestMouseMove(L, { x: L.tier1.left - 5000, y: 5 }, t2Start, t3Start));
+    expect(hit.tier).toBe(1);
+    expect(hit.seconds).toBe(-L.countdownSeconds);
+  });
+
+  it("clamps tier 1 above to missionDurationSeconds", () => {
+    const hit = nonNull(
+      hitTestMouseMove(L, { x: L.tier1.left + L.tier1.width + 5000, y: 5 }, t2Start, t3Start),
+    );
+    expect(hit.tier).toBe(1);
+    expect(hit.seconds).toBe(L.missionDurationSeconds);
+  });
+
+  it("returns tier 2 unclamped when inside the visible range", () => {
+    const inside = t2Start + (L.tier2.width * L.tier2.secondsPerPixel) / 2;
+    const x = tier2SecondsToX(L, inside, t2Start);
+    const y = L.tier2.top + 1;
+    const hit = nonNull(hitTestMouseMove(L, { x, y }, t2Start, t3Start));
+    expect(hit.tier).toBe(2);
+    expect(hit.seconds).toBeCloseTo(inside, 6);
+  });
+
+  it("clamps tier 2 below to tier2StartSeconds", () => {
+    const y = L.tier2.top + 1;
+    const hit = nonNull(hitTestMouseMove(L, { x: L.tier2.left - 1000, y }, t2Start, t3Start));
+    expect(hit.tier).toBe(2);
+    expect(hit.seconds).toBe(t2Start);
+  });
+
+  it("clamps tier 2 above to tier2StartSeconds + tier2Width * tier2SecondsPerPixel", () => {
+    const y = L.tier2.top + 1;
+    const maxX = L.tier2.left + L.tier2.width + 1000;
+    const hit = nonNull(hitTestMouseMove(L, { x: maxX, y }, t2Start, t3Start));
+    expect(hit.tier).toBe(2);
+    expect(hit.seconds).toBeCloseTo(t2Start + L.tier2.width * L.tier2.secondsPerPixel, 6);
+  });
+
+  it("returns tier 3 unclamped", () => {
+    const x = L.tier3.left + L.tier3.width / 2;
+    const y = L.tier3.top + 1;
+    const hit = nonNull(hitTestMouseMove(L, { x, y }, t2Start, t3Start));
+    expect(hit.tier).toBe(3);
+    expect(hit.seconds).toBeCloseTo(tier3XToSeconds(L, x, t3Start), 6);
+  });
+
+  it("returns null at the exact tier2/tier3 boundary (legacy gap)", () => {
+    const yBoundary = L.tier2.top + L.tier2.height + L.tierSpacing;
+    const hit = hitTestMouseMove(L, { x: L.tier3.left + 10, y: yBoundary }, t2Start, t3Start);
+    expect(hit).toBeNull();
+  });
+});
+
+describe("hitTestMouseClick", () => {
+  const L = computeLayout(A13);
+  const t2Start = 100_000;
+  const t3Start = 110_000;
+
+  it("returns tier 1 with unclamped seconds (legacy onMouseUp does not clamp)", () => {
+    const hit = hitTestMouseClick(L, { x: L.tier1.left - 5000, y: 5 }, t2Start, t3Start);
+    expect(hit.tier).toBe(1);
+    expect(hit.seconds).toBeCloseTo(tier1XToSeconds(L, L.tier1.left - 5000), 6);
+    expect(hit.seconds).toBeLessThan(-L.countdownSeconds); // confirms NO clamp
+  });
+
+  it("returns tier 2 with unclamped seconds for clicks past the right edge", () => {
+    const y = L.tier2.top + 1;
+    const x = L.tier2.left + L.tier2.width + 1000;
+    const hit = hitTestMouseClick(L, { x, y }, t2Start, t3Start);
+    expect(hit.tier).toBe(2);
+    expect(hit.seconds).toBeCloseTo(tier2XToSeconds(L, x, t2Start), 6);
+  });
+
+  it("falls through to tier 3 at the exact tier2/tier3 boundary (legacy else)", () => {
+    const yBoundary = L.tier2.top + L.tier2.height + L.tierSpacing;
+    const x = L.tier3.left + 10;
+    const hit = hitTestMouseClick(L, { x, y: yBoundary }, t2Start, t3Start);
+    expect(hit.tier).toBe(3);
+    expect(hit.seconds).toBeCloseTo(tier3XToSeconds(L, x, t3Start), 6);
+  });
+
+  it("returns tier 3 for points well below tier 2", () => {
+    const x = L.tier3.left + L.tier3.width / 2;
+    const y = L.tier3.top + L.tier3.height / 2;
+    const hit = hitTestMouseClick(L, { x, y }, t2Start, t3Start);
+    expect(hit.tier).toBe(3);
+    expect(hit.seconds).toBeCloseTo(tier3XToSeconds(L, x, t3Start), 6);
   });
 });

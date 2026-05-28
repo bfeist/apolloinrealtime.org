@@ -274,3 +274,95 @@ export function tier3StartSecondsFromNavBoxX(
 ): number {
   return (tier2NavBoxX - layout.tier2.left) * layout.tier2.secondsPerPixel + tier2StartSeconds;
 }
+
+// ── Hit-testing: mouse point -> { tier, seconds } ────────────────────────────
+
+export type NavigatorTier = 1 | 2 | 3;
+
+export interface NavigatorHit {
+  tier: NavigatorTier;
+  /** Mission-time seconds at the hit point. */
+  seconds: number;
+}
+
+/** A `(x, y)` pair in navigator-canvas coordinates (same space as `paper.view`). */
+export interface NavigatorPoint {
+  x: number;
+  y: number;
+}
+
+/**
+ * Decide which tier a y-coordinate falls in using the legacy `onMouseMove`
+ * boundary semantics:
+ *
+ * - `y <  tier1Top + tier1Height + tierSpacing` → tier 1
+ * - `y >= tier1Top + tier1Height + tierSpacing` and
+ *   `y <  tier2Top + tier2Height + tierSpacing` → tier 2
+ * - `y >  tier2Top + tier2Height + tierSpacing` → tier 3
+ * - exactly `y == tier2Top + tier2Height + tierSpacing` → `null` (matches the
+ *   gap in the legacy `else if` chain in `onMouseMove`)
+ */
+export function tierForY(layout: NavigatorLayout, y: number): NavigatorTier | null {
+  const tier1Bottom = layout.tier1.top + layout.tier1.height + layout.tierSpacing;
+  const tier2Bottom = layout.tier2.top + layout.tier2.height + layout.tierSpacing;
+  if (y < tier1Bottom) return 1;
+  if (y >= tier1Bottom && y < tier2Bottom) return 2;
+  if (y > tier2Bottom) return 3;
+  return null;
+}
+
+/**
+ * Hit-test for `paper.view.onMouseMove`. Mirrors the legacy `onMouseMove`
+ * handler in `navigator.js`:
+ *
+ * - tier 1: clamp x to `[-countdownSeconds, missionDurationSeconds]`
+ * - tier 2: clamp x to `[tier2StartSeconds, tier2StartSeconds + tier2Width * tier2SecondsPerPixel]`
+ * - tier 3: no clamp
+ *
+ * Returns `null` for y exactly on the tier-2/tier-3 boundary (the legacy
+ * handler leaves `mouseXSeconds` undefined in that case).
+ */
+export function hitTestMouseMove(
+  layout: NavigatorLayout,
+  point: NavigatorPoint,
+  tier2StartSeconds: number,
+  tier3StartSeconds: number,
+): NavigatorHit | null {
+  const tier = tierForY(layout, point.y);
+  if (tier === null) return null;
+  if (tier === 1) {
+    let seconds = tier1XToSeconds(layout, point.x);
+    if (seconds < layout.countdownSeconds * -1) seconds = layout.countdownSeconds * -1;
+    else if (seconds > layout.missionDurationSeconds) seconds = layout.missionDurationSeconds;
+    return { tier: 1, seconds };
+  }
+  if (tier === 2) {
+    const raw = tier2XToSeconds(layout, point.x, tier2StartSeconds);
+    return { tier: 2, seconds: clampTier2MouseSeconds(layout, raw, tier2StartSeconds) };
+  }
+  return { tier: 3, seconds: tier3XToSeconds(layout, point.x, tier3StartSeconds) };
+}
+
+/**
+ * Hit-test for `paper.view.onMouseUp` (click). Mirrors the legacy `onMouseUp`
+ * handler: same tier-1/tier-2 boundary as move, but the third branch is the
+ * unconditional `else` (so a y on the tier-2/tier-3 boundary falls through to
+ * tier 3). No clamping is applied — the legacy click handler reads the raw
+ * seconds for `seekToTime()`.
+ */
+export function hitTestMouseClick(
+  layout: NavigatorLayout,
+  point: NavigatorPoint,
+  tier2StartSeconds: number,
+  tier3StartSeconds: number,
+): NavigatorHit {
+  const tier1Bottom = layout.tier1.top + layout.tier1.height + layout.tierSpacing;
+  const tier2Bottom = layout.tier2.top + layout.tier2.height + layout.tierSpacing;
+  if (point.y < tier1Bottom) {
+    return { tier: 1, seconds: tier1XToSeconds(layout, point.x) };
+  }
+  if (point.y < tier2Bottom) {
+    return { tier: 2, seconds: tier2XToSeconds(layout, point.x, tier2StartSeconds) };
+  }
+  return { tier: 3, seconds: tier3XToSeconds(layout, point.x, tier3StartSeconds) };
+}

@@ -12,7 +12,7 @@ passes a side-by-side check.
 
 ## Verification approach (applies every phase)
 
-Three layers, lightest to heaviest:
+Four layers, lightest to heaviest:
 
 ### 1. Automated gates (run on every commit / `npm run check`)
 
@@ -27,7 +27,40 @@ npm run check
 These run fast and gate every PR. They do **not** check "does the app look
 right" — that's the human and Playwright layers.
 
-### 2. Manual browser comparison (every phase exit)
+### 2. Progressive in-browser dev pages (run continuously during a phase)
+
+Each typed module should be exercisable in a real browser **the same day it
+lands**, not at the end of the phase. Two surfaces:
+
+- **`/dev/` — module harness.** Imports each typed module directly from
+  `src/` and exposes button-driven smoke tests (input → output). Already in
+  place for `clock`, `csvLoader`, `ytplayer`. Add one block per new module
+  as it lands. No legacy code, no mission config — pure module surface.
+- **`/dev/{11,13,17}/` — per-mission progressive pages.** A near-blank
+  shell per mission that boots through `src/main.ts` against the typed
+  `MissionConfig`, but loads **only** the engines and panels that have been
+  converted to ESM so far. No legacy `index.js`, `ajax.js`, or
+  `navigator.js`. Starts almost empty (mission name + a running clock
+  readout) and grows as each Phase 4 / 4.5 / 5 deliverable lands: navigator
+  tier-bar renders, CSV loader feeds a transcript stub, MOCRviz panel
+  mounts, etc. This is the place an agent verifies a fresh extraction
+  behaviorally in a real browser without disturbing the legacy mission
+  pages at `/{11,13,17}/`.
+
+Rules for the per-mission `/dev/{N}/` pages:
+
+- They are scaffolding, not product. No Playwright baselines are captured
+  against them; the production-equivalence oracle remains the legacy
+  `/{N}/` pages.
+- Every typed module added to `src/engines/` or `src/panels/` MUST be wired
+  into all three `/dev/{N}/` pages it applies to before that module is
+  considered "done". The author is the first user of their own module in
+  context.
+- The legacy `/{N}/` pages stay byte-for-byte the lift from Phase 1 (head
+  injection aside) until Phase 5 converts call sites. Never edit them as a
+  way to smoke-test ESM work — use `/dev/{N}/` instead.
+
+### 3. Manual browser comparison (every phase exit)
 
 Open the staging app and the production app **side by side in two browser
 windows** at the same mission, same GET, same viewport. The quickest way:
@@ -52,7 +85,7 @@ Things to explicitly check each phase:
 For phases that affect layout (3, 6): also check tablet and mobile viewport
 widths in DevTools responsive mode.
 
-### 3. Playwright visual regression (phase exit + pre-cutover)
+### 4. Playwright visual regression (phase exit + pre-cutover)
 
 Playwright captures full-page screenshots at fixed GET snapshots and diffs
 them against the baseline set captured from production in Phase 0.
@@ -225,7 +258,13 @@ paths, no 404s). Playwright visual diff: informational; note any regressions
 but don't block on them yet.
 
 **Exit criterion:** one `index.html`, three working missions, same UX, the
-`src/dom/` shim exists and the bootstrap path is jQuery-free.
+`src/dom/` shim exists and the bootstrap path is jQuery-free. Per-mission
+progressive dev pages exist at `/dev/{11,13,17}/` (initially: mission name
+
+- live clock readout via `src/shell/clock.ts`, booted through
+  `src/main.ts` against `window.MISSION`). From this phase onward, every
+  typed engine/panel landed in `src/` must be wired into the matching
+  `/dev/{N}/` page before the work is considered done.
 
 ## Phase 4 — Extract shared engines (typed, tested)
 
@@ -248,16 +287,22 @@ After each extraction, all three missions must still pass the side-by-side
 check.
 
 **Verification:** `npm run check` + `vitest run` (unit tests for the modules
-extracted this phase). After clock extraction: write a quick manual test —
-paste a known GET string into the dev console, confirm `getToSeconds()` and
-`secondsToGet()` round-trip correctly against the mission duration. After
-CSV loader: open the Network tab in the browser and confirm `utteranceData.csv`
-loads once (not per panel), then scrub through the timeline and watch the
-transcript panel update. Playwright visual diff after each extraction:
-should be 0 pixel changes (no visible difference); any diff is a bug.
+extracted this phase). Each extracted module is also wired into `/dev/` (raw
+module harness) and into all three `/dev/{N}/` pages it applies to — the
+agent's first behavioral check is opening those pages in a real browser and
+exercising the new module against real mission data, before any side-by-side
+against legacy. After clock extraction: paste a known GET string into the
+dev console at `/dev/`, confirm round-trip; on `/dev/{N}/` the live clock
+readout should tick. After CSV loader: open Network tab on `/dev/13/` and
+confirm `utteranceData.csv` loads once, scrub through the timeline and
+watch the transcript stub update. Playwright visual diff against the legacy
+`/{N}/` pages after each extraction: should be 0 pixel changes (legacy
+pages are unchanged); any diff is a bug.
 
 **Exit criterion:** `index.js` is gone (lifted into typed modules); clock
-and CSV loader have Vitest unit tests; engines no longer use jQuery.
+and CSV loader have Vitest unit tests; engines no longer use jQuery. Each
+extracted engine is exercisable at `/dev/{N}/` for every mission it applies
+to.
 
 ## Phase 4.5 — MOCRviz refactor
 
@@ -274,11 +319,13 @@ MOCRviz is a fundamental part of A11 and A13 today, embedded via an
 
 **Verification:** Before starting: check the current MOCRviz on prod in A11
 and A13 — screenshot the panel open, note what mission-time it's synced to.
-After refactor: open the staging A13 MOCRviz panel, scrub the main player
-forward and back, confirm MOCRviz follows the main clock in real time
-(no iframe lag or postMessage gap). Repeat on A11. Run Playwright visual
-diff on the MOCRviz snapshot if one exists in the baseline set; otherwise add
-one now.
+During the refactor: mount the new ESM MOCRviz panel on `/dev/11/` and
+`/dev/13/` as soon as it loads at all (even if it can't sync yet), then
+iterate in-browser. After refactor: open the staging A13 MOCRviz panel,
+scrub the main player forward and back, confirm MOCRviz follows the main
+clock in real time (no iframe lag or postMessage gap). Repeat on A11. Run
+Playwright visual diff on the MOCRviz snapshot if one exists in the
+baseline set; otherwise add one now.
 
 **Exit criterion:** A11 and A13 render MOCRviz natively (no iframe), and
 MOCRviz reacts to scrubbing/playback from the main player in real time.
@@ -295,11 +342,16 @@ with non-trivial DOM behavior (transcript scrolling, photo grid, search).
 
 **Verification:** `npm run check` with zero jQuery remaining (confirm by
 running `grep -r '\$(' src/` — should be empty or only in `.spec` fixtures).
-Playwright visual diff: **blocking from this phase onward** — all 54
-baseline images must match within tolerance. Manual browser test for each
-panel's non-trivial behavior: transcript auto-scroll at a dense dialogue
-section, photo lazy-load scroll, search overlay open/close/result-click,
-telemetry chart at several GET points.
+Each panel converted to ESM gets wired into `/dev/{N}/` first; the
+per-mission dev page is the panel author's working surface throughout the
+phase. At end of phase, `/dev/{N}/` should be visually and behaviorally
+close to legacy `/{N}/` — that closeness is the cue that Phase 5 is
+converging. Playwright visual diff against the legacy `/{N}/` pages:
+**blocking from this phase onward** — all 54 baseline images must match
+within tolerance (legacy pages are still the oracle until Phase 7 cutover).
+Manual browser test for each panel's non-trivial behavior: transcript
+auto-scroll at a dense dialogue section, photo lazy-load scroll, search
+overlay open/close/result-click, telemetry chart at several GET points.
 
 **Exit criterion:** `src/panels/*.ts` exists, each panel can be loaded /
 unloaded without breaking the rest, no jQuery remains in the bundle, and
@@ -349,6 +401,8 @@ confirm it lands at the right GET and plays). After DNS cutover: repeat the
 manual deep-link checks against the live domain.
 
 **Exit criterion:** four weeks post-cutover with no regression reports.
+The `/dev/` and `/dev/{N}/` scaffolding pages are removed from the
+production build (kept in dev only).
 
 ## Phase 8 — Cleanup + future missions
 
