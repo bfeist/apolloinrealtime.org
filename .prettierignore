@@ -1,0 +1,11 @@
+dist
+node_modules
+legacy
+legacy-src
+public
+pipeline
+tests/visual/**/*-snapshots/**
+playwright-report
+test-results
+*.lock
+package-lock.json

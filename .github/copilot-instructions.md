@@ -45,6 +45,7 @@ Use subagents to preserve the main context window for coordination and
 decision-making. Default guidance:
 
 ### Use a Haiku subagent (`/sub-haiku`) for:
+
 - File copy / directory scaffolding operations
 - Repetitive file generation from a template (e.g., generating `11.config.ts`
   and `17.config.ts` once `13.config.ts` is working)
@@ -53,6 +54,7 @@ decision-making. Default guidance:
 - Generating CSV fixture files for tests
 
 ### Use a Sonnet subagent (`/sub-sonnet`) for:
+
 - Engine extraction tasks (Phase 4): reading 2000+ line JS and splitting into
   typed TypeScript modules
 - MOCRviz refactor (Phase 4.5): untangling iframe postMessage state
@@ -61,6 +63,7 @@ decision-making. Default guidance:
 - Any task requiring reading multiple large files simultaneously
 
 ### Keep in the main agent:
+
 - Phase-level decisions and deviations from plan
 - Resolving conflicts between planning docs
 - Writing tracker entries
@@ -104,11 +107,11 @@ Before marking a phase `done` in the tracker, confirm:
 
 - [ ] `npm run check` passes cleanly
 - [ ] Manual browser comparison: staging and prod open side-by-side at the
-  same GET, same mission — behavior is equivalent
+      same GET, same mission — behavior is equivalent
 - [ ] Zero JS console errors at all tested GETs
 - [ ] Network tab: no requests to `kxcdn` or `keycdnmedia` hosts (Phase 2+)
 - [ ] Playwright visual diff run; result noted in tracker (informational
-  through Phase 4, blocking Phase 5+)
+      through Phase 4, blocking Phase 5+)
 
 Full verification spec is in `05-migration-plan.md` under
 "Verification approach (applies every phase)".
