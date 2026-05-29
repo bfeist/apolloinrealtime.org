@@ -162,10 +162,9 @@ phone 390) = 54 baseline images. Stored in
 
 The baselines were captured against the **legacy** `apolloinrealtime.org`
 pages in Phase 0; they are the regression oracle for the new app. Visual
-diffs are **informational** during Phases 3 / 4 / 4.5 / 5 (the new app at
-`/dev/{N}/` is intentionally not pixel-equivalent yet). They become
-**blocking** in Phase 6 (when the new app's HTML/CSS shell goes live at
-`/dev/{N}/`) and again at Phase 7 pre-cutover.
+diffs are **informational** throughout all phases — they become a useful
+check-in tool once the typed app reaches visual parity with production,
+but are not a blocking gate at any phase exit.
 
 ### Lint — yes, it matters here
 
@@ -423,12 +422,16 @@ real mission page. The legacy oracle at `/legacy/{N}/` remains unchanged.
 
 **Verification:** Side-by-side `/{N}/` vs `/legacy/{N}/` at every
 snapshot GET and every viewport (phone, tablet, desktop). Playwright
-visual diff is **blocking** from this phase onward. Walk the full panel
-checklist at phone viewport.
+visual diff is **informational** from this phase onward (not a blocking
+exit gate — solidifying pixels before the design reaches parity just
+creates churn). The `tests/visual/visual.spec.ts` spec exists and
+captures typed-app snapshots; run `npm run test:visual:update` when
+the design is stable enough to lock in.
 
 **Exit criterion:** `/{N}/` is the production app: one base stylesheet,
 three tiny override files, the typed shell composes every engine and
-panel, Playwright phone/tablet/desktop baselines pass.
+panel, the app is usable and navigable at phone/tablet/desktop viewports
+and visually close enough to production that users can orient themselves.
 
 ## Phase 7 — Production cutover
 

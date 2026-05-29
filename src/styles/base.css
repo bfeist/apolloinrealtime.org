@@ -12,6 +12,11 @@
   box-sizing: border-box;
 }
 
+/* Ensure HTML5 hidden attribute is not overridden by explicit display rules. */
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   margin: 0;
@@ -85,21 +90,25 @@ button {
 }
 .airt-header__pretitle {
   margin: 0;
-  font-size: var(--airt-fs-sm);
+  font-family: var(--airt-font-display);
+  font-size: 10px; /* 0.5em × 20px base */
   color: var(--airt-fg-secondary);
 }
 .airt-header__title {
   margin: 0;
   font-family: var(--airt-font-display);
-  font-size: 28px;
-  line-height: 1.05;
+  font-size: var(--airt-fs-display); /* 20px — matches .info-wrapper .content */
+  line-height: 1.1;
   font-weight: 400;
-  color: var(--airt-fg-primary);
+  color: var(--airt-accent); /* #5e92a6 — production .title color */
 }
 .airt-header__subtitle {
-  margin: 0 0 var(--airt-sp-1);
-  font-size: var(--airt-fs-sm);
-  color: var(--airt-fg-secondary);
+  margin: 0 0 var(--airt-sp-2);
+  font-family: var(--airt-font-display);
+  font-size: 13px; /* 0.65em × 20px */
+  color: var(--airt-accent);
+  border-bottom: 1px solid var(--airt-border-hi);
+  padding-bottom: var(--airt-sp-2);
 }
 
 .airt-clock {
@@ -111,13 +120,16 @@ button {
 .airt-clock__row {
   display: flex;
   gap: var(--airt-sp-2);
-  font-family: var(--airt-font-mono);
-  font-size: var(--airt-fs-sm);
-  color: var(--airt-fg-secondary);
+  font-family: var(--airt-font-oswald);
+  font-size: var(--airt-fs-md);
+  font-weight: 300;
+  color: var(--airt-fg-primary);
+  line-height: 1;
 }
 .airt-clock__row--modern {
-  color: var(--airt-fg-muted);
-  font-size: var(--airt-fs-xs);
+  color: var(--airt-fg-secondary);
+  font-size: var(--airt-fs-sm);
+  margin-top: 2px;
 }
 
 .airt-get {
@@ -127,18 +139,22 @@ button {
   margin-top: 2px;
 }
 .airt-get__label {
+  font-family: var(--airt-font-oswald);
   font-size: var(--airt-fs-sm);
+  font-weight: 300;
   color: var(--airt-fg-secondary);
 }
 .airt-get__input {
   width: 9ch;
-  background: var(--airt-bg-monitor);
-  border: 1px solid var(--airt-border);
-  color: var(--airt-fg-primary);
+  background: var(--airt-bg-surface-hi);
+  border: 1px solid var(--airt-border-hi);
+  color: var(--airt-fg-secondary);
   padding: 3px 6px;
+  text-align: center;
   border-radius: var(--airt-radius-sm);
-  font-family: var(--airt-font-mono);
+  font-family: var(--airt-font-oswald);
   font-size: var(--airt-fs-md);
+  font-weight: 300;
 }
 .airt-get__input:focus {
   outline: 2px solid var(--airt-accent);
@@ -153,7 +169,9 @@ button {
   border-radius: var(--airt-radius-sm);
   background: var(--airt-bg-surface-hi);
   color: var(--airt-fg-primary);
+  font-family: var(--airt-font-oswald);
   font-size: var(--airt-fs-sm);
+  font-weight: 400;
   border: 1px solid var(--airt-border-hi);
   transition: background 100ms ease;
 }
@@ -162,7 +180,7 @@ button {
 }
 .airt-btn--accent {
   background: var(--airt-accent);
-  color: var(--airt-accent-on);
+  color: #000000;
   border-color: transparent;
 }
 .airt-btn--accent:hover {
@@ -258,9 +276,9 @@ button {
   border-bottom: 1px solid var(--airt-border);
 }
 .airt-overlay__title {
-  font-family: var(--airt-font-display);
-  font-size: var(--airt-fs-lg);
-  color: var(--airt-fg-primary);
+  font-family: var(--airt-font-display); /* Michroma — matches production overlay .title */
+  font-size: var(--airt-fs-md);
+  color: var(--airt-accent);
 }
 .airt-overlay__close {
   width: 24px;
@@ -362,8 +380,8 @@ button {
   color: var(--airt-fg-primary);
 }
 .airt-tab.is-active {
-  background: var(--airt-accent);
-  color: var(--airt-accent-on);
+  background: var(--airt-accent); /* #5e92a6 teal */
+  color: #000000;
   border-color: transparent;
 }
 .airt-action-btn {
@@ -408,11 +426,13 @@ button {
   flex: 0 0 auto;
   padding: var(--airt-sp-2) 4px;
   text-align: center;
-  font-size: 10px;
+  font-family: var(--airt-font-oswald);
+  font-size: 13px;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--airt-fg-muted);
-  line-height: 1.1;
+  letter-spacing: 0.04em;
+  color: var(--airt-fg-secondary);
+  line-height: 1.2;
   border-bottom: 1px solid var(--airt-border);
 }
 .airt-channels__list {
@@ -432,34 +452,42 @@ button {
 .airt-channels__list .thirtybtn-channel {
   display: block;
   width: 100%;
-  padding: 4px 2px;
-  text-align: center;
-  background: var(--airt-bg-surface-hi);
-  color: var(--airt-fg-secondary);
-  border: 1px solid var(--airt-border);
-  border-radius: 2px;
-  font-size: 9px;
-  font-weight: 600;
-  line-height: 1.1;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  white-space: normal;
-  word-break: break-word;
+  padding: 2px 2px;
+  text-align: left;
+  background: #292929;
+  color: #595959;
+  border: none;
+  border-right: 1px solid #292929;
+  border-bottom: 1px solid #292929;
+  border-radius: var(--airt-radius-sm);
+  font-family: var(--airt-font-mono);
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden; /* clip, no ellipsis — matches production */
+  box-shadow: inset -1px -1px 7px 3px rgba(0, 0, 0, 0.25);
   cursor: pointer;
 }
 .airt-channels__list .thirtybtn-channel:hover:not(:disabled) {
-  background: var(--airt-border-hi);
-  color: var(--airt-fg-primary);
+  background: #636363;
+  color: #000000;
+  border-right-color: #636363;
+  border-bottom-color: #636363;
 }
 .airt-channels__list .thirtybtn-channel:disabled {
-  opacity: 0.35;
+  background: #1a1a1a;
+  color: #333333;
   cursor: not-allowed;
+  opacity: 1;
 }
 .airt-channels__list .thirtybtn-channel.is-active,
-.airt-channels__list .thirtybtn-channel.selected {
-  background: var(--airt-accent);
-  color: var(--airt-accent-on);
-  border-color: transparent;
+.airt-channels__list .thirtybtn-channel.selected,
+.airt-channels__list .thirtybtn-channel.thirtybtn-selected {
+  background: #7cb7e0;
+  color: #000000;
+  border-right-color: rgb(93, 153, 177);
+  border-bottom-color: rgb(93, 153, 177);
 }
 
 /* ── RIGHT column: photo viewer + thumbnail rail ─────────────────────── */
@@ -492,8 +520,8 @@ button {
 }
 .airt-app-tab.is-active,
 .airt-app-tab.selected {
-  background: var(--airt-accent);
-  color: var(--airt-accent-on);
+  background: var(--airt-accent); /* #5e92a6 teal */
+  color: #000000;
   border-color: transparent;
 }
 .airt-app-tab:hover {

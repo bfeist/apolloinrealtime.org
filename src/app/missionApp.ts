@@ -38,7 +38,7 @@ import type { FrameOfReferenceRange } from "../panels/telemetry/index.js";
 import { createDashboardPanel } from "../panels/dashboard/index.js";
 import { createSearchPanel } from "../panels/search/index.js";
 import type { MocrvizPanel } from "../panels/mocrviz/index.js";
-import { channelsFor } from "../panels/mocrviz/channels.js";
+import { channelsFor, type ChannelInfo } from "../panels/mocrviz/channels.js";
 import { renderShell, setActiveTab, type ShellElements } from "./shell.js";
 import { parseDeepLink } from "./deepLink.js";
 
@@ -622,9 +622,16 @@ function renderChannelStrip(
     return;
   }
 
+  // Build a lookup map for fast access by id.
+  const infoById = new Map<number, ChannelInfo>(catalog.all.map((c) => [c.id, c]));
   const buttons = new Map<number, HTMLButtonElement>();
-  const redacted = new Set(catalog.redacted);
-  for (const info of catalog.all) {
+
+  // Render only the available channels, in the production display order
+  // (available array encodes that order). Redacted channels are omitted
+  // entirely — production HTML does not show them at all.
+  for (const chId of catalog.available) {
+    const info = infoById.get(chId);
+    if (!info) continue;
     const wrap = document.createElement("div");
     wrap.className = "buttondiv";
     const btn = document.createElement("button");
@@ -632,11 +639,10 @@ function renderChannelStrip(
     btn.id = `btn-ch${String(info.id)}`;
     btn.className = "thirtybtn-channel";
     btn.textContent = info.label;
-    btn.title = `${String(info.id)}. ${info.description}`;
-    btn.disabled = redacted.has(info.id) || !catalog.available.includes(info.id);
+    btn.title = info.description.length > 0 ? `${info.label}: ${info.description}` : info.label;
     if (info.id === catalog.defaultChannel) btn.classList.add("is-active");
     btn.addEventListener("click", () => {
-      if (btn.disabled || panel === null) return;
+      if (panel === null) return;
       panel.setChannel(info.id);
       for (const [id, button] of buttons) button.classList.toggle("is-active", id === info.id);
     });

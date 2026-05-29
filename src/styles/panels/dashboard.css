@@ -44,7 +44,7 @@
 
 .dashMissionDay,
 .dashMissionStage {
-  color: var(--airt-accent);
+  color: #84b8d9; /* production heading color */
 }
 
 .crewstatus_text {

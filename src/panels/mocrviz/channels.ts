@@ -43,86 +43,82 @@ function buildAll(entries: readonly (readonly [number, string, string])[]): read
     .sort((a, b) => a.id - b.id);
 }
 
-// Verbatim from public/13/MOCRviz/MOCRviz.js `cTrackInfo` (A13). Ordering
-// + ids match the legacy `cAvailableChannelsArray` and
-// `cRedactedChannelsArray`.
+// A13 channel catalog. Labels match the production HTML button text exactly
+// (short abbreviations from legacy-src/13/index.html). Descriptions are from
+// public/13/MOCRviz/MOCRviz.js `cTrackInfo` (tooltip text).
 const A13_ENTRIES: readonly (readonly [number, string, string])[] = [
-  [1, "HR1 Datastream", ""],
-  [2, "FLIGHT OPS DIR", "Overall responsibility for the mission interface to program Management."],
-  [
-    3,
-    "MISSION DIRECTOR",
-    "The primary interface between NASA Headquarters and the Flight Control Team.",
-  ],
+  [1, "HR1", ""],
+  [2, "FOD", "Overall responsibility for the mission interface to program Management."],
+  [3, "MSN DIR", "The primary interface between NASA Headquarters and the Flight Control Team."],
   [
     4,
-    "DOD MANAGER",
+    "DOD MGR",
     "Primary interface with NASA for any Department of Defense support required during a mission, including recovery ships and DoD controlled tracking resources.",
   ],
   [
     5,
     "PROCEDURES",
-    "Operations and Procedures Officer – Supervised the application of mission rules and detailed implementation of the Mission Control Center/Ground Operational Support Systems mission control procedures.",
+    "Operations and Procedures Officer \u2013 Supervised the application of mission rules and detailed implementation of the Mission Control Center/Ground Operational Support Systems mission control procedures.",
   ],
   [
     6,
-    "ASST FLIGHT DIR",
+    "ASST FD",
     "Responsible to the Flight Director for detailed control of the mission and assumed the duties of the Flight Director in his absence.",
   ],
   [
     7,
-    "FLIGHT DIRECTOR [L]",
+    "FLIGHT-L",
     "Left seat - Responsible to the Mission Director for detailed control of the mission from launch (tower clear) to splashdown and assumed the duties of the Mission Director in his absence. In real time was responsible to take any actions needed for crew safety and mission success.",
   ],
   [
     8,
-    "FLIGHT DIRECTOR [R]",
+    "FLIGHT-R",
     "Right seat - Responsible to the Mission Director for detailed control of the mission from launch (tower clear) to splashdown and assumed the duties of the Mission Director in his absence. In real time was responsible to take any actions needed for crew safety and mission success.",
   ],
   [
     9,
-    "FLIGHT ACTIVITIES OFFICER",
+    "FAO",
     "The FAO planned and supported crew activities, checklists, procedures and schedules.",
   ],
   [
     10,
-    "NETWORK CTRLR [L]",
+    "NETWORK-L",
     "Network Controller - Had detailed operational control of the world wide Ground Operational Support System (GOSS), which included the tracking stations. (left seat)",
   ],
   [
     11,
-    "NETWORK CTRLR [R]",
+    "NETWORK",
     "Network Controller - Had detailed operational control of the world wide Ground Operational Support System (GOSS), which included the tracking stations. (right seat)",
   ],
   [
     12,
-    "SURGEON [L]",
+    "SURGEON",
     "Directed all operational medical activities and crew's medical status. (left seat)",
   ],
   [
     13,
-    "SURGEON [R]",
+    "SURGEON-R",
     "Directed all operational medical activities and crew's medical status. (right seat)",
   ],
   [
     14,
-    "CAPCOM [L]",
-    "Spacecraft Communicator – or Capsule Communicator - An astronaut who provided all the voice communications between the ground and the spacecraft. (left seat)",
+    "CAPCOM",
+    "Spacecraft Communicator \u2013 or Capsule Communicator - An astronaut who provided all the voice communications between the ground and the spacecraft. (left seat)",
   ],
   [
     15,
-    "CAPCOM [R]",
-    "Spacecraft Communicator – or Capsule Communicator - An astronaut who provided all the voice communications between the ground and the spacecraft. (right seat)",
+    "CAPCOM-R",
+    "Spacecraft Communicator \u2013 or Capsule Communicator - An astronaut who provided all the voice communications between the ground and the spacecraft. (right seat)",
   ],
   [
     16,
     "CSM EECOM",
-    "Electrical, Environmental and Consumables Manager - Monitored cryogenic levels for fuel cells, and cabin cooling systems; electrical distribution systems; cabin pressure control systems; and vehicle lighting systems. EECOM originally stood for Electrical, Environmental and COMmunication systems",
+    "Electrical, Environmental and Consumables Manager - Monitored cryogenic levels for fuel cells, and cabin cooling systems; electrical distribution systems; cabin pressure control systems; and vehicle lighting systems.",
   ],
   [
     17,
     "POS EECOM",
-    "Electrical, Environmental and Consumables Manager - Monitored cryogenic levels for fuel cells, and cabin cooling systems; electrical distribution systems; cabin pressure control systems; and vehicle lighting systems. EECOM originally stood for Electrical, Environmental and COMmunication systems",
+    "Electrical, Environmental and Consumables Manager - Monitored cryogenic levels for fuel cells, and cabin cooling systems; electrical distribution systems; cabin pressure control systems; and vehicle lighting systems.",
   ],
   [
     18,
@@ -141,31 +137,27 @@ const A13_ENTRIES: readonly (readonly [number, string, string])[] = [
   ],
   [
     21,
-    "GUIDO [L]",
+    "GUIDO",
     "Guidance Officer - Monitored onboard navigational systems and onboard guidance computer software. Responsible for determining the position of the spacecraft in space. (left seat)",
   ],
   [
     22,
-    "GUIDO [R]",
+    "GUIDO-R",
     "Guidance Officer - Monitored onboard navigational systems and onboard guidance computer software. Responsible for determining the position of the spacecraft in space. (right seat)",
   ],
-  [
-    23,
-    "CCATS LOAD CONTROL",
-    "Communications, Command and Telemetry Support, Command Load Controller.",
-  ],
+  [23, "CCATS LD", "Communications, Command and Telemetry Support, Command Load Controller."],
   [24, "CCATS RTC", "Communications, Command and Telemetry Support, Real-Time Command Controller."],
   [25, "CCATS CMD", "Communications, Command and Telemetry Support, Command Controller."],
   [
     26,
     "CCATS TIC",
-    "Communications, Command and Telemetry Support, Telemetry Instrumentation Contoller.",
+    "Communications, Command and Telemetry Support, Telemetry Instrumentation Controller.",
   ],
   [27, "CCATS TM", "Communications, Command and Telemetry Support, Telemetry Controller."],
-  [28, "TRACK [L]", "Instrumentation Tracking Controller."],
-  [29, "TRACK [R]", "Instrumentation Tracking Controller, Unified S-Band."],
-  [30, "HR1 VOICE ANNOTATION", ""],
-  [31, "HR2 Datastream", ""],
+  [28, "TRACK", "Instrumentation Tracking Controller."],
+  [29, "TRACK-R", "Instrumentation Tracking Controller, Unified S-Band."],
+  [30, "HR1 VOX", ""],
+  [31, "HR2", ""],
   [
     32,
     "RECOVERY",
@@ -173,23 +165,23 @@ const A13_ENTRIES: readonly (readonly [number, string, string])[] = [
   ],
   [
     33,
-    "ASST NASA RCVY COORD",
+    "RCVY ASST",
     "NASA Assistant Recovery Officer - Taking the lead for interfacing with other ROCR personnel.",
   ],
-  [34, "RECOVERY STATUS", "ROCR Recovery Status Monitor."],
-  [35, "RECOVERY EVALUATOR", "ROCR Evaluator / Display Controller."],
+  [34, "RCVY STUS", "ROCR Recovery Status Monitor."],
+  [35, "RCVY ST 2", "ROCR Evaluator / Display Controller."],
   [36, "DOD COORD", ""],
-  [37, "DOD PRIMARY OP", ""],
-  [38, "DOD MANAGER [RCVY]", ""],
+  [37, "DOD PRI OP", ""],
+  [38, "DOD MGR RC", ""],
   [39, "DOD EXEC", ""],
-  [40, "DOD ASST FOR COMM 1", ""],
+  [40, "DOD COMM 1", ""],
   [41, "DOD PIO", ""],
-  [42, "COMM TECH [3RD FL]", ""],
-  [43, "COMM CTRLR [3RD FL]", ""],
-  [44, "SPACE ENVIRONMENT", "Supplied information on meteorological and space radiation."],
+  [42, "COMM TECH", ""],
+  [43, "COMM CTRL", ""],
+  [44, "SPACE ENV", "Supplied information on meteorological and space radiation."],
   [
     45,
-    "COMPUTER SUPERVISOR",
+    "COMP SUP",
     "Apollo Guidance Computer Supervisor is in overall control of the RTCC Complex and its associated mission computers.",
   ],
   [
@@ -199,40 +191,41 @@ const A13_ENTRIES: readonly (readonly [number, string, string])[] = [
   ],
   [
     47,
-    "BOOSTER [L]",
+    "BOOSTER",
     "Monitored and evaluated performance of propulsion-related aspects of the launch vehicle during prelaunch and ascent. (left seat)",
   ],
-  [48, "BOOSTER [C]", "Booster, center seat."],
-  [49, "BOOSTER [R]", "Booster, right seat."],
-  [50, "FLIGHT DIRECTOR LOOP", "FD clean voice-only recording of Flight Director [R]"],
-  [51, "AFD CONF LOOP", "Assistant Flight Director - Comm line."],
-  [52, "GOSS 2 LOOP", "Ground Operational Support System (GOSS) - Comm line."],
+  [48, "BOOSTER-C", "Booster, center seat."],
+  [49, "BOOSTER-R", "Booster, right seat."],
+  [50, "FLIGHT", "FD clean voice-only recording of Flight Director [R]"],
+  [51, "AFD CONF", "Assistant Flight Director - Comm line."],
+  [52, "GOSS 2", "Ground Operational Support System (GOSS) - Comm line."],
   [
     53,
     "INCO",
-    "Instrumentation and Communications Officer – With the advent of dual spacecraft operations, lunar surface operations, science TV, and extensive data recovery, a new operating position was added.",
+    "Instrumentation and Communications Officer \u2013 With the advent of dual spacecraft operations, lunar surface operations, science TV, and extensive data recovery, a new operating position was added.",
   ],
-  [54, "MOCR DYN LOOP", "Comm line."],
-  [55, "GOSS CONF LOOP", "Ground Operational Support System (GOSS) - Comm line."],
-  [56, "GOSS 4 LOOP", "Ground Operational Support System (GOSS) - Comm line."],
+  [54, "MOCR DYN", "Comm line."],
+  [55, "GOSS CONF", "Ground Operational Support System (GOSS) - Comm line."],
+  [56, "GOSS 4", "Ground Operational Support System (GOSS) - Comm line."],
   [57, "LM GNC", "(CONTROL) Lunar Module Guidance, Navigation, and Controls Systems Engineer."],
   [
     58,
     "TELMU",
     "(LM EECOM) Lunar Module Electrical, Environmental and Consumables Management Engineer.",
   ],
-  [59, "EXPMT ACTIVITIES OFSR", "Experiments Officer."],
-  [60, "HR2 VOICE ANNOTATION", ""],
+  [59, "EXPMT AO", "Experiments Officer."],
+  [60, "HR2 VOX", ""],
 ];
 
 const A13_CHANNELS: MissionChannels = {
   all: buildAll(A13_ENTRIES),
+  // Display order matches the production legacy-src/13/index.html button list exactly.
   available: [
-    2, 3, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-    32, 33, 34, 35, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+    2, 3, 50, 7, 8, 14, 15, 47, 48, 49, 19, 20, 21, 22, 12, 13, 16, 17, 58, 18, 57, 5, 9, 6, 11, 42,
+    43, 28, 29, 32, 33, 34, 35, 51, 52, 53, 54, 55, 56, 23, 24, 25, 26, 27, 59, 44, 45, 46,
   ],
   redacted: [1, 4, 10, 30, 31, 36, 37, 38, 39, 40, 41, 60],
-  defaultChannel: 14, // CAPCOM [L]
+  defaultChannel: 14, // CAPCOM
 };
 
 // A11 has the same MOCR positions but the legacy code has a separate

@@ -26,8 +26,9 @@ li.tocitem:hover {
 }
 ul.TOC1 > li.tocitem,
 ul.TOC1 li.tocitem {
-  font-weight: 600;
-  color: var(--airt-fg-primary);
+  font-weight: normal;
+  color: #84b8d9; /* production: ul.TOC1 color */
+  line-height: 1.3;
 }
 ul.TOC2 > li.tocitem,
 ul.TOC2 li.tocitem {

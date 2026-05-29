@@ -5,8 +5,21 @@ import { defineConfig, devices } from "@playwright/test";
 const PROD_BASE = process.env["AIRT_PROD_BASE"] ?? "https://apolloinrealtime.org";
 const LOCAL_BASE = process.env["AIRT_LOCAL_BASE"] ?? "http://localhost:5173";
 
+// Auto-start the local Vite dev server for the `visual` project only.
+// reuseExistingServer:true means if you already ran `npm run dev` it
+// won't launch a second one. Set AIRT_NO_WEB_SERVER=1 to skip entirely.
+const useWebServer = !process.env["AIRT_NO_WEB_SERVER"];
+
 export default defineConfig({
   testDir: "tests/visual",
+  ...(useWebServer && {
+    webServer: {
+      command: "npm run dev",
+      url: LOCAL_BASE,
+      reuseExistingServer: true,
+      timeout: 60_000,
+    },
+  }),
   fullyParallel: false,
   forbidOnly: !!process.env["CI"],
   retries: 0,

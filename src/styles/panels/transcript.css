@@ -6,24 +6,33 @@
   width: 100%;
   border-collapse: collapse;
   font-family: var(--airt-font-mono);
-  font-size: var(--airt-fs-sm);
-  color: var(--airt-fg-primary);
+  font-size: 0.9em; /* matches production .utteranceTable font-size */
+  color: var(--airt-fg-secondary);
 }
 
 tr.utterance,
 tr.commentary {
   cursor: pointer;
-  border-bottom: 1px solid #1a1a1a;
+  vertical-align: top;
   transition: background 80ms ease;
+}
+tr.utterance:nth-child(odd),
+tr.commentary:nth-child(odd) {
+  background: #000000;
+}
+tr.utterance:nth-child(even),
+tr.commentary:nth-child(even) {
+  background: #0a0a0a;
 }
 tr.utterance:hover,
 tr.commentary:hover {
-  background: var(--airt-bg-surface-hi);
+  background: #1e1e1e;
 }
 tr.utterance > td,
 tr.commentary > td {
-  padding: 4px 6px;
-  vertical-align: top;
+  padding: 3px;
+  font-size: 0.9em;
+  line-height: 1.3;
 }
 
 .timestamp {
@@ -48,28 +57,28 @@ tr.commentary > td {
   margin-top: 2px;
 }
 
-/* Speaker color codes (legacy classnames). */
+/* Speaker color codes matching legacy styles.css exactly. */
 .utt_pao,
 .who.utt_pao {
-  color: var(--airt-utt-pao);
+  color: #535353; /* Public Affairs — very dark grey */
 }
 .utt_capcom,
 .who.utt_capcom {
-  color: var(--airt-utt-capcom);
+  color: grey; /* CAPCOM */
 }
 .utt_crew,
 .who.utt_crew {
-  color: var(--airt-utt-crew);
+  color: #84b8d9; /* Crew — soft teal-blue */
 }
 .utt_mocr,
 .who.utt_mocr {
-  color: var(--airt-utt-mocr);
+  color: #b86c75; /* MOCR — dusty rose */
 }
 .com_support {
-  color: var(--airt-com-support);
+  color: grey;
 }
 .com_crew {
-  color: var(--airt-com-crew);
+  color: #84b8d9;
 }
 
 /* Active row highlight — driven by `setActiveTimeId`. */
