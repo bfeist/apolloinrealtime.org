@@ -156,9 +156,11 @@ function makeFakePaper(width: number, height: number): FakePaper {
   return paper;
 }
 
+const canvasAdd = vi.fn();
+const canvasRemove = vi.fn();
 const CANVAS = {
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn(),
+  addEventListener: canvasAdd,
+  removeEventListener: canvasRemove,
 } as unknown as HTMLCanvasElement;
 
 /** Group accessor that throws on out-of-range index (keeps tests strict-safe). */
@@ -191,7 +193,7 @@ describe("NavigatorRenderer", () => {
     // Resize is still on the view (supported in all Paper.js versions).
     expect(paper.view.onResize).toBeTypeOf("function");
     // DOM mouseleave is wired to the canvas.
-    expect(CANVAS.addEventListener).toHaveBeenCalledWith("mouseleave", expect.any(Function));
+    expect(canvasAdd).toHaveBeenCalledWith("mouseleave", expect.any(Function));
   });
 
   it("mount() is idempotent", () => {
@@ -283,7 +285,7 @@ describe("NavigatorRenderer", () => {
     expect(paper.lastTool?.onMouseMove).toBeNull();
     expect(paper.lastTool?.onMouseUp).toBeNull();
     expect(paper.view.onResize).toBeNull();
-    expect(CANVAS.removeEventListener).toHaveBeenCalledWith("mouseleave", expect.any(Function));
+    expect(canvasRemove).toHaveBeenCalledWith("mouseleave", expect.any(Function));
   });
 
   it("exposes the legacy color palette", () => {
