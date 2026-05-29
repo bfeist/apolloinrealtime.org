@@ -62,11 +62,20 @@ interface MissionConfig {
   /** Audio channel numbers that are redacted (`cRedactedChannelsArray`). A11/A13 only. */
   redactedChannels?: number[];
 
+  // --- Feature flags (Phase 4.5+) ---
+  /** Per-mission feature flags. Currently only `mocrviz` (typed MOCR audio panel). */
+  features?: MissionFeatures;
+
   // --- HTML head (Phase 3) ---
   /** Per-mission meta tags, injected into <head> by the shared head builder. */
   meta: MissionMeta;
   /** Per-mission head/script-chain switches that differ across legacy missions. */
   head: MissionHeadOptions;
+}
+
+interface MissionFeatures {
+  /** Mount the typed MOCRviz audio panel. True for A11/A13. */
+  mocrviz?: boolean;
 }
 
 /** Mission-specific meta tag values. Drives the shared head template. */

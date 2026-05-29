@@ -31,6 +31,9 @@ export const a11Config: MissionConfig = {
     ogUrl: "https://apolloinrealtime.org/11/",
     fbAppId: "2082429458513047",
   },
+  features: {
+    mocrviz: true,
+  },
   head: {
     paperVariant: "min",
     includeYouTubeIframeApi: true,

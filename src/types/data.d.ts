@@ -237,3 +237,23 @@ interface ParseCrewStatusOptions {
   /** Mission duration in seconds, used to set the end of the last entry. */
   missionDurationSeconds: number;
 }
+
+// ── tapeRangesData (MOCRviz) ──────────────────────────────────────────────────
+
+/** One contiguous MOCR audio recording on one tape × channel-bank. */
+interface TapeRange {
+  /** Tape identifier, e.g. "T920", "T868a", "T999" (sentinel = no audio). */
+  readonly tapeId: string;
+  /** Channel bank the tape served. */
+  readonly channelBank: "HR1U" | "HR1L" | "HR2U" | "HR2L";
+  readonly startTimeStr: string;
+  readonly endTimeStr: string;
+  readonly startSeconds: number;
+  readonly endSeconds: number;
+}
+
+/** Tape ranges split by HR1 / HR2 bank and sorted by start time. */
+interface TapeRangesData {
+  readonly hr1: readonly TapeRange[];
+  readonly hr2: readonly TapeRange[];
+}
