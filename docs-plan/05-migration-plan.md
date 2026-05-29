@@ -9,46 +9,58 @@
 ## Strategy (binding — read before phase work)
 
 This is a **greenfield port**, not a gradual conversion. The new app is
-built end-to-end in `src/` (plus its dev pages under `dev/`) until it has
-full feature parity with the legacy missions. Then we **cut over once**,
-deleting the legacy sources. There is no intermediate hybrid state in
-production.
+built end-to-end in `src/`. Production cutover is a separate concern from
+local development — in the dev server the new app already lives at the
+real mission URLs, and grows in place toward feature parity.
 
-Specifically:
+### URL layout (in dev server)
 
-1. **The legacy code is reference-only.** `legacy/` (subtree imports of the
-   four original repos) is permanently read-only. `legacy-src/{11,13,17}/`
-   and `public/{11,13,17}/index.js` / `navigator.js` / `ajax.js` / `lib/*` /
-   `MOCRviz/*` exist solely as the **production-equivalence oracle**: we
-   open the live legacy `/{N}/` pages and compare behavior. We do **not**
-   edit them to slowly integrate new code into them, and we do not "convert
-   call sites" inside them. They are deleted in Phase 7 (cutover), not
-   piecemeal.
-2. **The new app is built independently.** Every typed module lives in
-   `src/`. Every behavioral check during Phases 4 / 4.5 / 5 / 6 happens on
-   `/dev/{N}/` (which boots through `src/main.ts` against the typed
-   `MissionConfig` and loads only typed ESM modules — never legacy
-   `index.js` / `navigator.js` / `ajax.js`). The new app must run
-   stand-alone before cutover.
-3. **jQuery is not removed from the legacy code — by construction, the
-   new code never used it.** `src/dom/index.ts` is the typed DOM shim; no
-   `src/**` file ever imports jQuery. The "remove jQuery" milestone that
-   appeared in earlier drafts of this plan was a hybrid-era artifact; it
-   is dropped. jQuery disappears from the deployed bundle the moment the
-   legacy `public/{N}/index.js` etc. are deleted in Phase 7.
-4. **Cutover is atomic.** Phase 7 (a) builds the new app at `/{N}/` paths,
-   (b) deletes the legacy `public/{N}/` script payloads, (c) replaces
-   `{N}/index.html` with the new app's HTML shell, (d) deploys. Before
-   that moment, `apolloinrealtime.org` keeps serving the old repos
-   unchanged.
-5. **No "hybrid" feature flags.** We do not ship a build that mixes legacy
-   `index.js` with typed ESM modules. The two systems coexist only on the
-   developer machine: `/{N}/` runs the legacy lift (oracle), `/dev/{N}/`
-   runs the typed app (under construction).
+| URL              | Source                                  | What it is                                                    |
+| ---------------- | --------------------------------------- | ------------------------------------------------------------- |
+| `/`              | `index.html`                            | Landing placeholder + links to the other URLs                 |
+| `/11/` `/13/` `/17/` | `{N}/index.html` + `src/app/missionApp.ts` | **The new typed app under construction.** This is where work happens. |
+| `/legacy/11/` etc.   | `legacy-oracle/{N}/index.html` (via Vite plugin) | **Byte-for-byte legacy oracle**, for side-by-side comparison. Pristine; never edited. Assets are pulled from `public/{N}/`. Dev-only. |
+| `/dev/`          | `dev/index.html` + `src/dev/harness.ts` | Per-module browser smoke tests (clock, CSV loader, ytplayer). Dev-only. |
 
-Principle throughout: **never have a "the new site doesn't work yet" window
-in production.** The legacy repos keep serving until the new app passes a
-side-by-side check and lands in Phase 7.
+Bindings:
+
+1. **The legacy code is reference-only and pristine.** `legacy/` (the
+   subtree imports of the four original repos), `legacy-src/{11,13,17}/`
+   (grep-convenience copy of the script/HTML files), and `public/{11,13,17}/`
+   (the served asset tree, including `index.js`, `navigator.js`, `ajax.js`,
+   `lib/*`, `MOCRviz/*`) are byte-for-byte copies of what
+   `apolloinrealtime.org/{N}/` serves. They are never edited. If anything
+   drifts, restore it from the sibling repos at `../Apollo_11`,
+   `../Apollo_13`, `../Apollo17.org`. The `legacy-oracle/{N}/index.html`
+   files are the same content, sitting at a separate path so Vite can
+   serve them at `/legacy/{N}/` without colliding with the typed app at
+   `/{N}/`.
+2. **The new typed app is built end-to-end in `src/` and lives at `/{N}/`
+   from now on.** It boots through `src/app/missionApp.ts` against the
+   typed `MissionConfig` and loads only typed ESM modules. It never
+   imports `public/{N}/index.js` / `navigator.js` / `ajax.js` / `lib/*`
+   (jQuery, peaks.js, etc.). Paper.js is loaded directly from the
+   vendored `public/{N}/lib/paper-full.js` because it is the navigator
+   engine; the typed renderer accepts an injected `PaperScopeLike`.
+3. **jQuery is never in the new code's bundle.** `src/dom/index.ts` is
+   the typed DOM shim; no `src/**` file ever imports jQuery. jQuery
+   exists in the repo only inside `public/{N}/lib/` because the legacy
+   oracle still loads it.
+4. **No "hybrid" runtime.** The typed app at `/{N}/` and the legacy
+   oracle at `/legacy/{N}/` are two independent pages; they share
+   nothing beyond the static assets in `public/{N}/` (indexes, photos,
+   MOCRviz audio data, vendored paper.js).
+5. **Production cutover is incremental, not a big bang.** As the typed
+   app at `/{N}/` reaches feature parity with the oracle at
+   `/legacy/{N}/`, the cutover is just `npm run build` shipping the
+   typed app at `/{N}/`. The atomic Phase 7 from earlier plan drafts
+   ("delete `public/{N}/index.js`, `navigator.js`, `ajax.js`, `lib/*`,
+   `MOCRviz/*.{html,js,css}` in one commit") still happens, but it is
+   purely a build-output decision — by then the typed app has been the
+   live site for some time.
+
+Principle: **the new app's URL is the real URL from day one.** No URL
+swap at the end. The work shows up where users will eventually use it.
 
 ## Verification approach (applies every phase)
 
@@ -67,45 +79,42 @@ npm run check
 These run fast and gate every PR. They do **not** check "does the app look
 right" — that's the human and Playwright layers.
 
-### 2. Progressive in-browser dev pages (run continuously during a phase)
+### 2. Progressive in-browser pages (run continuously during a phase)
 
-Each typed module should be exercisable in a real browser **the same day it
-lands**, not at the end of the phase. Two surfaces:
+Each typed module should be exercisable in a real browser **the same day
+it lands**. Two surfaces:
 
 - **`/dev/` — module harness.** Imports each typed module directly from
-  `src/` and exposes button-driven smoke tests (input → output). No mission
-  config — pure module surface.
-- **`/dev/{11,13,17}/` — per-mission progressive pages.** A near-blank
-  shell per mission that boots through `src/main.ts` against the typed
-  `MissionConfig`, loading **only** typed ESM modules. No legacy
-  `index.js`, `ajax.js`, or `navigator.js` — ever. This is where the agent
-  verifies a fresh extraction behaviorally in a real browser. By the end
-  of Phase 5 this page mounts every typed engine and panel; in Phase 6 it
-  grows into the production HTML shell.
+  `src/` and exposes button-driven smoke tests (input → output). No
+  mission config — pure module surface.
+- **`/11/`, `/13/`, `/17/` — the typed app itself.** Boots through
+  `src/app/missionApp.ts` against the typed `MissionConfig`, loading
+  **only** typed ESM modules. No legacy `index.js`, `ajax.js`, or
+  `navigator.js` — ever. This is the in-flight production app.
 
-Rules for the `/dev/{N}/` pages:
+Rules:
 
-- They are the in-flight version of the production app. By Phase 6 they
-  effectively become the production page (Phase 6 promotes the layout +
-  CSS work; Phase 7 swaps URLs).
-- The legacy `/{N}/` pages remain the production-equivalence oracle until
-  Phase 7. They stay byte-for-byte the lift from Phase 1 (head injection
-  aside). Never edit them to integrate typed modules.
-- Every typed module added to `src/engines/` or `src/panels/` MUST be wired
-  into all three `/dev/{N}/` pages it applies to before that module is
-  considered "done". The author is the first user of their own module in
-  context.
+- The typed app at `/{N}/` is the in-flight production app. Phase 6
+  promotes the layout + CSS work so the page actually looks like a
+  mission page; the URL itself doesn't change.
+- The legacy oracle at `/legacy/{N}/` remains pristine. Never edit it
+  to integrate typed modules; restore it from the sibling repo if it
+  drifts.
+- Every typed module added to `src/engines/` or `src/panels/` MUST be
+  wired into all three mission apps (`src/app/missionApp.ts` already
+  switches on mission id) before that module is considered "done".
+  The author is the first user of their own module in context.
 
 ### 3. Manual browser comparison (every phase exit)
 
-Open the new app and the legacy app **side by side in two browser windows**
-at the same mission, same GET, same viewport:
+Open the new app and the legacy oracle **side by side in two browser
+windows** at the same mission, same GET, same viewport:
 
 ```
-# Local dev server on one port, legacy oracle on a second tab
-npm run dev  # -> http://localhost:5173/dev/13/   (new app)
-#               http://localhost:5173/13/         (legacy oracle, unmodified)
-# Prod:        https://apolloinrealtime.org/13/   (legacy in production)
+# Local dev server
+npm run dev  # -> http://localhost:5173/13/         (new typed app)
+#               http://localhost:5173/legacy/13/   (legacy oracle, pristine)
+# Prod:        https://apolloinrealtime.org/13/   (production live site)
 ```
 
 Things to explicitly check each phase:
@@ -295,7 +304,7 @@ are never imported, called, or modified.
    paper`).
 
 **Exit criterion:** All five typed reference modules exist in `src/` with
-Vitest tests and are exercisable on `/dev/{N}/` for every mission they
+Vitest tests and are exercisable at `/{N}/` for every mission they
 apply to.
 
 ## Phase 4.5 — MOCRviz typed re-implementation
@@ -320,31 +329,32 @@ playback (`MOCRviz/MOCRviz.js`'s `gPlayer` + `loadChannelSoundfile()`).
 - Unit-test the pure pieces: channel index, time-to-pixel mapping,
   channel filename resolution.
 
-**Verification:** Mount the new ESM MOCRviz panel into `/dev/11/` and
-`/dev/13/` as soon as it loads at all (even before audio works), then
-iterate in-browser. After: scrub the typed clock forward and back, confirm
-the MOCRviz playhead and channel audio follow without lag. Compare the
-playhead position at fixed GETs to the legacy `/{N}/` MOCRviz iframe.
-Update the Playwright snapshot set if needed.
+**Verification:** Mount the new ESM MOCRviz panel into `/11/` and `/13/`
+as soon as it loads at all (even before audio works), then iterate
+in-browser. After: scrub the typed clock forward and back, confirm the
+MOCRviz playhead and channel audio follow without lag. Compare the
+playhead position at fixed GETs to the oracle's `/legacy/{N}/` MOCRviz
+iframe. Update the Playwright snapshot set if needed.
 
-**Exit criterion:** Typed MOCRviz mounts on `/dev/{11,13}/`, plays audio
-on at least the default channel, follows the typed clock when scrubbing,
+**Exit criterion:** Typed MOCRviz mounts on `/{11,13}/`, plays audio on
+at least the default channel, follows the typed clock when scrubbing,
 and visually matches the legacy waveform/playhead at the listed snapshot
 GETs.
 
 ## Phase 5 — Data layer, navigator overlays, and panels
 
 Phase 5 has three sub-tracks. Each must pass `npm run check` before the
-next starts. All work happens in `src/` and `/dev/{N}/`. **Nothing in
-`public/{N}/` or `legacy-src/{N}/` is modified.**
+next starts. All work happens in `src/` and `/{N}/`. **Nothing in
+`public/{N}/`, `legacy-src/{N}/`, `legacy/`, or `legacy-oracle/` is
+modified.**
 
 ### Track A — Typed CSV data loaders
 
 A typed loader + row type per CSV the legacy app reads. All loaders live
 in `src/data/`; TypeScript row types in `src/types/data.d.ts`. Each has
-Vitest unit tests against fixture CSVs and is wired into the
-`/dev/{N}/` page (current entry at the live GET, refreshed per second).
-Loaders: `csvLoader`, `tocData`, `missionStagesData`, `videoSegmentData`,
+Vitest unit tests against fixture CSVs and is wired into the `/{N}/`
+page (current entry at the live GET, refreshed per second). Loaders:
+`csvLoader`, `tocData`, `missionStagesData`, `videoSegmentData`,
 `commentaryData`, `utteranceData`, `photoData`, `videoUrlData`,
 `crewStatusData`, `telemetryData`, `orbitData`.
 
@@ -352,7 +362,7 @@ Loaders: `csvLoader`, `tocData`, `missionStagesData`, `videoSegmentData`,
 
 Extend `renderer.ts` with draw groups that consume the typed data loaders.
 Additive: the existing renderer API and tests are unchanged. Each overlay
-gets unit tests and is wired into the `/dev/{N}/` navigator section.
+gets unit tests and is wired into the `/{N}/` navigator section.
 
 Draw order mirrors the legacy `drawTier1` / `drawTier2`:
 
@@ -372,25 +382,25 @@ Draw order mirrors the legacy `drawTier1` / `drawTier2`:
 ### Track C — Typed panels
 
 A typed panel per legacy panel, in `src/panels/`. Each is jQuery-free,
-iframe-free, mounted in `/dev/{N}/`, and unit-tested where it has
+iframe-free, mounted at `/{N}/`, and unit-tested where it has
 non-trivial pure logic (utterance-class mapping, telemetry interpolation,
 search index/match, photo URL parsing, wake-up countdown, etc.). Panels:
 TOC, transcript, commentary, photo, telemetry, crew status, dashboard,
 search.
 
 **Exit criterion (Phase 5):** All 11 data loaders, all four navigator
-overlay types, and all eight panels live in `src/`. `/dev/{N}/` mounts
-every one of them. `npm run check` passes. The new app at `/dev/{N}/` is
-behaviorally close to legacy `/{N}/` at the snapshot GETs (panels show
-the right content; only the page chrome/layout differs because Phase 6
-hasn't built that yet).
+overlay types, and all eight panels live in `src/`. `/{N}/` mounts every
+one of them. `npm run check` passes. The new app at `/{N}/` is
+behaviorally close to the oracle at `/legacy/{N}/` at the snapshot GETs
+(panels show the right content; only the page chrome/layout differs
+because Phase 6 hasn't built that yet).
 
 ## Phase 6 — Production HTML shell + CSS + responsive
 
-Phase 6 turns `/dev/{N}/` into the production app. The legacy `/{N}/`
-pages remain unchanged as the oracle.
+Phase 6 grows the current diagnostic-readout shell at `/{N}/` into the
+real mission page. The legacy oracle at `/legacy/{N}/` remains unchanged.
 
-- Author **one** HTML shell template in `src/template/page.ts` (or an
+- Author **one** HTML shell template in `src/app/shell.ts` (or an
   `index.html` partial driven by `MissionConfig`) that composes the
   header (logo + mission title + GET input + navigator), the video block
   (with player + search/dashboard overlays), the tabs (transcript / TOC /
@@ -400,30 +410,32 @@ pages remain unchanged as the oracle.
   properties keyed off `<body data-mission="{N}">`. Per-mission stylesheet
   (`src/styles/missions/{N}.css`) only contains overrides; target < 100
   lines each.
-- **Wire the typed engines and panels into the shell** in `src/main.ts`:
-  clock ticking, navigator mounted on `#navCanvas`, video player mounted,
-  channel selector hooked to MOCRviz/audio scheduler, panels mounted into
-  their tabs, search/dashboard overlays wired, deep-link GET parsing.
-- **Add responsive breakpoints** (phone-portrait, phone-landscape, tablet,
-  desktop). This phase owns the work the old `/mobile/` subdir used to
-  do. The unified app must be usable end-to-end on a phone.
-- `/dev/{N}/` is updated to use the production HTML shell (the dev-only
-  diagnostic readouts move to `/dev/` raw harness or are deleted).
+- **Wire the typed engines and panels into the shell** inside
+  `src/app/missionApp.ts`: clock ticking, navigator mounted on
+  `#navCanvas`, video player mounted, channel selector hooked to
+  MOCRviz/audio scheduler, panels mounted into their tabs,
+  search/dashboard overlays wired, deep-link GET parsing.
+- **Add responsive breakpoints** (phone-portrait, phone-landscape,
+  tablet, desktop). This phase owns the work the old `/mobile/` subdir
+  used to do. The unified app must be usable end-to-end on a phone.
+- The diagnostic-readout view of `missionApp.ts` shrinks to a debug
+  toggle (or moves into `/dev/`) once the real shell is in place.
 
-**Verification:** Side-by-side `/dev/{N}/` vs legacy `/{N}/` at every
+**Verification:** Side-by-side `/{N}/` vs `/legacy/{N}/` at every
 snapshot GET and every viewport (phone, tablet, desktop). Playwright
 visual diff is **blocking** from this phase onward. Walk the full panel
 checklist at phone viewport.
 
-**Exit criterion:** `/dev/{N}/` is the production app: one base
-stylesheet, three tiny override files, the typed shell composes every
-engine and panel, Playwright phone/tablet/desktop baselines pass.
+**Exit criterion:** `/{N}/` is the production app: one base stylesheet,
+three tiny override files, the typed shell composes every engine and
+panel, Playwright phone/tablet/desktop baselines pass.
 
-## Phase 7 — Cutover (atomic, one shot)
+## Phase 7 — Production cutover
 
-This is the only phase that touches `public/{N}/`. It is destructive and
-irreversible from a repo perspective (old repos are preserved separately
-as rollback).
+The typed app at `/{N}/` has been the dev-server reality since Phase 3.
+Production cutover is shipping it. The legacy script files in
+`public/{N}/` and the `legacy-oracle/` HTML stay in the repo for one
+more release as a rollback path; the **build output** is the new app only.
 
 Sequence:
 
@@ -431,29 +443,35 @@ Sequence:
    snapshot GET against the built output served locally
    (`npx vite preview`). All 54 baselines pass. Manual deep-link spot
    check at every snapshot GET in every mission.
-2. **Delete the legacy production payloads** in one commit:
-   `public/{11,13,17}/{index.js,navigator.js,ajax.js,robots.txt,TOC.html,navigator_dev.{html,js}}`,
-   `public/{11,13,17}/lib/` (jQuery + jQuery plugins + Paper.js stays only
-   if Phase 4 keeps loading it as a vendored runtime), `public/{N}/MOCRviz/*.{html,js,css}`
-   (waveform PNGs + audio + calibration JSON in `data/` and `img/` stay —
-   they're reference data the typed MOCRviz reads). The legacy `styles.css`
-   is deleted; the new `src/styles/` is what ships.
-3. **Promote the new HTML shell** as each mission's `{N}/index.html`. The
-   `/dev/{N}/` URLs and the `/dev/` raw harness are removed from the
-   production build (they remain in dev for future feature work).
-4. `legacy/` (the four subtree-imported repos) stays committed —
-   permanent reference, never deleted.
-5. **Deploy** the build to `apolloinrealtime.org`. Add 301 redirects for
-   `/{N}/mobile/*` → `/{N}/` and 410/301 for retired
+2. **Configure the build to exclude legacy and oracle.** The Vite config
+   already does not list `legacy-oracle/` in `rollupOptions.input` and
+   the `legacyOraclePlugin` is dev-only. Verify `dist/` after build:
+   `/{N}/index.html` is the typed app; no `legacy/` paths; no oracle
+   HTML. Confirm `public/{N}/index.js`, `navigator.js`, `ajax.js`,
+   `lib/jquery*`, `MOCRviz/*.{html,js,css}` are NOT referenced by
+   anything in `dist/`. They may still copy through `publicDir` — if so,
+   add `vite-plugin-static-copy` exclusions or move the legacy script
+   files out of `publicDir` and the oracle plugin out of dev simultaneously.
+3. **Deploy** the built `dist/` to `apolloinrealtime.org`. Add 301
+   redirects for `/{N}/mobile/*` → `/{N}/` and 410/301 for retired
    `spacecraft_dev/` and `nominee/` paths.
-6. Keep the **old apolloinrealtime.org code** (separate repo / branch) in
-   a hot rollback slot for one week.
-7. Monitor analytics, share-link traffic, console errors.
+4. Keep the **previous apolloinrealtime.org build** (separate hosting
+   slot / branch) in a hot rollback slot for one week.
+5. Monitor analytics, share-link traffic, console errors.
+6. After the rollback window closes, **delete the legacy script payloads
+   from the repo** in one commit: `public/{11,13,17}/{index.js,
+   navigator.js, ajax.js, TOC.html, navigator_dev.{html,js}}`,
+   `public/{N}/lib/` (jQuery + jQuery plugins; Paper.js stays only if
+   still vendored as a runtime), `public/{N}/MOCRviz/*.{html,js,css}`
+   (waveform PNGs + audio + calibration JSON in `MOCRviz/data/` and
+   `MOCRviz/img/` stay — they're reference data the typed MOCRviz reads),
+   `public/{N}/styles.css`, plus `legacy-oracle/`, `legacy-src/`, and
+   the `legacyOraclePlugin` block in `vite.config.ts`. `legacy/` (the
+   four subtree-imported repos) stays committed — permanent reference,
+   never deleted.
 
-**Exit criterion:** Four weeks post-cutover with no regression reports.
-Cutover commit can be reverted to the previous commit (which still has
-the legacy payloads under `public/{N}/`) if needed within the rollback
-window.
+**Exit criterion:** Four weeks post-cutover with no regression reports;
+legacy script payloads removed from the repo.
 
 ## Phase 8 — Cleanup + future missions
 

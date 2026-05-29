@@ -1,21 +1,15 @@
 /**
- * Per-mission progressive dev harness.
+ * Per-mission app entry — boots the typed Apollo {N} app at `/{N}/`.
  *
- * Boots a near-blank shell at `/dev/{11,13,17}/` that loads ONLY the typed
- * ESM modules that exist so far — no legacy `index.js` / `ajax.js` /
- * `navigator.js`. This is the surface where each Phase 4 / 4.5 / 5 module
- * is wired in as soon as it lands, so the author can verify it
- * behaviorally in a real browser against real mission config.
+ * Mounts every typed engine and panel that exists so far. Today this
+ * looks like a diagnostic readout under construction; over time it grows
+ * into the production HTML shell + CSS (see docs-plan/05-migration-plan.md).
+ * The byte-for-byte legacy oracle has moved to `/legacy/{N}/` for
+ * side-by-side comparison; nothing under `src/**` ever imports it.
  *
- * See docs-plan/05-migration-plan.md §Verification "layer 2" and
- * docs-plan/08-progress-tracker.md.
- *
- * Mission id is read from `<body data-mission="11|13|17">`. The script
- * imports the matching typed config statically (all three are tiny) and
- * exposes it at `window.MISSION` for any module that still reads it.
- *
- * This module is dev-only scaffolding. It is excluded from the production
- * build (Phase 7 cutover removes the `/dev/` pages entirely).
+ * Mission id is read from `<body data-mission="11|13|17">`. The matching
+ * typed `MissionConfig` is imported statically and exposed at
+ * `window.MISSION` for any module that still reads it.
  */
 
 import { a11Config } from "../missions/11.config.js";
@@ -76,14 +70,14 @@ interface ClockReadout {
 
 function buildShell(config: MissionConfig): ClockReadout {
   const root = document.getElementById("mission-root");
-  if (!root) throw new Error("[dev/missionHarness] #mission-root missing");
+  if (!root) throw new Error("[missionApp] #mission-root missing");
 
   root.innerHTML = `
     <header>
       <h1>${config.name} <small>(${config.id})</small></h1>
       <p class="muted">
-        Progressive dev shell — loads only typed ESM modules. No legacy
-        <code>index.js</code> / <code>ajax.js</code> / <code>navigator.js</code>.
+        New typed app, under construction. No jQuery, no iframes, no legacy <code>index.js</code>.
+        Compare to the byte-for-byte legacy oracle at <a href="/legacy/${config.id}/">/legacy/${config.id}/</a>.
       </p>
     </header>
 
@@ -340,7 +334,7 @@ function buildShell(config: MissionConfig): ClockReadout {
   const modern = root.querySelector("#get-modern");
   const historic = root.querySelector("#get-historic");
   if (!(modern instanceof HTMLElement) || !(historic instanceof HTMLElement)) {
-    throw new Error("[dev/missionHarness] clock readout elements missing");
+    throw new Error("[missionApp] clock readout elements missing");
   }
   return { modern, historic };
 }
@@ -380,17 +374,17 @@ function loadPaper(missionId: string): Promise<PaperScopeLike> {
     script.onload = (): void => {
       const paper = (window as unknown as { paper?: PaperScopeLike }).paper;
       if (paper) resolve(paper);
-      else reject(new Error("[dev/missionHarness] paper-full.js loaded but window.paper is unset"));
+      else reject(new Error("[missionApp] paper-full.js loaded but window.paper is unset"));
     };
     script.onerror = (): void => {
-      reject(new Error(`[dev/missionHarness] failed to load ${script.src}`));
+      reject(new Error(`[missionApp] failed to load ${script.src}`));
     };
     document.head.appendChild(script);
   });
 }
 
 /**
- * Mount the typed {@link NavigatorRenderer} on the dev page's `#navCanvas`,
+ * Mount the typed {@link NavigatorRenderer} on the app page's `#navCanvas`,
  * driven by the live mission clock. Click-to-seek updates the displayed
  * mission time (no media player on this page) and the "last seek" readout.
  */
@@ -499,7 +493,7 @@ async function mountTocData(config: MissionConfig): Promise<void> {
 }
 
 /**
- * Mount the typed {@link createTocPanel} into the dev page, driven by the
+ * Mount the typed {@link createTocPanel} into the app page, driven by the
  * live historic-launch GET. Logs clicks to the "last click" readout instead
  * of seeking (there's no media player on this page).
  */
@@ -1216,7 +1210,7 @@ async function mountMocrvizPanel(config: MissionConfig): Promise<void> {
 ready(() => {
   const id = readMissionId();
   if (!id) {
-    console.error("[dev/missionHarness] <body data-mission> missing or invalid");
+    console.error("[missionApp] <body data-mission> missing or invalid");
     return;
   }
   const config = CONFIGS[id];
@@ -1244,5 +1238,5 @@ ready(() => {
   void mountDashboardPanel(config);
   void mountSearchPanel(config);
   void mountMocrvizPanel(config);
-  console.warn(`[dev/missionHarness] ${config.name} (${id}) ready`);
+  console.warn(`[missionApp] ${config.name} (${id}) ready`);
 });

@@ -1,62 +1,35 @@
 import { defineConfig, type Plugin } from "vite";
 import { resolve } from "node:path";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { a11Config } from "./src/missions/11.config.js";
-import { a13Config } from "./src/missions/13.config.js";
-import { a17Config } from "./src/missions/17.config.js";
-import { renderMissionHead } from "./src/template/head.js";
-
-const MISSION_CONFIGS: Record<MissionId, MissionConfig | null> = {
-  "11": a11Config,
-  "13": a13Config,
-  "17": a17Config,
-};
-
-const HEAD_BLOCK = /<head\b[^>]*>[\s\S]*?<\/head>/i;
-
-/** Pure HTML transform: replace <head>…</head> with the generated head. */
-function applyHeadInjection(
-  html: string,
-  config: MissionConfig,
-  options: { includeEsmEntry?: boolean } = {},
-): string {
-  const windowMission = `<script>window.MISSION = ${JSON.stringify(config)};</script>`;
-  const generatedHead = `<head>\n${windowMission}\n${renderMissionHead(config, options)}\n</head>`;
-  return HEAD_BLOCK.test(html)
-    ? html.replace(HEAD_BLOCK, generatedHead)
-    : html.replace(/<html[^>]*>/i, (m) => `${m}\n${generatedHead}`);
-}
-
-// Phase 1: each lifted mission HTML uses non-module <script src> tags —
-// Vite can't bundle those and emits noisy warnings if it tries. Instead,
-// keep it out of rollupOptions and copy it to dist/{N}/ verbatim — but apply
-// the Phase 3 head injection on the way through, so production matches dev.
-const copyLegacyHtml = (mission: MissionId) => ({
-  name: `copy-legacy-html-${mission}`,
-  closeBundle() {
-    const config = MISSION_CONFIGS[mission];
-    if (!config) return;
-    const src = `${mission}/index.html`;
-    const dest = `dist/${mission}/index.html`;
-    const transformed = applyHeadInjection(readFileSync(src, "utf8"), config, {
-      includeEsmEntry: false,
-    });
-    mkdirSync(`dist/${mission}`, { recursive: true });
-    writeFileSync(dest, transformed);
-  },
-});
+import { existsSync, readFileSync } from "node:fs";
 
 /**
- * For any path that looks like a directory (no dot-extension, no trailing slash),
- * append a trailing slash so Vite resolves the index.html inside it.
- * Handles /dev, /11, /13, /17, etc. without needing per-route entries.
+ * URL strategy
+ * ------------
+ *  /                      \u2192 landing/index.html (placeholder)
+ *  /11/  /13/  /17/       \u2192 the new typed app (this is the work-in-progress).
+ *                            HTML lives at {N}/index.html, ESM at
+ *                            src/app/missionApp.ts, assets under public/{N}/.
+ *  /legacy/{N}/           \u2192 byte-for-byte lifted legacy mission, served from
+ *                            legacy-oracle/{N}/index.html for side-by-side
+ *                            comparison. Dev-only \u2014 not in the production build.
+ *  /dev/                  \u2192 raw per-module smoke harness (src/dev/harness.ts).
+ *                            Dev-only \u2014 not in the production build.
+ *
+ * All shared assets (CSVs, photos, MOCRviz audio data, vendored paper.js)
+ * live under public/{N}/ and are reachable from both the new app and the
+ * legacy oracle.
+ */
+
+/**
+ * If a path looks like a directory (no extension, no trailing slash), append
+ * one so Vite resolves the index.html inside. Handles /11, /13, /17, /dev,
+ * /legacy, /legacy/13, etc. without per-route config.
  */
 const trailingSlashRedirect = (): Plugin => ({
   name: "trailing-slash-redirect",
   configureServer(server) {
     server.middlewares.use((req, _res, next) => {
       const url = req.url ?? "";
-      // Only rewrite if: has no trailing slash, no query string, no file extension
       if (url !== "/" && !url.endsWith("/") && !url.includes("?") && !/\.[^/]+$/.test(url)) {
         req.url = url + "/";
       }
@@ -65,26 +38,42 @@ const trailingSlashRedirect = (): Plugin => ({
   },
 });
 
-// Phase 3: rebuild each mission's <head> from the shared template
-// (src/template/head.ts) using the typed mission config. The first script
-// is `window.MISSION = {...}` so the legacy `index.js` `var c*` block reads
-// it. The generated head ends with `<script type="module" src="/src/main.ts">`
-// — the ESM bootstrap entry. This plugin handles the dev server; the build
-// path applies the same transform inside `copyLegacyHtml`.
-const injectMissionConfig = (): Plugin => ({
-  name: "inject-mission-config",
-  transformIndexHtml(html, ctx) {
-    const match = /^\/?(\d{2})\/index\.html$/.exec(ctx.path.replace(/^\//, ""));
-    if (!match) return;
-    const id = match[1] as MissionId;
-    const config = MISSION_CONFIGS[id];
-    if (!config) return;
-    return applyHeadInjection(html, config);
+/**
+ * Dev-only: serve /legacy/{11,13,17}/ from legacy-oracle/{N}/index.html as
+ * a read-only byte-for-byte oracle. The oracle's <script src="..."> tags
+ * reference relative paths (e.g. "lib/jquery-2.1.4.js", "index.js") that
+ * resolve against the URL prefix \u2014 we rewrite those requests to look under
+ * public/{N}/ so the same asset tree serves both the new app and the
+ * oracle. The oracle is never copied into the production build.
+ */
+const legacyOraclePlugin = (): Plugin => ({
+  name: "legacy-oracle",
+  configureServer(server) {
+    const oracleHtml = (mission: string): string | null => {
+      const path = resolve("legacy-oracle", mission, "index.html");
+      return existsSync(path) ? readFileSync(path, "utf8") : null;
+    };
+    server.middlewares.use((req, res, next) => {
+      const url = req.url ?? "";
+      const m = /^\/legacy\/(11|13|17)\/(.*)$/.exec(url);
+      if (!m) return next();
+      const [, mission, rest] = m;
+      // bare /legacy/{N}/ \u2192 serve the oracle HTML
+      if (rest === "" || rest === "index.html") {
+        const html = oracleHtml(mission!);
+        if (!html) return next();
+        res.setHeader("content-type", "text/html; charset=utf-8");
+        res.end(html);
+        return;
+      }
+      // /legacy/{N}/<asset> \u2192 rewrite to /{N}/<asset> so Vite serves it
+      // from public/{N}/
+      req.url = `/${mission}/${rest}`;
+      next();
+    });
   },
 });
 
-// Multi-page setup: one HTML entry per mission + landing.
-// During Phase 0 these are empty placeholder shells; Phases 1-3 fill them in.
 export default defineConfig({
   root: ".",
   publicDir: "public",
@@ -97,19 +86,16 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
-  plugins: [
-    trailingSlashRedirect(),
-    injectMissionConfig(),
-    copyLegacyHtml("11"),
-    copyLegacyHtml("13"),
-    copyLegacyHtml("17"),
-  ],
+  plugins: [trailingSlashRedirect(), legacyOraclePlugin()],
   build: {
     outDir: "dist",
     emptyOutDir: true,
     rollupOptions: {
       input: {
         landing: resolve(__dirname, "index.html"),
+        a11: resolve(__dirname, "11/index.html"),
+        a13: resolve(__dirname, "13/index.html"),
+        a17: resolve(__dirname, "17/index.html"),
       },
     },
   },

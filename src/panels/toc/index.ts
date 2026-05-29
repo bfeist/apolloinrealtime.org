@@ -14,10 +14,9 @@
  *   - is jQuery-free (uses native `scrollIntoView`, `addEventListener`).
  *
  * The panel renders from a {@link TocData} object (already loaded by
- * `src/data/tocData.ts`). Legacy callers will continue to use the iframe
- * until their call site itself converts to ESM (per the wire-up lesson
- * in `08-progress-tracker.md`); the typed panel is exercised on
- * `/dev/{N}/` in the meantime.
+ * `src/data/tocData.ts`). The new typed app mounts it at `/{N}/` via
+ * `src/app/missionApp.ts`; the legacy iframe-based TOC lives only in the
+ * read-only oracle at `/legacy/{N}/`.
  *
  * Legacy origin:
  *   - `legacy-src/{11,13,17}/index.html` `<iframe id="iFrameTOC">`
