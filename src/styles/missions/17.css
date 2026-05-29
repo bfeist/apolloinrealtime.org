@@ -1,0 +1,14 @@
+/* Apollo 17 visual overrides.
+   Most styling comes from `src/styles/base.css` + token overrides in
+   `tokens.css` keyed off `body[data-mission="17"]`. This file is for
+   anything that can't be expressed as a token.
+   Keep < 100 lines. */
+
+/* A17 uses the "photo-block" layout in legacy — no app tabs over the
+   photo panel. The typed shell uses a single layout for all three
+   missions; if Ben wants the A17 simplified look we'd add a layout
+   variant here. For now: no override needed. */
+
+/* A17 image-overlay backgrounds are `#222222` in the legacy css; the
+   token override in `tokens.css` already bumps `--airt-bg-surface-hi`
+   to that value for A17. */

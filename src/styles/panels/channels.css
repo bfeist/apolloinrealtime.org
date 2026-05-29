@@ -1,0 +1,55 @@
+/* Mission Control channel grid + MOCRviz audio panel. */
+
+.airt-channels__grid button,
+.mocrviz-channel {
+  height: var(--airt-channel-btn);
+  background: var(--airt-bg-surface-hi);
+  border: 1px solid var(--airt-border);
+  color: var(--airt-fg-secondary);
+  font-family: var(--airt-font-mono);
+  font-size: var(--airt-fs-xs);
+  text-transform: uppercase;
+  border-radius: var(--airt-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px;
+  text-align: center;
+  line-height: 1.1;
+}
+.airt-channels__grid button:hover,
+.mocrviz-channel:hover {
+  background: var(--airt-border-hi);
+  color: var(--airt-fg-primary);
+}
+.airt-channels__grid button[disabled],
+.mocrviz-channel[disabled] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.airt-channels__grid button.is-active,
+.mocrviz-channel.is-active {
+  background: var(--airt-accent);
+  color: var(--airt-accent-on);
+  border-color: transparent;
+}
+
+.mocrviz-channel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--airt-channel-btn), 1fr));
+  gap: 2px;
+  margin-top: var(--airt-sp-2);
+}
+.mocrviz-status {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--airt-sp-2);
+  font-family: var(--airt-font-mono);
+  font-size: var(--airt-fs-xs);
+  color: var(--airt-fg-secondary);
+}
+.mocrviz-audio {
+  width: 100%;
+  margin-top: var(--airt-sp-2);
+}

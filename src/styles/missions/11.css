@@ -1,0 +1,15 @@
+/* Apollo 11 visual overrides.
+   Most styling comes from `src/styles/base.css` + token overrides in
+   `tokens.css` keyed off `body[data-mission="11"]`. This file is for
+   anything that can't be expressed as a token.
+   Keep < 100 lines. */
+
+body[data-mission="11"] .airt-header__title {
+  /* Slightly tighter to fit "Apollo 11" elegantly on phones. */
+  letter-spacing: -0.01em;
+}
+
+/* A11 gallery scrollbar tint (legacy used a green border). */
+body[data-mission="11"] .airt-photo__gallery::-webkit-scrollbar-thumb {
+  background: var(--airt-accent);
+}

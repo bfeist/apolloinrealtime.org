@@ -1,0 +1,481 @@
+/* Unified base + layout for /{11,13,17}/.
+   Imports the design tokens; per-panel CSS in `panels/*.css`; per-mission
+   overrides in `missions/{N}.css`. */
+
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--airt-bg-page);
+  color: var(--airt-fg-primary);
+  font-family: var(--airt-font-sans);
+  font-size: var(--airt-fs-md);
+  line-height: 1.45;
+  min-height: 100%;
+}
+
+a {
+  color: var(--airt-accent);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--airt-accent-hi);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* ── app shell layout ──────────────────────────────────────────────── */
+
+.airt-app {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 100vh;
+  max-height: 100vh;
+  gap: var(--airt-sp-3);
+  padding: var(--airt-sp-3);
+  overflow: hidden;
+}
+
+/* Header: logo | info | navigator (3-col on desktop, stacks on mobile) */
+.airt-header {
+  display: grid;
+  grid-template-columns: 120px 1fr minmax(0, 1.4fr);
+  gap: var(--airt-sp-4);
+  align-items: stretch;
+  background: var(--airt-bg-surface);
+  border: 1px solid var(--airt-border);
+  border-radius: var(--airt-radius-md);
+  padding: var(--airt-sp-3);
+}
+.airt-header__logo {
+  display: block;
+  width: 100px;
+  height: 100px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  align-self: center;
+  justify-self: center;
+}
+.airt-header__info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+.airt-header__pretitle {
+  margin: 0;
+  font-size: var(--airt-fs-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--airt-fg-muted);
+}
+.airt-header__title {
+  margin: 0;
+  font-family: var(--airt-font-display);
+  font-size: var(--airt-fs-display);
+  line-height: 1.1;
+  color: var(--airt-fg-primary);
+}
+.airt-header__subtitle {
+  margin: 0 0 var(--airt-sp-2);
+  font-size: var(--airt-fs-sm);
+  color: var(--airt-fg-secondary);
+}
+
+.airt-clock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--airt-sp-2);
+}
+.airt-clock__row {
+  display: flex;
+  gap: var(--airt-sp-2);
+  font-family: var(--airt-font-mono);
+  font-size: var(--airt-fs-sm);
+  color: var(--airt-fg-secondary);
+}
+.airt-clock__row--modern {
+  color: var(--airt-fg-muted);
+  font-size: var(--airt-fs-xs);
+}
+
+.airt-get {
+  display: flex;
+  align-items: center;
+  gap: var(--airt-sp-2);
+}
+.airt-get__label {
+  font-size: var(--airt-fs-sm);
+  color: var(--airt-fg-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.airt-get__input {
+  width: 9ch;
+  background: var(--airt-bg-monitor);
+  border: 1px solid var(--airt-border);
+  color: var(--airt-fg-primary);
+  padding: 4px 6px;
+  border-radius: var(--airt-radius-sm);
+  font-family: var(--airt-font-mono);
+  font-size: var(--airt-fs-md);
+}
+.airt-get__input:focus {
+  outline: 2px solid var(--airt-accent);
+  outline-offset: 1px;
+}
+
+.airt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 14px;
+  border-radius: var(--airt-radius-sm);
+  background: var(--airt-bg-surface-hi);
+  color: var(--airt-fg-primary);
+  font-size: var(--airt-fs-sm);
+  border: 1px solid var(--airt-border-hi);
+  transition: background 100ms ease;
+}
+.airt-btn:hover {
+  background: var(--airt-border-hi);
+}
+.airt-btn--accent {
+  background: var(--airt-accent);
+  color: var(--airt-accent-on);
+  border-color: transparent;
+}
+.airt-btn--accent:hover {
+  background: var(--airt-accent-hi);
+}
+
+.airt-header__navigator {
+  background: var(--airt-bg-monitor);
+  border: 1px solid var(--airt-border);
+  border-radius: var(--airt-radius-sm);
+  min-height: 120px;
+  display: flex;
+}
+.airt-header__navigator > canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+  background: var(--airt-bg-monitor);
+}
+
+/* Main: video block (left) + side rail (right) */
+.airt-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--airt-side-w);
+  gap: var(--airt-sp-3);
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── video block + tabs ────────────────────────────────────────────── */
+
+.airt-video {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: var(--airt-sp-2);
+  background: var(--airt-bg-surface);
+  border: 1px solid var(--airt-border);
+  border-radius: var(--airt-radius-md);
+  padding: var(--airt-sp-3);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.airt-video__player {
+  position: relative;
+  background: var(--airt-bg-monitor);
+  border-radius: var(--airt-radius-sm);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  max-height: 60vh;
+  /* When the aspect-ratio would push width below the column, fall back
+     to filling whatever vertical room remains (the panel area stays >=
+     220px tall regardless). */
+  width: 100%;
+  max-width: calc(60vh * 4 / 3);
+  margin: 0 auto;
+}
+.airt-video__iframe {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--airt-fg-muted);
+}
+.airt-video__iframe iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.airt-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  color: var(--airt-fg-primary);
+  z-index: var(--airt-z-overlay);
+  padding: var(--airt-sp-3);
+  overflow: auto;
+}
+.airt-overlay[hidden] {
+  display: none;
+}
+
+.airt-video__tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--airt-border);
+}
+.airt-tab {
+  height: var(--airt-tab-h);
+  padding: 0 var(--airt-sp-4);
+  background: var(--airt-bg-surface-hi);
+  color: var(--airt-fg-secondary);
+  border-radius: var(--airt-radius-sm) var(--airt-radius-sm) 0 0;
+  border: 1px solid var(--airt-border);
+  border-bottom: 0;
+  font-size: var(--airt-fs-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.airt-tab:hover {
+  background: var(--airt-border-hi);
+  color: var(--airt-fg-primary);
+}
+.airt-tab.is-active {
+  background: var(--airt-accent);
+  color: var(--airt-accent-on);
+  border-color: transparent;
+}
+
+.airt-video__output {
+  background: var(--airt-bg-monitor);
+  border: 1px solid var(--airt-border);
+  border-radius: var(--airt-radius-sm);
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Panel hosts (transcript / TOC / commentary) */
+.airt-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--airt-sp-2);
+}
+.airt-panel[hidden] {
+  display: none;
+}
+
+/* ── side rail ────────────────────────────────────────────────────── */
+
+.airt-side {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--airt-sp-3);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.airt-channels {
+  min-height: 0;
+  overflow: auto;
+}
+
+.airt-channels {
+  background: var(--airt-bg-surface);
+  border: 1px solid var(--airt-border);
+  border-radius: var(--airt-radius-md);
+  padding: var(--airt-sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--airt-sp-2);
+  min-height: 0;
+}
+.airt-channels__title {
+  margin: 0;
+  font-size: var(--airt-fs-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--airt-fg-muted);
+}
+.airt-channels__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--airt-channel-btn), 1fr));
+  gap: 2px;
+}
+.airt-channels__viz {
+  background: var(--airt-bg-monitor);
+  border: 1px solid var(--airt-border);
+  border-radius: var(--airt-radius-sm);
+  padding: var(--airt-sp-2);
+  font-family: var(--airt-font-mono);
+  font-size: var(--airt-fs-xs);
+}
+.airt-channels__viz[hidden] {
+  display: none;
+}
+
+.airt-photo {
+  background: var(--airt-bg-surface);
+  border: 1px solid var(--airt-border);
+  border-radius: var(--airt-radius-md);
+  padding: var(--airt-sp-3);
+  display: grid;
+  grid-template-rows: minmax(140px, 2fr) minmax(80px, 1fr);
+  gap: var(--airt-sp-2);
+  min-height: 0;
+  overflow: hidden;
+}
+.airt-photo__main {
+  background: var(--airt-bg-monitor);
+  border: 1px solid var(--airt-border);
+  border-radius: var(--airt-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 0;
+}
+.airt-photo__main img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.airt-photo__gallery {
+  display: flex;
+  gap: var(--airt-sp-1);
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-items: center;
+  scrollbar-color: var(--airt-border-hi) var(--airt-bg-monitor);
+}
+.airt-photo__gallery img {
+  height: 60px;
+  width: auto;
+  border: 1px solid var(--airt-border);
+  border-radius: var(--airt-radius-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.airt-photo__gallery img:hover {
+  border-color: var(--airt-accent);
+}
+
+/* ── debug readout (?debug=1) ─────────────────────────────────────── */
+
+.airt-debug {
+  background: var(--airt-bg-surface);
+  border: 1px dashed var(--airt-border-hi);
+  border-radius: var(--airt-radius-md);
+  padding: var(--airt-sp-3);
+  font-family: var(--airt-font-mono);
+  font-size: var(--airt-fs-xs);
+  color: var(--airt-fg-secondary);
+  max-height: 60vh;
+  overflow: auto;
+}
+.airt-debug[hidden] {
+  display: none;
+}
+.airt-debug h2 {
+  margin: var(--airt-sp-3) 0 var(--airt-sp-1);
+  color: var(--airt-accent);
+  font-size: var(--airt-fs-sm);
+  font-family: var(--airt-font-mono);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--airt-border);
+  padding-bottom: 2px;
+}
+
+/* ── responsive breakpoints ───────────────────────────────────────── */
+
+/* Tablet portrait: collapse side rail under main column. */
+@media (max-width: 1024px) {
+  .airt-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .airt-side {
+    grid-template-rows: auto auto;
+  }
+  :root {
+    --airt-header-h: 200px;
+  }
+}
+
+/* Phone: stack header and reduce padding. */
+@media (max-width: 640px) {
+  .airt-app {
+    padding: var(--airt-sp-2);
+    gap: var(--airt-sp-2);
+  }
+  .airt-header {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "logo"
+      "info"
+      "nav";
+    text-align: left;
+    padding: var(--airt-sp-3);
+  }
+  .airt-header__logo {
+    grid-area: logo;
+    width: 80px;
+    height: 80px;
+    justify-self: start;
+  }
+  .airt-header__info {
+    grid-area: info;
+  }
+  .airt-header__navigator {
+    grid-area: nav;
+    min-height: 80px;
+  }
+  .airt-header__title {
+    font-size: var(--airt-fs-xl);
+  }
+  .airt-video {
+    padding: var(--airt-sp-2);
+  }
+  .airt-tab {
+    padding: 0 var(--airt-sp-2);
+    font-size: var(--airt-fs-xs);
+  }
+  :root {
+    --airt-channel-btn: 48px;
+  }
+}
+
+/* Phone landscape: keep nav visible but compress. */
+@media (max-width: 900px) and (orientation: landscape) {
+  .airt-header__navigator {
+    min-height: 70px;
+  }
+}

@@ -1,0 +1,40 @@
+/* Search panel — input + results list. */
+
+.search_panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--airt-sp-2);
+}
+
+#searchInputField {
+  width: 100%;
+  padding: 6px 10px;
+  background: var(--airt-bg-monitor);
+  border: 1px solid var(--airt-border);
+  color: var(--airt-fg-primary);
+  border-radius: var(--airt-radius-sm);
+  font-family: var(--airt-font-sans);
+  font-size: var(--airt-fs-md);
+}
+#searchInputField:focus {
+  outline: 2px solid var(--airt-accent);
+  outline-offset: 1px;
+}
+
+#searchResultsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--airt-font-mono);
+  font-size: var(--airt-fs-sm);
+}
+#searchResultsTable tr {
+  cursor: pointer;
+  border-bottom: 1px solid #1a1a1a;
+}
+#searchResultsTable tr:hover {
+  background: var(--airt-bg-surface-hi);
+}
+#searchResultsTable td {
+  padding: 4px 6px;
+  vertical-align: top;
+}

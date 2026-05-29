@@ -1,0 +1,97 @@
+/* Design tokens for the AiRT2 typed shell.
+   All tokens are CSS custom properties; per-mission overrides live in
+   `missions/{N}.css` and key off `body[data-mission="{N}"]`. */
+
+:root {
+  /* ── color palette ── */
+  --airt-bg-page: #0e0e0e;
+  --airt-bg-surface: #161616;
+  --airt-bg-surface-hi: #1e1e1e;
+  --airt-bg-monitor: #000000;
+  --airt-border: #2a2a2a;
+  --airt-border-hi: #3a3a3a;
+
+  --airt-fg-primary: #f0f0f0;
+  --airt-fg-secondary: #a8a8a8;
+  --airt-fg-muted: #6e6e6e;
+
+  /* Default accent — overridden per mission. */
+  --airt-accent: #6cf;
+  --airt-accent-hi: #8ef;
+  --airt-accent-on: #001020;
+
+  /* Transcript speaker colors (legacy: utt_pao / utt_capcom / utt_crew / utt_mocr). */
+  --airt-utt-pao: #6cf;
+  --airt-utt-capcom: #f5d76e;
+  --airt-utt-crew: #f5f5f5;
+  --airt-utt-mocr: #b86c75;
+
+  /* Commentary tones (legacy: com_support / com_crew). */
+  --airt-com-support: #b3b3b3;
+  --airt-com-crew: #f5f5f5;
+
+  /* Active-row highlight used by every panel.
+     Drives `setActiveTimeId` background; mirrors legacy
+     `cBackground_color_active`. */
+  --airt-row-active: #234;
+
+  /* ── typography ── */
+  --airt-font-sans: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --airt-font-mono: "Roboto Mono", ui-monospace, Menlo, Consolas, monospace;
+  --airt-font-display: "Roboto Slab", Georgia, serif;
+
+  --airt-fs-xs: 11px;
+  --airt-fs-sm: 12px;
+  --airt-fs-md: 14px;
+  --airt-fs-lg: 18px;
+  --airt-fs-xl: 24px;
+  --airt-fs-display: 32px;
+
+  /* ── spacing scale ── */
+  --airt-sp-1: 4px;
+  --airt-sp-2: 8px;
+  --airt-sp-3: 12px;
+  --airt-sp-4: 16px;
+  --airt-sp-5: 24px;
+  --airt-sp-6: 32px;
+
+  /* ── layout dimensions ── */
+  --airt-header-h: 160px;
+  --airt-side-w: 360px;
+  --airt-tab-h: 36px;
+  --airt-channel-btn: 56px;
+
+  /* ── z-index scale ── */
+  --airt-z-base: 1;
+  --airt-z-overlay: 50;
+  --airt-z-modal: 100;
+  --airt-z-tooltip: 200;
+
+  /* ── motion ── */
+  --airt-radius-sm: 3px;
+  --airt-radius-md: 6px;
+  --airt-radius-lg: 10px;
+  --airt-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --airt-shadow-2: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Per-mission accent overrides.
+   Legacy A11 uses a green-ish gallery accent, A13 uses warm orange in
+   places, A17 uses cooler blue/teal. These are approximations until
+   Phase 6 visual-diff QA refines them. */
+body[data-mission="11"] {
+  --airt-accent: #6f6;
+  --airt-accent-hi: #9f9;
+  --airt-accent-on: #001a00;
+}
+body[data-mission="13"] {
+  --airt-accent: #f93;
+  --airt-accent-hi: #fb6;
+  --airt-accent-on: #1a0900;
+}
+body[data-mission="17"] {
+  --airt-accent: #6cf;
+  --airt-accent-hi: #8ef;
+  --airt-accent-on: #001020;
+  --airt-bg-surface-hi: #222222; /* A17 uses a slightly lighter hover than A13. */
+}

@@ -1,0 +1,11 @@
+/* Apollo 13 visual overrides.
+   Most styling comes from `src/styles/base.css` + token overrides in
+   `tokens.css` keyed off `body[data-mission="13"]`. This file is for
+   anything that can't be expressed as a token.
+   Keep < 100 lines. */
+
+/* A13 has a MOCR speaker class not used in A11. Already tokenized in
+   `tokens.css` (`--airt-utt-mocr`); nothing else to add here for now. */
+
+/* A13 hover background is `#1e1e1e` in the legacy css, which is already
+   the default `--airt-bg-surface-hi`. */

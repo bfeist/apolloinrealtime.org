@@ -1,0 +1,53 @@
+/* Photo panel — mirrors legacy `imageBlock` / `galleryItemContainer`
+   selectors used by `src/panels/photo/index.ts`. */
+
+.imageBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+.selectedPhoto {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.photodivcaption,
+.photoMeta {
+  margin-top: var(--airt-sp-1);
+  font-size: var(--airt-fs-xs);
+  color: var(--airt-fg-secondary);
+  text-align: center;
+  max-width: 100%;
+}
+
+.galleryItemContainer {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-right: var(--airt-sp-1);
+}
+.galleryItemContainer img,
+img.galleryImage {
+  height: 60px;
+  width: auto;
+  border: 1px solid var(--airt-border);
+  border-radius: var(--airt-radius-sm);
+  cursor: pointer;
+  display: block;
+}
+.galleryItemContainer img:hover,
+img.galleryImage:hover {
+  border-color: var(--airt-accent);
+}
+.galleryOverlay {
+  background: var(--airt-bg-surface-hi);
+}
+
+img.galleryImage.airt-row-active,
+.galleryItemContainer.airt-row-active img {
+  border-color: var(--airt-accent);
+  box-shadow: 0 0 0 1px var(--airt-accent);
+}

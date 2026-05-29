@@ -1,0 +1,57 @@
+/* Dashboard / telemetry / crew status panels. */
+
+.dashboard_panel,
+.telemetry_panel,
+.crewstatus_panel {
+  font-family: var(--airt-font-mono);
+  font-size: var(--airt-fs-sm);
+  color: var(--airt-fg-primary);
+}
+
+.dash-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 2px 0;
+  gap: var(--airt-sp-3);
+}
+.dash-row .label {
+  color: var(--airt-fg-muted);
+  text-transform: uppercase;
+  font-size: var(--airt-fs-xs);
+  letter-spacing: 0.06em;
+}
+.dash-row .value {
+  color: var(--airt-fg-primary);
+  font-weight: 600;
+  text-align: right;
+}
+
+.frame {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.velocity-value,
+.distance-value {
+  color: var(--airt-accent);
+}
+.velocity-frame,
+.distance-frame {
+  color: var(--airt-fg-muted);
+  font-size: var(--airt-fs-xs);
+}
+
+.dashMissionDay,
+.dashMissionStage {
+  color: var(--airt-accent);
+}
+
+.crewstatus_text {
+  color: var(--airt-fg-primary);
+}
+.crewstatus_wake {
+  margin-top: var(--airt-sp-1);
+  color: var(--airt-utt-pao);
+  font-size: var(--airt-fs-xs);
+}

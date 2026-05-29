@@ -1,0 +1,57 @@
+/* TOC (Table of Contents) panel — mirrors legacy `TOC.html` selectors so
+   the typed `src/panels/toc/index.ts` slots into the same look. */
+
+.TOC_container {
+  font-family: var(--airt-font-mono);
+  font-size: var(--airt-fs-sm);
+  color: var(--airt-fg-primary);
+}
+
+ul.TOCli,
+ul.TOC1,
+ul.TOC2,
+ul.TOC3 {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+li.tocitem {
+  padding: 4px 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #1a1a1a;
+}
+li.tocitem:hover {
+  background: var(--airt-bg-surface-hi);
+}
+ul.TOC1 > li.tocitem,
+ul.TOC1 li.tocitem {
+  font-weight: 600;
+  color: var(--airt-fg-primary);
+}
+ul.TOC2 > li.tocitem,
+ul.TOC2 li.tocitem {
+  padding-left: 20px;
+  color: var(--airt-fg-secondary);
+}
+ul.TOC3 > li.tocitem,
+ul.TOC3 li.tocitem {
+  padding-left: 36px;
+  color: var(--airt-fg-muted);
+  font-size: var(--airt-fs-xs);
+}
+
+.TOCTimestamp {
+  display: inline-block;
+  width: 7ch;
+  color: var(--airt-fg-muted);
+  margin-right: var(--airt-sp-2);
+}
+.TOC_item {
+  color: inherit;
+}
+
+li.tocitem.airt-row-active {
+  background: var(--airt-row-active);
+  color: var(--airt-fg-primary);
+}
