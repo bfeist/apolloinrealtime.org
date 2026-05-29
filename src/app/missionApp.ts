@@ -656,6 +656,7 @@ async function mountMocrvizPanel(
   config: MissionConfig,
   shell: ShellElements,
   ref: { value: number },
+  initialChannel: number | null,
 ): Promise<void> {
   if (config.features?.mocrviz !== true) {
     renderChannelStrip(config, shell, null);
@@ -695,6 +696,20 @@ async function mountMocrvizPanel(
   // Production default is Photography; MOCR audio is a right-column tab.
   shell.mocrvizHost.hidden = true;
   renderChannelStrip(config, shell, panel);
+
+  // Apply `?ch=N` deep link: select the requested channel on load.
+  if (initialChannel !== null) {
+    panel.setChannel(initialChannel);
+    // Update button highlights to reflect the deep-linked channel.
+    const buttons = shell.channelGrid.querySelectorAll<HTMLButtonElement>(".thirtybtn-channel");
+    const catalog = channelsFor(config.id);
+    if (catalog) {
+      for (const btn of buttons) {
+        const id = parseInt(btn.id.replace("btn-ch", ""), 10);
+        btn.classList.toggle("is-active", id === initialChannel);
+      }
+    }
+  }
 
   const photoTab = document.getElementById("photoTab");
   const mocrTab = document.getElementById("mocrTab");
@@ -867,7 +882,7 @@ ready(() => {
   void mountDashboardPanel(config, shell, currentSecondsRef);
   void startDashboardAutodisplay(config, shell, currentSecondsRef, overlayState);
   void mountSearchPanel(config, shell);
-  void mountMocrvizPanel(config, shell, currentSecondsRef);
+  void mountMocrvizPanel(config, shell, currentSecondsRef, deepLink.channel);
   void mountDebugReadout(config, shell, currentSecondsRef);
 
   console.warn(`[missionApp] ${config.name} (${id}) ready (debug=${String(shell.debugVisible)})`);
