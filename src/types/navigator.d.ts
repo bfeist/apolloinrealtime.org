@@ -93,13 +93,20 @@ interface PaperMouseEvent {
   point: PaperPoint;
 }
 
+/**
+ * A Paper.js Tool — the cross-version API for per-canvas mouse events.
+ * `paper.view.onMouseMove/Up/Leave` were added in Paper.js v0.11; older
+ * builds (A17 ships v0.9.24) only support mouse events on Tool.
+ */
+interface PaperTool {
+  onMouseMove: ((event: PaperMouseEvent) => void) | null;
+  onMouseUp: ((event: PaperMouseEvent) => void) | null;
+}
+
 interface PaperView {
   readonly size: PaperSize;
   draw: () => void;
   onResize: (() => void) | null;
-  onMouseMove: ((event: PaperMouseEvent) => void) | null;
-  onMouseUp: ((event: PaperMouseEvent) => void) | null;
-  onMouseLeave: (() => void) | null;
 }
 
 /**
@@ -119,6 +126,11 @@ interface PaperScopeLike {
   Rectangle: new (x: number, y: number, width: number, height: number) => PaperRectangle;
   Path: PaperPathConstructor;
   PointText: new (options: PaperPointTextOptions) => PaperPointText;
+  /**
+   * Paper.js Tool constructor. Works in both v0.9.x (A17) and v0.11.x
+   * (A11/A13). Preferred over `view.onMouseMove` for cross-version compat.
+   */
+  Tool: new () => PaperTool;
 }
 
 // ── layout ────────────────────────────────────────────────────────────────────
@@ -188,6 +200,18 @@ interface NavigatorPoint {
 
 // ── renderer ──────────────────────────────────────────────────────────────────
 
+/**
+ * Optional data overlays passed to {@link NavigatorRendererOptions}.
+ * All fields are optional; omitting the whole object leaves the renderer
+ * in structural-skeleton-only mode (all existing tests remain unaffected).
+ */
+interface NavigatorOverlays {
+  stages?: MissionStagesData;
+  videoSegments?: VideoSegmentsData;
+  photos?: PhotoData;
+  toc?: TocData;
+}
+
 interface NavigatorRendererOptions {
   /** `cMissionDurationSeconds`. */
   missionDurationSeconds: number;
@@ -200,4 +224,10 @@ interface NavigatorRendererOptions {
    * target mission-time in seconds. Optional — omit for a read-only display.
    */
   onSeek?: (seconds: number) => void;
+  /**
+   * Mission data arrays to render as overlays on top of the structural
+   * skeleton. When absent the renderer draws tier borders, nav boxes, and
+   * cursors only — matching the Phase-4 baseline behavior.
+   */
+  overlays?: NavigatorOverlays;
 }

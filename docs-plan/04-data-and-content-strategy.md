@@ -12,7 +12,7 @@ Plan:
 
 1. **Define one canonical schema** per CSV file type (one TOCData schema, one
    utteranceData schema, etc.) in `docs/csv-schemas.md`, mirrored as
-   TypeScript row types in `src/types/csv.ts`. This is the contract the new
+   TypeScript row types in `src/types/data.d.ts`. This is the contract the new
    data pipeline writes and the loader reads.
 2. **Write one typed CSV loader** in `src/data/csvLoader.ts` that parses +
    builds a GET-second-indexed lookup table, returning typed rows. Replaces
@@ -118,7 +118,7 @@ scripts:
   - `airt-ingest photo-timing --mission 13 ...`
   - `airt-ingest build --mission 13` (emit all standardized `indexes/*.csv`)
   - `airt-ingest validate --mission 13` (schema-check output against
-    `docs/csv-schemas.md` / `src/types/csv.ts`)
+    `docs/csv-schemas.md` / `src/types/data.d.ts`)
 - **Standardized input layout + naming.** Define a single per-mission input
   convention (raw transcripts, photo manifests, telemetry sources) under
   `pipeline/missions/{N}/` so every mission is ingested the same way.

@@ -46,7 +46,25 @@ export const NAVIGATOR_COLORS = {
   zoomPane2Border: "#84b8d9",
   cursor: "red",
   navCursor: "#5E92A6",
+  // Data overlay colors (legacy `gColorMissionStage*`, `gColorVideoRegion*`, etc.)
+  overlayStageStroke: "grey",
+  overlayStageText: "lightgrey",
+  overlayVideoFill: "#010047",
+  overlayVideoStroke: "blue",
+  overlayVideo3dFill: "#270047",
+  overlayVideo3dStroke: "#4D0062",
+  overlayPhotoTick: "#00C000",
+  overlayTocTick: "orange",
+  overlayTocText: "#999999",
+  overlayTimeTick: "#333333",
 } as const;
+
+/** Legacy `gHeightVideoRectDenominator`. */
+const VIDEO_RECT_HEIGHT_DENOM = 6;
+/** Legacy `gHeightPhotoTickDenominator`. */
+const PHOTO_TICK_HEIGHT_DENOM = 6;
+/** Tier 2 TOC tick height as a fraction: `tier2.height / TOC_TICK_HEIGHT_DENOM`. */
+const TOC_TICK_HEIGHT_DENOM = 3;
 
 /** `graphFontFamily` in the legacy file. */
 const FONT_FAMILY = "Roboto Mono";
@@ -80,6 +98,19 @@ export class NavigatorRenderer {
   private tier3Group: PaperGroup | null = null;
   private cursorGroup: PaperGroup | null = null;
   private navCursorGroup: PaperGroup | null = null;
+
+  /**
+   * Paper.js Tool that owns mouse events. `paper.view.onMouseMove/Up/Leave`
+   * were only added in Paper.js v0.11; A17 ships v0.9.24 which requires Tool.
+   * Using Tool for all missions keeps the code uniform.
+   */
+  private _tool: PaperTool | null = null;
+  /** Canvas element stored for removing the DOM `mouseleave` listener. */
+  private _canvas: HTMLCanvasElement | null = null;
+  /** Stable bound reference so `removeEventListener` matches `addEventListener`. */
+  private readonly _onMouseLeave = (): void => {
+    this.handleMouseLeave();
+  };
 
   constructor(paper: PaperScopeLike, options: NavigatorRendererOptions) {
     this.paper = paper;
@@ -116,15 +147,16 @@ export class NavigatorRenderer {
     this.paper.view.onResize = (): void => {
       this.render(this.currentSeconds);
     };
-    this.paper.view.onMouseMove = (event): void => {
+    const tool = new this.paper.Tool();
+    tool.onMouseMove = (event): void => {
       this.handleMouseMove(event.point);
     };
-    this.paper.view.onMouseUp = (event): void => {
+    tool.onMouseUp = (event): void => {
       this.handleMouseUp(event.point);
     };
-    this.paper.view.onMouseLeave = (): void => {
-      this.handleMouseLeave();
-    };
+    canvas.addEventListener("mouseleave", this._onMouseLeave);
+    this._tool = tool;
+    this._canvas = canvas;
 
     this.mounted = true;
     this.render(this.currentSeconds);
@@ -132,7 +164,7 @@ export class NavigatorRenderer {
 
   /**
    * Redraw everything at `currentSeconds`. Mirrors `redrawAll()`:
-   * tier borders → tier-1 nav box → tier-2 nav box → cursor → `view.draw()`.
+   * tier borders → tier-1 nav box → tier-2 nav box → overlays → cursor → `view.draw()`.
    */
   render(currentSeconds: number): void {
     if (!this.mounted) return;
@@ -142,6 +174,7 @@ export class NavigatorRenderer {
     this.drawTierBorders(layout);
     this.tier2StartSeconds = this.drawTier1NavBox(layout, currentSeconds);
     this.tier3StartSeconds = this.drawTier2NavBox(layout, currentSeconds, this.tier2StartSeconds);
+    this.drawTierOverlays(layout, this.tier2StartSeconds);
     this.drawCursor(layout, currentSeconds, this.cursorGroup, NAVIGATOR_COLORS.cursor, false);
     this.paper.view.draw();
   }
@@ -161,9 +194,13 @@ export class NavigatorRenderer {
       group?.remove();
     }
     this.paper.view.onResize = null;
-    this.paper.view.onMouseMove = null;
-    this.paper.view.onMouseUp = null;
-    this.paper.view.onMouseLeave = null;
+    if (this._tool) {
+      this._tool.onMouseMove = null;
+      this._tool.onMouseUp = null;
+      this._tool = null;
+    }
+    this._canvas?.removeEventListener("mouseleave", this._onMouseLeave);
+    this._canvas = null;
     this.mounted = false;
   }
 
@@ -446,5 +483,221 @@ export class NavigatorRenderer {
     const line = this.paper.Path.Line({ x, y: top }, { x, y: bottom });
     line.strokeColor = color;
     group.addChild(line);
+  }
+
+  /**
+   * Append data overlay items to the tier groups (called from `render()` after
+   * `drawTierBorders` has cleared each group and redrawn the border).
+   *
+   * No-ops when `options.overlays` is absent, preserving the Phase-4 baseline
+   * behavior and leaving all existing unit tests unaffected.
+   *
+   * Tier-2 overlays are viewport-dependent; they use the `tier2StartSeconds`
+   * computed by `drawTier1NavBox()` in the same render cycle. Tier-2 content
+   * therefore updates every second when driven by the mission clock. Hover-only
+   * refresh (without a full `render()`) is a planned follow-up.
+   *
+   * Mirrors the data-drawing sections of `drawTier1()` and `drawTier2()` in
+   * the legacy `navigator.js`.
+   */
+  private drawTierOverlays(layout: NavigatorLayout, tier2StartSeconds: number): void {
+    const { overlays } = this.options;
+    if (!overlays) return;
+    if (!this.tier1Group || !this.tier2Group) return;
+
+    const { countdownSeconds } = layout;
+
+    // ── Tier 1: mission-stage ticks ──────────────────────────────────────────
+    if (overlays.stages) {
+      for (const stage of overlays.stages.stages) {
+        const x =
+          layout.tier1.left + (stage.seconds + countdownSeconds) * layout.tier1.pixelsPerSecond;
+        if (x < layout.tier1.left || x > layout.tier1.left + layout.tier1.width) continue;
+        this.addLine(
+          this.tier1Group,
+          x,
+          layout.tier1.top,
+          layout.tier1.top + layout.tier1.height / 2,
+          NAVIGATOR_COLORS.overlayStageStroke,
+        );
+      }
+    }
+
+    // ── Tier 1: video-segment rectangles ─────────────────────────────────────
+    if (overlays.videoSegments) {
+      const { top, left, height, pixelsPerSecond } = layout.tier1;
+      const rectHeight = height / VIDEO_RECT_HEIGHT_DENOM;
+      const rectTop = top + height - rectHeight;
+      for (const seg of overlays.videoSegments.segments) {
+        const startX = left + (seg.startSeconds + countdownSeconds) * pixelsPerSecond;
+        const segWidth = (seg.endSeconds - seg.startSeconds) * pixelsPerSecond;
+        if (segWidth <= 0) continue;
+        const rect = this.paper.Path.Rectangle(startX, rectTop, segWidth, rectHeight);
+        if (seg.extra !== "") {
+          rect.fillColor = NAVIGATOR_COLORS.overlayVideo3dFill;
+          rect.strokeColor = NAVIGATOR_COLORS.overlayVideo3dStroke;
+        } else {
+          rect.fillColor = NAVIGATOR_COLORS.overlayVideoFill;
+          rect.strokeColor = NAVIGATOR_COLORS.overlayVideoStroke;
+        }
+        this.tier1Group.addChild(rect);
+      }
+    }
+
+    // ── Tier 1: photo ticks ───────────────────────────────────────────────────
+    if (overlays.photos) {
+      const { top, left, height, width, pixelsPerSecond } = layout.tier1;
+      const barHeight = height / PHOTO_TICK_HEIGHT_DENOM;
+      const tierBottom = top + height;
+      for (const photo of overlays.photos.entries) {
+        const x = left + (photo.seconds + countdownSeconds) * pixelsPerSecond;
+        if (x < left || x > left + width) continue;
+        this.addLine(
+          this.tier1Group,
+          x,
+          tierBottom - barHeight,
+          tierBottom,
+          NAVIGATOR_COLORS.overlayPhotoTick,
+        );
+      }
+    }
+
+    // ── Tier 2: video-segment rectangles (viewport-clipped) ──────────────────
+    const tier2 = layout.tier2;
+    const secondsOnTier2 = tier2.width * tier2.secondsPerPixel;
+    const tier2Bottom = tier2.top + tier2.height;
+
+    if (overlays.videoSegments) {
+      const rectHeight = tier2.height / VIDEO_RECT_HEIGHT_DENOM - 2;
+      const rectTop = tier2.top + tier2.height - tier2.height / VIDEO_RECT_HEIGHT_DENOM;
+      for (const seg of overlays.videoSegments.segments) {
+        if (seg.startSeconds > tier2StartSeconds + secondsOnTier2) continue;
+        if (seg.endSeconds < tier2StartSeconds) continue;
+        let startX = tier2.left + (seg.startSeconds - tier2StartSeconds) * tier2.pixelsPerSecond;
+        let segWidth = (seg.endSeconds - seg.startSeconds) * tier2.pixelsPerSecond;
+        if (startX < 0) segWidth -= Math.abs(startX);
+        if (startX < tier2.left + 1) startX = tier2.left + 1;
+        if (segWidth > tier2.width - startX - 1) segWidth = tier2.width - startX + tier2.left - 1;
+        if (segWidth <= 0) continue;
+        const rect = this.paper.Path.Rectangle(startX, rectTop, segWidth, rectHeight);
+        if (seg.extra !== "") {
+          rect.fillColor = NAVIGATOR_COLORS.overlayVideo3dFill;
+          rect.strokeColor = NAVIGATOR_COLORS.overlayVideo3dStroke;
+        } else {
+          rect.fillColor = NAVIGATOR_COLORS.overlayVideoFill;
+          rect.strokeColor = NAVIGATOR_COLORS.overlayVideoStroke;
+        }
+        this.tier2Group.addChild(rect);
+      }
+    }
+
+    // ── Tier 2: photo ticks ───────────────────────────────────────────────────
+    if (overlays.photos) {
+      const barHeight = tier2.height / PHOTO_TICK_HEIGHT_DENOM;
+      for (const photo of overlays.photos.entries) {
+        const secondsFromLeft = photo.seconds - tier2StartSeconds;
+        if (secondsFromLeft > secondsOnTier2) break; // entries are time-sorted
+        if (secondsFromLeft < 0) continue;
+        const x = tier2.left + secondsFromLeft * tier2.pixelsPerSecond;
+        this.addLine(
+          this.tier2Group,
+          x,
+          tier2Bottom - barHeight,
+          tier2Bottom,
+          NAVIGATOR_COLORS.overlayPhotoTick,
+        );
+      }
+    }
+
+    // ── Tier 2: half-hour time ticks ─────────────────────────────────────────
+    {
+      const totalSpan = layout.missionDurationSeconds + countdownSeconds;
+      const halfHourCount = Math.ceil(totalSpan / 1800);
+      for (let i = 0; i < halfHourCount; i++) {
+        // Absolute seconds in signed T-0 space (i=0 = start of countdown)
+        const tickSeconds = i * 1800 - countdownSeconds;
+        const secondsFromLeft = tickSeconds - tier2StartSeconds;
+        if (secondsFromLeft > secondsOnTier2) break;
+        if (secondsFromLeft < 0) continue;
+        const x = tier2.left + secondsFromLeft * tier2.pixelsPerSecond;
+        this.addLine(this.tier2Group, x, tier2.top, tier2Bottom, NAVIGATOR_COLORS.overlayTimeTick);
+      }
+    }
+
+    // ── Tier 2: TOC ticks + level-1 labels ───────────────────────────────────
+    if (overlays.toc) {
+      const barHeight = tier2.height / TOC_TICK_HEIGHT_DENOM;
+      for (const entry of overlays.toc.entries) {
+        const secondsFromLeft = entry.seconds - tier2StartSeconds;
+        if (secondsFromLeft < 0 || secondsFromLeft > secondsOnTier2) continue;
+        const x = tier2.left + secondsFromLeft * tier2.pixelsPerSecond;
+        this.addLine(
+          this.tier2Group,
+          x,
+          tier2Bottom - barHeight,
+          tier2Bottom,
+          NAVIGATOR_COLORS.overlayTocTick,
+        );
+        if (entry.level === 1) {
+          const text = new this.paper.PointText({
+            justification: "left",
+            fontFamily: FONT_FAMILY,
+            fontSize: 8 + layout.fontScaleFactor,
+            fillColor: NAVIGATOR_COLORS.overlayTocText,
+          });
+          const textY = tier2Bottom - barHeight + 2;
+          text.point = { x: x + 2, y: textY };
+          text.content = entry.label;
+          const bg = this.paper.Path.Rectangle(
+            x,
+            textY - text.bounds.height,
+            text.bounds.width + 4,
+            text.bounds.height + 2,
+          );
+          bg.fillColor = "black";
+          bg.strokeColor = "black";
+          this.tier2Group.addChild(bg);
+          this.tier2Group.addChild(text);
+        }
+      }
+    }
+
+    // ── Tier 2: mission-stage ticks + labels ─────────────────────────────────
+    if (overlays.stages) {
+      for (const stage of overlays.stages.stages) {
+        if (stage.seconds > tier2StartSeconds + secondsOnTier2) continue;
+        if (stage.endSeconds < tier2StartSeconds) continue;
+        let x = tier2.left + (stage.seconds - tier2StartSeconds) * tier2.pixelsPerSecond;
+        const drawTick = x >= tier2.left + 1;
+        if (!drawTick) x = tier2.left + 1;
+        if (drawTick) {
+          this.addLine(
+            this.tier2Group,
+            x,
+            tier2.top,
+            tier2.top + tier2.height / 2,
+            NAVIGATOR_COLORS.overlayStageStroke,
+          );
+        }
+        const text = new this.paper.PointText({
+          justification: "left",
+          fontFamily: FONT_FAMILY,
+          fontSize: 8 + layout.fontScaleFactor,
+          fillColor: NAVIGATOR_COLORS.overlayStageText,
+        });
+        const textY = tier2.top + tier2.height / 2 - 3;
+        text.point = { x: x + 2, y: textY };
+        text.content = stage.name;
+        const bg = this.paper.Path.Rectangle(
+          x,
+          textY - text.bounds.height,
+          text.bounds.width + 4,
+          text.bounds.height + 2,
+        );
+        bg.fillColor = "black";
+        this.tier2Group.addChild(bg);
+        this.tier2Group.addChild(text);
+      }
+    }
   }
 }

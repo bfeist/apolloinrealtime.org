@@ -299,12 +299,20 @@ watch the transcript stub update. Playwright visual diff against the legacy
 `/{N}/` pages after each extraction: should be 0 pixel changes (legacy
 pages are unchanged); any diff is a bug.
 
-**Exit criterion:** `index.js` is gone (lifted into typed modules); clock
-and CSV loader have Vitest unit tests; engines no longer use jQuery. Each
-extracted engine is exercisable at `/dev/{N}/` for every mission it applies
-to.
+**Exit criterion:** All five planned typed reference modules (`clock`,
+`csvLoader`, `ytplayer`, `navigator/layout`, `navigator/renderer`) exist in
+`src/` with Vitest unit tests and are exercisable on `/dev/{N}/` for every
+mission they apply to. The legacy `index.js`/`ajax.js`/`navigator.js` files
+remain the production oracle; removing them is a Phase 5 task that follows
+each call site's own ESM conversion (per the wire-up lesson in
+`08-progress-tracker.md`).
 
 ## Phase 4.5 — MOCRviz refactor
+
+> **Gate:** Before starting, take a reference screenshot of the MOCRviz
+> panel open in A11 and A13 at a known GET (sync state noted). This is the
+> before-state for Ben's verification. Do not begin the refactor until Ben
+> has confirmed the current behavior.
 
 MOCRviz is a fundamental part of A11 and A13 today, embedded via an
 `<iframe>`. Replace that:
@@ -331,31 +339,85 @@ baseline set; otherwise add one now.
 MOCRviz reacts to scrubbing/playback from the main player in real time.
 Playwright baselines for the MOCRviz view still match.
 
-## Phase 5 — Extract panels (finish jQuery removal)
+## Phase 5 — Data overlays, panels, and jQuery removal
 
-Convert each panel (TOC, transcript, commentary, photos, telemetry, crew
-status) into a self-contained `.ts` module. Move per-mission-only panels
-(geology, heartrates) behind `mission.features.*` flags. **Remove the last
-jQuery call sites** as each panel is converted; delete the `jquery` dep when
-the final one is gone. Add **browser tests** (`tests/browser/`) for panels
-with non-trivial DOM behavior (transcript scrolling, photo grid, search).
+Phase 5 has three sequential sub-tracks. Each must pass `npm run check`
+before the next starts.
 
-**Verification:** `npm run check` with zero jQuery remaining (confirm by
-running `grep -r '\$(' src/` — should be empty or only in `.spec` fixtures).
-Each panel converted to ESM gets wired into `/dev/{N}/` first; the
-per-mission dev page is the panel author's working surface throughout the
-phase. At end of phase, `/dev/{N}/` should be visually and behaviorally
-close to legacy `/{N}/` — that closeness is the cue that Phase 5 is
-converging. Playwright visual diff against the legacy `/{N}/` pages:
-**blocking from this phase onward** — all 54 baseline images must match
-within tolerance (legacy pages are still the oracle until Phase 7 cutover).
-Manual browser test for each panel's non-trivial behavior: transcript
-auto-scroll at a dense dialogue section, photo lazy-load scroll, search
-overlay open/close/result-click, telemetry chart at several GET points.
+### Track A — Typed CSV data loaders ✅ complete
 
-**Exit criterion:** `src/panels/*.ts` exists, each panel can be loaded /
-unloaded without breaking the rest, no jQuery remains in the bundle, and
-key panels have browser tests.
+All 11 typed data loaders have landed in `src/data/` with Vitest unit tests
+and are wired into `/dev/{N}/` (167 tests green). TypeScript row types live
+in `src/types/data.d.ts` (ambient declarations — the `src/types/csv.ts`
+reference in earlier planning renamed to match the `.d.ts` convention):
+`csvLoader`, `tocData`, `missionStagesData`, `videoSegmentData`,
+`commentaryData`, `utteranceData`, `photoData`, `videoUrlData`,
+`crewStatusData`, `telemetryData`, `orbitData`.
+
+### Track B — Navigator data overlays (additive, next)
+
+Extend `renderer.ts` with draw groups that consume the typed data loaders.
+These are **purely additive** — the existing renderer API and tests are
+unchanged. Each overlay type gets its own unit tests and is wired into the
+`/dev/{N}/` navigator section.
+
+Draw order mirrors `drawTier1` / `drawTier2` in the legacy navigator:
+
+1. **Mission-stage ticks** (`missionStagesData`): half-height vertical tick
+   at each stage start in tier 1; tick + stage-name label in tier 2 within
+   the visible window. Stroke color `"grey"`, text color `"lightgrey"`.
+2. **Video-segment rectangles** (`videoSegmentData`): filled rectangle at
+   the bottom of each tier (height `= tierHeight / gHeightVideoRectDenominator`).
+   Regular: fill `"#010047"` / stroke `"blue"`. 3D/graph: fill `"#270047"` /
+   stroke `"#4D0062"`.
+3. **Photo ticks** (`photoData`): bottom-aligned tick in each tier.
+   Color `"#00C000"`.
+4. **TOC ticks + labels** (`tocData`): one-third-height tick from the bottom
+   in tiers 2 and 3. Level-1 TOC items get a text label. Tick `"orange"`,
+   label `"#999999"`.
+
+The renderer receives these via a new optional `overlays?: NavigatorOverlays`
+field in `NavigatorRendererOptions` (a bag of the four data objects above).
+When `overlays` is absent, the renderer behaves exactly as before (all
+existing tests pass unmodified). `missionHarness.ts` passes the
+already-loaded data objects.
+
+**Verification:** `npm run check` passes. Open `/dev/{11,13,17}/`; the
+navigator canvas shows stage ticks, video-segment rectangles, photo ticks,
+and TOC ticks matching the legacy `/{N}/` navigator.
+
+### Track C — Panel extraction (finish jQuery removal)
+
+Convert each panel (TOC panel, transcript, commentary, photos, telemetry,
+crew status) into a self-contained `.ts` module in `src/panels/`. Move
+per-mission-only panels (geology, heartrates) behind `mission.features.*`
+flags. **Remove the last jQuery call sites** as each panel is converted;
+delete the `jquery` dep when the final one is gone. Add **browser tests**
+(`tests/browser/`) for panels with non-trivial DOM behavior (transcript
+scrolling, photo grid, search).
+
+Each panel follows this sequence: (1) implement in `src/panels/`, (2) wire
+into `/dev/{N}/` first (the panel author's working surface), (3) confirm
+visual parity on the Playwright suite, (4) convert the call site in the
+legacy page to the typed module, (5) remove the old inline code.
+
+Playwright visual diff: **blocking from Track C onward** — all 54 baseline
+images must match within tolerance before each panel call-site conversion.
+Manual browser test: transcript auto-scroll at a dense dialogue section,
+photo lazy-load scroll, search overlay open/close/result-click, telemetry
+chart at several GET points. At end of Track C, `/dev/{N}/` should be
+visually and behaviorally close to legacy `/{N}/`.
+
+**Verification:** `npm run check` with zero jQuery remaining (`grep -r '\$('
+src/` should be empty outside `.spec` fixtures).
+
+### Phase 5 exit criterion
+
+- Track A: ✅ done (167 tests, all loaders wired into `/dev/{N}/`)
+- Track B: `renderer.ts` draws stage/video/photo/TOC overlays; overlay
+  tests pass; `/dev/{N}/` navigator matches legacy for those layers
+- Track C: `src/panels/*.ts` exists, each panel loads/unloads cleanly, no
+  jQuery remains in the bundle, key panels have browser tests
 
 ## Phase 6 — CSS unification + responsive (mobile-replacement)
 
@@ -423,7 +485,7 @@ reference-only.
 - **P-1** Stand up `pipeline/` with **uv** (`uv venv`, `uv.lock`), Python
   3.12+, ruff + black + mypy, pinned. Define the `airt-ingest` CLI skeleton.
 - **P-2** Define + lock the canonical CSV schema in `docs/csv-schemas.md`
-  (mirrored by `src/types/csv.ts`); define the standardized per-mission
+  (mirrored by `src/types/data.d.ts`); define the standardized per-mission
   input layout in `docs/data-inputs.md`.
 - **P-3** Implement A13 first (matches canonical base): `transcripts`,
   `photo-timing`, `build`, `validate`. Reproduce A13's `indexes/` from
