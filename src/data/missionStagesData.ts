@@ -24,35 +24,8 @@
  * guard).
  */
 
-import { loadCsv, type LoadCsvOptions } from "./csvLoader.js";
+import { loadCsv } from "./csvLoader.js";
 import { secondsToTimeStr, timeStrToSeconds } from "../shell/clock.js";
-
-export interface MissionStage {
-  /** Stage start as a signed mission-time string, e.g. `"-35:17:28"`. */
-  readonly timeStr: string;
-  /** Stage start as signed integer seconds from T-0. */
-  readonly seconds: number;
-  /** Short stage label. */
-  readonly name: string;
-  /** Longer free-text description. */
-  readonly description: string;
-  /** Stage end as a signed mission-time string (= next stage start, or
-   * mission end for the final stage). */
-  readonly endTimeStr: string;
-  /** Stage end as signed integer seconds from T-0. */
-  readonly endSeconds: number;
-}
-
-export interface MissionStagesData {
-  /** Stages in file order. */
-  readonly stages: readonly MissionStage[];
-}
-
-export interface ParseMissionStagesOptions {
-  /** Total mission duration in seconds; used as the final stage's
-   * `endSeconds` (legacy behavior). */
-  missionDurationSeconds: number;
-}
 
 /**
  * Parse already-loaded pipe-delimited rows into a {@link MissionStagesData}

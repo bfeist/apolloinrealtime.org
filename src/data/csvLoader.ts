@@ -16,18 +16,6 @@
  *   - Frequent trailing empty lines that callers must filter.
  */
 
-export interface LoadCsvOptions {
-  /**
-   * If true, append `?stopcache=<random>` to defeat HTTP caches. Matches
-   * the legacy `cStopCache` flag. Default `false`.
-   */
-  cacheBust?: boolean;
-  /**
-   * Optional fetch override for tests. Defaults to global `fetch`.
-   */
-  fetchFn?: typeof fetch;
-}
-
 /**
  * Parse pipe-delimited text into an array of rows.
  * Each row is an array of string fields. Empty rows are preserved

@@ -5,8 +5,6 @@
 // Keep the API small and intentional. Add helpers as concrete migration
 // sites need them, not speculatively.
 
-export type Selector = string;
-
 /** Single-element querySelector. Returns null if not found. Cast at call site if a more specific element type is needed. */
 export function qs(selector: Selector, root: ParentNode = document): HTMLElement | null {
   return root.querySelector(selector);

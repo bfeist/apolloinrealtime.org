@@ -1,10 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import {
-  parseTocData,
-  loadTocData,
-  findClosestTocIndex,
-  type TocData,
-} from "../../src/data/tocData";
+import { parseTocData, loadTocData, findClosestTocIndex } from "../../src/data/tocData";
 
 const SAMPLE_ROWS: string[][] = [
   ["-351728", "1", "Countdown"],

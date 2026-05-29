@@ -1,16 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { NavigatorRenderer, NAVIGATOR_COLORS } from "../../src/engines/navigator/renderer";
-import {
-  computeLayout,
-  hitTestMouseClick,
-  type NavigatorLayoutInput,
-} from "../../src/engines/navigator/layout";
-import type {
-  PaperGroup,
-  PaperPath,
-  PaperPointText,
-  PaperScopeLike,
-} from "../../src/engines/navigator/paperApi";
+import { computeLayout, hitTestMouseClick } from "../../src/engines/navigator/layout";
 
 // A13 desktop baseline. Mission timing matches src/missions/13.config.ts.
 const A13: Pick<NavigatorLayoutInput, "missionDurationSeconds" | "countdownSeconds"> & {

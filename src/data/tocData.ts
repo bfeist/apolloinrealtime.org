@@ -27,33 +27,8 @@
  * `data[0] !== ""` guard.
  */
 
-import { loadCsv, type LoadCsvOptions } from "./csvLoader.js";
+import { loadCsv } from "./csvLoader.js";
 import { timeIdToSeconds, timeIdToTimeStr } from "../shell/clock.js";
-
-/** TOC entry level: 1 = chapter heading, 2 = sub-item. */
-export type TocLevel = 1 | 2;
-
-export interface TocEntry {
-  /** Raw timeId from the CSV, e.g. `"-351728"` or `"0050000"`. */
-  readonly timeId: string;
-  /** Human-readable time string (`"HHH:MM:SS"` / `"-HH:MM:SS"`). */
-  readonly timeStr: string;
-  /** Signed integer seconds from T-0. */
-  readonly seconds: number;
-  /** Heading level. Unrecognized values fall back to `2`. */
-  readonly level: TocLevel;
-  /** Free-text label. */
-  readonly label: string;
-}
-
-export interface TocData {
-  /** Entries in file order (the order they're displayed in the TOC). */
-  readonly entries: readonly TocEntry[];
-  /** timeIds in file order. Used for nearest-time binary/linear search. */
-  readonly timeIds: readonly string[];
-  /** `timeId -> entry index` lookup. */
-  readonly byTimeId: ReadonlyMap<string, number>;
-}
 
 /**
  * Parse already-loaded pipe-delimited rows into a {@link TocData} view.

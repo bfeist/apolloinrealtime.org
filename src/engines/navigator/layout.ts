@@ -28,55 +28,6 @@
 /** Legacy `gNavZoomFactor` default. */
 export const DEFAULT_NAV_ZOOM_FACTOR = 25;
 
-export interface NavigatorLayoutInput {
-  /** Canvas/`paper.view` width in CSS pixels. */
-  width: number;
-  /** Canvas/`paper.view` height in CSS pixels. */
-  height: number;
-  /** `cMissionDurationSeconds` from the mission config. */
-  missionDurationSeconds: number;
-  /** `cCountdownSeconds` from the mission config (pre-launch span). */
-  countdownSeconds: number;
-  /** `gNavZoomFactor`. Defaults to {@link DEFAULT_NAV_ZOOM_FACTOR}. */
-  zoomFactor?: number;
-}
-
-export interface TierLayout {
-  /** y-coordinate of the tier's top edge in canvas px. */
-  top: number;
-  /** x-coordinate of the tier's left edge in canvas px. */
-  left: number;
-  /** Tier width in canvas px. */
-  width: number;
-  /** Tier height in canvas px. */
-  height: number;
-  /** Forward mapping: how many canvas px represent one mission-time second. */
-  pixelsPerSecond: number;
-  /** Inverse mapping: how many mission-time seconds one canvas px represents. */
-  secondsPerPixel: number;
-}
-
-export interface NavigatorLayout {
-  width: number;
-  height: number;
-  zoomFactor: number;
-  missionDurationSeconds: number;
-  countdownSeconds: number;
-  /** Total visible timeline span = countdown + mission, in seconds. */
-  totalSpanSeconds: number;
-  /** `gFontScaleFactor`: `floor(height * 0.02) - 1`. */
-  fontScaleFactor: number;
-  /** `gTierSpacing`: vertical gap applied twice (tier1->tier2 and tier2->tier3). */
-  tierSpacing: number;
-  tier1: TierLayout;
-  tier2: TierLayout;
-  tier3: TierLayout;
-  /** Width in px of the tier 1 zoom-pane indicator (`tier1Width / zoomFactor`). */
-  tier1NavBoxWidth: number;
-  /** Width in px of the tier 2 zoom-pane indicator (`tier2Width / zoomFactor`). */
-  tier2NavBoxWidth: number;
-}
-
 /**
  * Compute the full navigator layout from canvas size + mission timing.
  *
@@ -276,20 +227,6 @@ export function tier3StartSecondsFromNavBoxX(
 }
 
 // ── Hit-testing: mouse point -> { tier, seconds } ────────────────────────────
-
-export type NavigatorTier = 1 | 2 | 3;
-
-export interface NavigatorHit {
-  tier: NavigatorTier;
-  /** Mission-time seconds at the hit point. */
-  seconds: number;
-}
-
-/** A `(x, y)` pair in navigator-canvas coordinates (same space as `paper.view`). */
-export interface NavigatorPoint {
-  x: number;
-  y: number;
-}
 
 /**
  * Decide which tier a y-coordinate falls in using the legacy `onMouseMove`

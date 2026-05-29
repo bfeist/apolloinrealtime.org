@@ -16,8 +16,6 @@ import {
   tierForY,
   hitTestMouseMove,
   hitTestMouseClick,
-  type NavigatorHit,
-  type NavigatorLayoutInput,
 } from "../../src/engines/navigator/layout";
 
 function nonNull(hit: NavigatorHit | null): NavigatorHit {

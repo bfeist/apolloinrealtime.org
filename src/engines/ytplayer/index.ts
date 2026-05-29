@@ -12,40 +12,6 @@
  * until Phase 5 panel extraction.
  */
 
-// Minimal subset of the YT.Player surface we use. The full type lives in
-// `@types/youtube` if/when we depend on it; for now we declare what's needed.
-export interface YTPlayer {
-  playVideo(): void;
-  pauseVideo(): void;
-  seekTo(seconds: number, allowSeekAhead: boolean): void;
-  getCurrentTime(): number;
-  getPlayerState(): number;
-  setPlaybackQuality(quality: string): void;
-  loadVideoById(videoId: string, startSeconds?: number): void;
-  getVideoUrl(): string;
-}
-
-export interface YTPlayerStateConstants {
-  UNSTARTED: -1;
-  ENDED: 0;
-  PLAYING: 1;
-  PAUSED: 2;
-  BUFFERING: 3;
-  CUED: 5;
-}
-
-export interface YTNamespace {
-  Player: new (elementId: string, options: Record<string, unknown>) => YTPlayer;
-  PlayerState: YTPlayerStateConstants;
-}
-
-declare global {
-  interface Window {
-    YT?: YTNamespace;
-    onYouTubeIframeAPIReady?: () => void;
-  }
-}
-
 let loadPromise: Promise<YTNamespace> | null = null;
 
 /**

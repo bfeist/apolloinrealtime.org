@@ -36,9 +36,7 @@ import {
   tier2StartSecondsFromNavBoxX,
   tier3SecondsToX,
   tier3StartSecondsFromNavBoxX,
-  type NavigatorLayout,
 } from "./layout.js";
-import type { PaperGroup, PaperScopeLike } from "./paperApi.js";
 
 /** Color palette, copied verbatim from the legacy `navigator.js` `gColor*` block. */
 export const NAVIGATOR_COLORS = {
@@ -56,20 +54,6 @@ const FONT_FAMILY = "Roboto Mono";
 const ZOOM_FADE_OPACITY = 0.2;
 /** `gAlphaRectOpacity`. */
 const ALPHA_RECT_OPACITY = 0.4;
-
-export interface NavigatorRendererOptions {
-  /** `cMissionDurationSeconds`. */
-  missionDurationSeconds: number;
-  /** `cCountdownSeconds`. */
-  countdownSeconds: number;
-  /** `gNavZoomFactor`. Defaults to the layout module default (25). */
-  zoomFactor?: number;
-  /**
-   * Called when the user clicks a tier (legacy `seekToTime`). Receives the
-   * target mission-time in seconds. Optional — omit for a read-only display.
-   */
-  onSeek?: (seconds: number) => void;
-}
 
 /**
  * Stateful renderer bound to one `<canvas>` + injected Paper.js scope.

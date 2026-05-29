@@ -9,11 +9,7 @@
  *   - the `_resetForTests` seam
  */
 import { describe, it, expect, beforeEach } from "vitest";
-import {
-  loadYouTubeIframeApi,
-  _resetForTests,
-  type YTNamespace,
-} from "../../src/engines/ytplayer/index";
+import { loadYouTubeIframeApi, _resetForTests } from "../../src/engines/ytplayer/index";
 
 function fakeYT(): YTNamespace {
   return {

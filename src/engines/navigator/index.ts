@@ -5,4 +5,3 @@
  */
 export * from "./layout";
 export * from "./renderer";
-export type * from "./paperApi";

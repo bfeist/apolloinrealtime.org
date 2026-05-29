@@ -19,24 +19,8 @@
  * guard).
  */
 
-import { loadCsv, type LoadCsvOptions } from "./csvLoader.js";
+import { loadCsv } from "./csvLoader.js";
 import { timeStrToSeconds } from "../shell/clock.js";
-
-export interface VideoSegment {
-  readonly startTimeStr: string;
-  readonly endTimeStr: string;
-  /** Start as signed integer seconds from T-0. */
-  readonly startSeconds: number;
-  /** End as signed integer seconds from T-0. */
-  readonly endSeconds: number;
-  /** Third CSV column (empty in current data; preserved for forward
-   * compatibility). */
-  readonly extra: string;
-}
-
-export interface VideoSegmentsData {
-  readonly segments: readonly VideoSegment[];
-}
 
 /**
  * Parse already-loaded pipe-delimited rows into a {@link VideoSegmentsData}
