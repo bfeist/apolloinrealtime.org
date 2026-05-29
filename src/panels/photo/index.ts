@@ -54,8 +54,16 @@ export function parseAsRollImg(
 
 /** Options for {@link createPhotoPanel}. */
 export interface PhotoPanelOptions {
-  /** Container element. Cleared and populated. */
-  container: HTMLElement;
+  /**
+   * Either a single legacy-style container (the panel will create its own
+   * `#photoGallery` + `#photodiv` inside), OR a pair of pre-built
+   * gallery/viewer hosts for the Phase 6.5 split-slot shell layout.
+   */
+  container?: HTMLElement;
+  /** Gallery rail host (Phase 6.5 split layout). */
+  gallery?: HTMLElement;
+  /** Photo viewer host (Phase 6.5 split layout). */
+  viewer?: HTMLElement;
   /** Parsed photo data (from `src/data/photoData.ts`). */
   data: PhotoData;
   /** Mission-specific URL resolver. */
@@ -81,16 +89,36 @@ export function galleryItemId(timeId: string): string {
 }
 
 export function createPhotoPanel(options: PhotoPanelOptions): PhotoPanelHandle {
-  const { container, data, resolveUrls, onSeek } = options;
-  container.textContent = "";
+  const { data, resolveUrls, onSeek } = options;
 
-  const gallery = document.createElement("div");
-  gallery.id = "photoGallery";
-  gallery.className = "photoGallery";
+  // Two mount modes:
+  //   split: gallery + viewer are pre-built siblings (Phase 6.5 shell)
+  //   legacy: single container; panel creates its own gallery + viewer
+  const splitGallery = options.gallery;
+  const splitViewer = options.viewer;
+  let gallery: HTMLElement;
+  let photoDiv: HTMLElement;
 
-  const photoDiv = document.createElement("div");
-  photoDiv.id = "photodiv";
-  photoDiv.className = "photodiv";
+  if (splitGallery !== undefined && splitViewer !== undefined) {
+    gallery = splitGallery;
+    photoDiv = splitViewer;
+    gallery.textContent = "";
+    photoDiv.textContent = "";
+  } else {
+    const container = options.container;
+    if (!container) {
+      throw new Error("[photo] either { container } or { gallery, viewer } is required");
+    }
+    container.textContent = "";
+    gallery = document.createElement("div");
+    gallery.id = "photoGallery";
+    gallery.className = "photoGallery";
+    photoDiv = document.createElement("div");
+    photoDiv.id = "photodiv";
+    photoDiv.className = "photodiv";
+    container.appendChild(gallery);
+    container.appendChild(photoDiv);
+  }
 
   for (const entry of data.entries) {
     const urls = resolveUrls(entry);
@@ -113,9 +141,6 @@ export function createPhotoPanel(options: PhotoPanelOptions): PhotoPanelHandle {
 
     gallery.appendChild(item);
   }
-
-  container.appendChild(gallery);
-  container.appendChild(photoDiv);
 
   const off = delegate(gallery, "click", ".galleryItemContainer", (_ev, el) => {
     const timeId = el.dataset.timeid;
@@ -168,7 +193,8 @@ export function createPhotoPanel(options: PhotoPanelOptions): PhotoPanelHandle {
 
   const destroy = (): void => {
     off();
-    container.textContent = "";
+    gallery.textContent = "";
+    photoDiv.textContent = "";
     activeEl = null;
   };
 

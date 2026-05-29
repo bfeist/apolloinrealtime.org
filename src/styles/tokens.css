@@ -56,9 +56,11 @@
   --airt-sp-6: 32px;
 
   /* ── layout dimensions ── */
-  --airt-header-h: 160px;
-  --airt-side-w: 360px;
-  --airt-tab-h: 36px;
+  --airt-header-h: 150px;
+  --airt-side-w: 360px; /* legacy 2-col token, kept for back-compat */
+  --airt-channels-w: 70px; /* narrow vertical channel strip (production: 70px) */
+  --airt-photo-rail-w: 130px; /* far-right thumbnail rail (production: 130px) */
+  --airt-tab-h: 32px;
   --airt-channel-btn: 56px;
 
   /* ── z-index scale ── */

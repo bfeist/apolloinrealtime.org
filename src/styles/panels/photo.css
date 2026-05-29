@@ -1,5 +1,6 @@
 /* Photo panel — mirrors legacy `imageBlock` / `galleryItemContainer`
-   selectors used by `src/panels/photo/index.ts`. */
+   selectors used by `src/panels/photo/index.ts`. Phase 6.5 lays the
+   gallery out as a right-edge vertical rail. */
 
 .imageBlock {
   display: flex;
@@ -8,10 +9,11 @@
   justify-content: center;
   height: 100%;
   width: 100%;
+  min-height: 0;
 }
 .selectedPhoto {
   max-width: 100%;
-  max-height: 100%;
+  max-height: calc(100% - 56px);
   object-fit: contain;
 }
 .photodivcaption,
@@ -24,15 +26,15 @@
 }
 
 .galleryItemContainer {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  margin-right: var(--airt-sp-1);
+  display: block;
+  flex: 0 0 auto;
+  margin: 0 0 var(--airt-sp-1);
+  position: relative;
 }
 .galleryItemContainer img,
 img.galleryImage {
-  height: 60px;
-  width: auto;
+  width: 100%;
+  height: auto;
   border: 1px solid var(--airt-border);
   border-radius: var(--airt-radius-sm);
   cursor: pointer;
@@ -42,12 +44,20 @@ img.galleryImage {
 img.galleryImage:hover {
   border-color: var(--airt-accent);
 }
-.galleryOverlay {
-  background: var(--airt-bg-surface-hi);
-}
-
-img.galleryImage.airt-row-active,
-.galleryItemContainer.airt-row-active img {
+.galleryItemContainer.selected img,
+.galleryItemContainer.airt-row-active img,
+img.galleryImage.airt-row-active {
   border-color: var(--airt-accent);
   box-shadow: 0 0 0 1px var(--airt-accent);
+}
+.galleryOverlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  color: var(--airt-fg-secondary);
+  font-size: 9px;
+  line-height: 1.2;
+  padding: 2px;
 }

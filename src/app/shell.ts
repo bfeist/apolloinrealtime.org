@@ -1,32 +1,38 @@
 /**
  * Typed production shell for /{11,13,17}/.
  *
- * Renders the per-mission HTML skeleton that the typed engines and
- * panels mount into. Replaces the diagnostic-readout view that lived
- * inline in `missionApp.ts` (still available via the `?debug=1` flag).
+ * Three-column production layout (Phase 6.5 — matches measured
+ * apolloinrealtime.org/{N}/ at 1667×1005):
  *
- * Design goals (see docs-plan/05-migration-plan.md Phase 6 and
- * docs-plan/PHASE6-shell-analysis.md):
+ *   ┌─────────────────────────────────────────────────────────────────┐
+ *   │ HEADER  (compact info ~30%  |  navigator canvas ~70%)            │
+ *   ├──────────────────┬────────┬────────────────────────────────────┤
+ *   │ LEFT  (~40%)     │ CHAN   │ RIGHT  (~56%)                       │
+ *   │  • dashboard     │ narrow │  • photo viewer (default)           │
+ *   │    overlay       │ vert.  │  • or video iframe (in seg)          │
+ *   │  • tabs          │ ~70px  │  • far-right thumbnail rail          │
+ *   │  • transcript /  │ strip  │                                      │
+ *   │    TOC / commen. │        │                                      │
+ *   └──────────────────┴────────┴────────────────────────────────────┘
  *
- * - Single shared template, driven by `MissionConfig`. Per-mission deltas
- *   live in the config and in CSS overrides keyed off
- *   `<body data-mission="{N}">`.
- * - Stable mount-point IDs that the typed engines/panels target:
- *     #navCanvas        navigator (Paper.js)
- *     #player           YouTube iframe player
- *     #missionElapsedTime + #GETBtn   GET input + jump button
- *     #historicalDate / #historicalTime  modern + historic clock readouts
- *     #transcriptTab / #tocTab / #commentaryTab   tab buttons
- *     #transcriptWrapper / #tocWrapper / #commentaryWrapper   tab panels
- *     #thirtytrack-container   audio channel grid
- *     #photoGallery / #photodiv   photo panel slots
- *     #dashboardContent         dashboard panel slot
- *     #searchResultsTable       search panel slot
- *     #mocrviz-host             MOCRviz audio panel slot
- *     #debug-host               debug readout host (?debug=1 only)
- *
- * - Does NOT inject scripts; the entry (`missionApp.ts`) does that.
- * - Does NOT mutate the DOM after the first render; panels do that.
+ * Stable mount-point IDs (typed engines/panels target these):
+ *   #navCanvas              navigator (Paper.js)
+ *   #player                 YouTube iframe player slot
+ *   #missionElapsedTime     GET input
+ *   #GETBtn                 GET "GO" button
+ *   #historicalDate / #historicalTime  / #modernDate / #modernTime
+ *                           clock readouts
+ *   #transcriptTab / #tocTab / #commentaryTab
+ *                           text-tab buttons
+ *   #transcriptWrapper / #tocWrapper / #commentaryWrapper
+ *                           text-tab content hosts
+ *   #thirtytrack-container  audio channel strip
+ *   #photoGallery           thumbnail rail
+ *   #photodiv               main photo viewer
+ *   #dashboardContent       mission-status dashboard slot
+ *   #searchResultsTable     search overlay slot
+ *   #mocrviz-host           MOCRviz audio controller slot
+ *   #debug-host             ?debug=1 readout host
  */
 
 import { secondsToTimeStr } from "../shell/clock.js";
@@ -50,8 +56,23 @@ export interface ShellElements {
   channelGrid: HTMLElement;
   photoGallery: HTMLElement;
   photoDiv: HTMLElement;
+  /** Default-visible dashboard ("Mission Status") content slot. */
   dashboardContent: HTMLElement;
+  /** Dashboard overlay wrapper — layered on top of the left-column video player.
+      Auto-hides when current GET is inside a video segment (legacy
+      manageOverlaysAutodisplay), unless the user manually toggled it. */
+  dashboardOverlay: HTMLElement;
+  /** Toggle button on the action row to show/hide dashboard overlay. */
+  dashboardBtn: HTMLElement;
+  /** Search overlay container (hidden by default; toggled by #searchBtn). */
+  searchOverlay: HTMLElement;
   searchResults: HTMLElement;
+  searchBtn: HTMLElement;
+  searchClose: HTMLElement;
+  /** YouTube player wrapper — lives in the LEFT column, under the
+      dashboard overlay. (Production layout: dashboard sits on top of
+      the video; clicking the dashboard close button reveals the video.) */
+  playerWrapper: HTMLElement;
   mocrvizHost: HTMLElement;
   debugHost: HTMLElement;
   /** True when `?debug=1` was on the URL (debug readout is visible). */
@@ -89,6 +110,11 @@ export function renderShell(config: MissionConfig): ShellElements {
     if (!(el instanceof HTMLCanvasElement)) throw new Error(`[shell] #${id} not a <canvas>`);
     return el;
   };
+  const queryOne = (sel: string): HTMLElement => {
+    const el = document.querySelector<HTMLElement>(sel);
+    if (!el) throw new Error(`[shell] ${sel} missing after render`);
+    return el;
+  };
 
   return {
     root,
@@ -100,6 +126,8 @@ export function renderShell(config: MissionConfig): ShellElements {
     getButton: get("GETBtn"),
     navCanvas: getCanvas("navCanvas"),
     player: get("player"),
+    playerWrapper: get("player-iframe-wrapper"),
+    dashboardOverlay: queryOne(".airt-dashboard-overlay"),
     transcriptTab: get("transcriptTab"),
     tocTab: get("tocTab"),
     commentaryTab: get("commentaryTab"),
@@ -110,7 +138,11 @@ export function renderShell(config: MissionConfig): ShellElements {
     photoGallery: get("photoGallery"),
     photoDiv: get("photodiv"),
     dashboardContent: get("dashboardContent"),
-    searchResults: get("searchResultsTable"),
+    dashboardBtn: get("dashboardBtn"),
+    searchOverlay: get("searchOverlay"),
+    searchResults: get("searchPanelHost"),
+    searchBtn: get("searchBtn"),
+    searchClose: get("searchClose"),
     mocrvizHost: get("mocrviz-host"),
     debugHost: get("debug-host"),
     debugVisible: debug,
@@ -162,6 +194,11 @@ function buildHtml(config: MissionConfig, debug: boolean): string {
   // the input's HHH:MM:SS display.
   const defaultGet = formatDefaultGet(config.defaultStartTimeId) ?? startTimeStr;
 
+  // Per-mission right-column tab labels (legacy `app-tab` strip).
+  const photoTabLabel = config.id === "17" ? "Photography" : "Photography";
+  const showMocrTab = config.id === "11" || config.id === "13";
+  const showSpacecraftTab = config.id === "13";
+
   return `
 <div class="airt-app" role="application" aria-label="${missionName}">
   <header class="airt-header">
@@ -185,7 +222,7 @@ function buildHtml(config: MissionConfig, debug: boolean): string {
         </div>
       </div>
       <div class="airt-get">
-        <label class="airt-get__label" for="missionElapsedTime">GET</label>
+        <label class="airt-get__label" for="missionElapsedTime">Ground Elapsed Time (GET):</label>
         <input
           id="missionElapsedTime"
           class="airt-get__input"
@@ -198,50 +235,90 @@ function buildHtml(config: MissionConfig, debug: boolean): string {
     </div>
 
     <div class="airt-header__navigator">
-      <canvas id="navCanvas" width="1200" height="220"
+      <canvas id="navCanvas" width="1200" height="160"
               aria-label="Mission navigator timeline"></canvas>
     </div>
   </header>
 
   <main class="airt-main">
-    <section class="airt-video" aria-label="Mission video">
-      <div class="airt-video__player">
-        <div id="player" class="airt-video__iframe"></div>
-        <div id="dashboardContent" class="airt-overlay airt-overlay--dashboard" hidden></div>
-        <div class="airt-overlay airt-overlay--search" data-overlay="search" hidden>
-          <div id="searchResultsTable" class="airt-search__results"></div>
+    <!-- LEFT: video player (with dashboard overlay on top) + tabs + transcript host -->
+    <section class="airt-left" aria-label="Mission video and transcript">
+      <div class="airt-monitor airt-monitor--top">
+        <!-- video player (always present, plays underneath the overlay) -->
+        <div id="player-iframe-wrapper" class="airt-player-wrapper">
+          <div id="player" class="airt-player"></div>
+        </div>
+        <!-- dashboard overlay sits on top of the player; auto-hides when
+             current GET is inside a video segment (legacy
+             manageOverlaysAutodisplay rule) -->
+        <div class="airt-dashboard-overlay" data-overlay="dashboard">
+          <div class="airt-overlay__head">
+            <span class="airt-overlay__title">Mission Status</span>
+            <button class="airt-overlay__close" type="button" data-close="dashboard" aria-label="Close">✕</button>
+          </div>
+          <div id="dashboardContent" class="airt-dashboard"></div>
+        </div>
+        <!-- search overlay (left column, legacy) -->
+        <div id="searchOverlay" class="airt-search-overlay" hidden>
+          <div class="airt-overlay__head">
+            <span class="airt-overlay__title">Search</span>
+            <button id="searchClose" class="airt-overlay__close" type="button" aria-label="Close">✕</button>
+          </div>
+          <div id="searchPanelHost" class="airt-search-overlay__results"></div>
         </div>
       </div>
-      <div class="airt-video__tabs" role="tablist" aria-label="Mission content">
-        <button id="transcriptTab" class="airt-tab is-active"
-                type="button" role="tab" aria-selected="true">Transcript</button>
-        <button id="tocTab" class="airt-tab"
-                type="button" role="tab" aria-selected="false">Index</button>
-        <button id="commentaryTab" class="airt-tab"
-                type="button" role="tab" aria-selected="false">Commentary</button>
+
+      <div class="airt-tabs-wrapper">
+        <div class="airt-button-row">
+          <button id="transcriptTab" class="airt-tab is-active" type="button" role="tab" aria-selected="true"
+                  title="Every word spoken on the mission">Transcript</button>
+          <button id="tocTab" class="airt-tab" type="button" role="tab" aria-selected="false"
+                  title="Points of interest throughout the mission">Mission Milestones</button>
+          <button id="commentaryTab" class="airt-tab" type="button" role="tab" aria-selected="false"
+                  title="Description of events and post-mission interviews with the crew">Commentary</button>
+        </div>
+        <div class="airt-button-row airt-button-row--small">
+          <button id="searchBtn" class="airt-action-btn" type="button" title="Search mission" aria-label="Search">🔍</button>
+          <button id="dashboardBtn" class="airt-action-btn" type="button" title="Show/hide Mission Status" aria-label="Dashboard">🎚</button>
+          <button id="playPauseBtn" class="airt-action-btn" type="button" title="Play/Pause" aria-label="Play/Pause">⏸</button>
+          <button id="soundBtn" class="airt-action-btn" type="button" title="Sound on/off" aria-label="Sound">🔊</button>
+          <button id="fullscreenBtn" class="airt-action-btn" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
+        </div>
       </div>
-      <div class="airt-video__output">
-        <div id="transcriptWrapper" class="airt-panel airt-panel--transcript"
+
+      <div class="airt-monitor airt-monitor--text">
+        <div id="transcriptWrapper" class="airt-text-panel"
              role="tabpanel" aria-labelledby="transcriptTab"></div>
-        <div id="tocWrapper" class="airt-panel airt-panel--toc"
+        <div id="tocWrapper" class="airt-text-panel"
              role="tabpanel" aria-labelledby="tocTab" hidden></div>
-        <div id="commentaryWrapper" class="airt-panel airt-panel--commentary"
+        <div id="commentaryWrapper" class="airt-text-panel"
              role="tabpanel" aria-labelledby="commentaryTab" hidden></div>
       </div>
     </section>
+    <!-- /LEFT -->
 
-    <aside class="airt-side">
-      <section class="airt-channels" aria-label="Mission Control channels">
-        <h2 class="airt-channels__title">Mission Control Channels</h2>
-        <div id="thirtytrack-container" class="airt-channels__grid"></div>
-        <div id="mocrviz-host" class="airt-channels__viz" hidden></div>
-      </section>
+    <!-- MIDDLE: narrow vertical channel strip -->
+    <section class="airt-channels" aria-label="Mission Control channels">
+      <div class="airt-channels__title">Mission Control Channels</div>
+      <div id="thirtytrack-container" class="airt-channels__list"></div>
+    </section>
 
-      <section class="airt-photo" aria-label="Photo gallery">
-        <div id="photodiv" class="airt-photo__main"></div>
-        <div id="photoGallery" class="airt-photo__gallery"></div>
-      </section>
-    </aside>
+    <!-- RIGHT: photo viewer + far-right vertical thumbnail rail -->
+    <section class="airt-right" aria-label="Photography">
+      <div class="airt-right__tabs">
+        <button id="photoTab" class="airt-app-tab is-active" type="button">${escapeHtml(photoTabLabel)}</button>
+        ${showMocrTab ? `<button id="mocrTab" class="airt-app-tab" type="button">Mission Control Audio</button>` : ""}
+        ${showSpacecraftTab ? `<button id="spacecraftTab" class="airt-app-tab" type="button">Spacecraft Details</button>` : ""}
+      </div>
+      <div class="airt-right__body">
+        <!-- big viewer (photodiv) + far-right vertical thumbnail rail (photoGallery) -->
+        <div id="photodiv" class="airt-photodiv"></div>
+        <div id="photoGallery" class="airt-photo-rail"></div>
+
+        <!-- MOCRviz audio host overlays when MOCR tab is active -->
+        <div id="mocrviz-host" class="airt-mocrviz-host" hidden></div>
+      </div>
+    </section>
   </main>
 
   <div id="debug-host" class="airt-debug" ${debug ? "" : "hidden"}></div>

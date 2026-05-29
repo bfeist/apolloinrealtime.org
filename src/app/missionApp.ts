@@ -25,7 +25,7 @@ import { loadVideoSegmentData, findVideoSegmentIndex } from "../data/videoSegmen
 import { loadCommentaryData, findClosestCommentaryIndex } from "../data/commentaryData.js";
 import { loadUtteranceData, findClosestUtteranceIndex } from "../data/utteranceData.js";
 import { loadPhotoData, findClosestPhotoIndex } from "../data/photoData.js";
-import { loadVideoUrlData } from "../data/videoUrlData.js";
+import { loadVideoUrlData, findVideoUrlIndex } from "../data/videoUrlData.js";
 import { loadCrewStatusData } from "../data/crewStatusData.js";
 import { loadTelemetryData } from "../data/telemetryData.js";
 import { loadOrbitData } from "../data/orbitData.js";
@@ -38,6 +38,7 @@ import type { FrameOfReferenceRange } from "../panels/telemetry/index.js";
 import { createDashboardPanel } from "../panels/dashboard/index.js";
 import { createSearchPanel } from "../panels/search/index.js";
 import type { MocrvizPanel } from "../panels/mocrviz/index.js";
+import { channelsFor } from "../panels/mocrviz/channels.js";
 import { renderShell, setActiveTab, type ShellElements } from "./shell.js";
 
 const CONFIGS: Record<string, MissionConfig> = {
@@ -134,6 +135,147 @@ function wireTabs(shell: ShellElements): void {
   });
   shell.commentaryTab.addEventListener("click", () => {
     setActiveTab(shell, "commentary");
+  });
+}
+
+interface OverlayState {
+  /** Mirrors legacy `gDashboardManuallyToggled`; seeking resets it. */
+  dashboardManuallyToggled: boolean;
+  /** Start time of the video segment that already auto-hid the dashboard. */
+  lastVideoSegmentDashboardHidden: number | null;
+}
+
+function setDashboardVisible(shell: ShellElements, visible: boolean): void {
+  shell.dashboardOverlay.hidden = !visible;
+  shell.dashboardBtn.classList.toggle("is-active", visible);
+}
+
+function setSearchVisible(shell: ShellElements, state: OverlayState, visible: boolean): void {
+  shell.searchOverlay.hidden = !visible;
+  shell.searchBtn.classList.toggle("is-active", visible);
+  if (visible) {
+    // Legacy: search takes over the player area and dashboard is turned off.
+    state.dashboardManuallyToggled = true;
+    setDashboardVisible(shell, false);
+    const input = shell.searchOverlay.querySelector<HTMLInputElement>("#searchInputField");
+    input?.focus();
+  } else {
+    // Legacy: closing search re-enables automatic dashboard show/hide.
+    state.dashboardManuallyToggled = false;
+  }
+}
+
+/**
+ * Wire small action buttons. Dashboard is an overlay on top of the video
+ * player. By default it auto-shows when no video segment is active and
+ * auto-hides when a video segment starts; manual user toggles disable
+ * that automation until the next seek.
+ */
+function wireOverlays(shell: ShellElements): OverlayState {
+  const state: OverlayState = {
+    dashboardManuallyToggled: false,
+    lastVideoSegmentDashboardHidden: null,
+  };
+
+  shell.dashboardBtn.addEventListener("click", () => {
+    state.dashboardManuallyToggled = true;
+    setDashboardVisible(shell, shell.dashboardOverlay.hasAttribute("hidden"));
+  });
+  shell.dashboardOverlay
+    .querySelector("[data-close='dashboard']")
+    ?.addEventListener("click", () => {
+      state.dashboardManuallyToggled = true;
+      setDashboardVisible(shell, false);
+    });
+  shell.searchBtn.addEventListener("click", () => {
+    setSearchVisible(shell, state, shell.searchOverlay.hasAttribute("hidden"));
+  });
+  shell.searchClose.addEventListener("click", () => {
+    setSearchVisible(shell, state, false);
+  });
+  document.addEventListener("airt:seek", () => {
+    state.dashboardManuallyToggled = false;
+    state.lastVideoSegmentDashboardHidden = null;
+  });
+
+  setDashboardVisible(shell, true);
+  return state;
+}
+
+/**
+ * Legacy `manageOverlaysAutodisplay` rule: video segments reveal the
+ * underlying video by hiding the dashboard once per segment; outside
+ * video segments the dashboard returns, unless the user manually toggled
+ * it since the last seek.
+ */
+async function startDashboardAutodisplay(
+  config: MissionConfig,
+  shell: ShellElements,
+  ref: { value: number },
+  state: OverlayState,
+): Promise<void> {
+  let videos: VideoUrlData;
+  try {
+    videos = await loadVideoUrlData(`/${config.id}/`);
+  } catch (err) {
+    console.warn("[missionApp] failed to load video URLs for dashboard auto-display", err);
+    return;
+  }
+  startTicker(ref, (seconds) => {
+    if (state.dashboardManuallyToggled || !shell.searchOverlay.hidden) return;
+    const idx = findVideoUrlIndex(videos, seconds);
+    if (idx >= 0) {
+      const segment = videos.entries[idx];
+      if (!segment) return;
+      if (state.lastVideoSegmentDashboardHidden !== segment.startSeconds) {
+        state.lastVideoSegmentDashboardHidden = segment.startSeconds;
+        setDashboardVisible(shell, false);
+      }
+      return;
+    }
+    state.lastVideoSegmentDashboardHidden = null;
+    setDashboardVisible(shell, true);
+  });
+}
+
+/**
+ * Minimal YouTube embed surface. The player sits in the left-column
+ * monitor underneath the dashboard overlay. When current GET enters a
+ * `videoURLData.csv` range, load that video's iframe and seek to the
+ * offset inside the segment; otherwise leave the last frame/blank player
+ * behind the dashboard.
+ */
+async function mountVideoPlayer(
+  config: MissionConfig,
+  shell: ShellElements,
+  ref: { value: number },
+): Promise<void> {
+  let data: VideoUrlData;
+  try {
+    data = await loadVideoUrlData(`/${config.id}/`);
+  } catch (err) {
+    console.warn("[missionApp] failed to load video URL data", err);
+    return;
+  }
+
+  let lastVideoKey = "";
+  startTicker(ref, (seconds) => {
+    const idx = findVideoUrlIndex(data, seconds);
+    if (idx < 0) return;
+    const entry = data.entries[idx];
+    if (!entry || entry.videoId === "") return;
+    const startOffset = Math.max(0, Math.floor(seconds - entry.startSeconds));
+    // Only rebuild when changing segment/video. Avoid resetting playback
+    // once a second while still inside the same segment.
+    const key = `${entry.videoId}:${String(entry.startSeconds)}`;
+    if (key === lastVideoKey) return;
+    lastVideoKey = key;
+    const src = new URL(`https://www.youtube.com/embed/${encodeURIComponent(entry.videoId)}`);
+    src.searchParams.set("start", String(startOffset));
+    src.searchParams.set("autoplay", "1");
+    src.searchParams.set("mute", "1");
+    src.searchParams.set("playsinline", "1");
+    shell.player.innerHTML = `<iframe title="Mission video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen src="${src.toString()}"></iframe>`;
   });
 }
 
@@ -373,25 +515,16 @@ async function mountPhotoPanel(
   shell: ShellElements,
   ref: { value: number },
 ): Promise<void> {
-  // The photo panel paints both gallery + photodiv into a single container,
-  // so mount it on the `.airt-photo` wrapper instead of just one slot.
-  const wrap = shell.photoGallery.parentElement;
-  if (!(wrap instanceof HTMLElement)) return;
-  // Wipe the two skeleton hosts the shell rendered (`#photoGallery`,
-  // `#photodiv`); the panel re-creates its own DOM and reuses the same
-  // class names so per-panel CSS still applies.
-  shell.photoGallery.remove();
-  shell.photoDiv.remove();
-
   let data: PhotoData;
   try {
     data = await loadPhotoData(`/${config.id}/`);
   } catch (err) {
-    wrap.textContent = `failed: ${(err as Error).message}`;
+    shell.photoDiv.textContent = `failed: ${(err as Error).message}`;
     return;
   }
   const panel = createPhotoPanel({
-    container: wrap,
+    gallery: shell.photoGallery,
+    viewer: shell.photoDiv,
     data,
     resolveUrls: photoResolverFor(config),
     onSeek: (timeId) => {
@@ -441,9 +574,9 @@ async function mountDashboardPanel(
     shell.dashboardContent.textContent = "failed to load dashboard data";
     return;
   }
-  // Keep dashboard hidden until the user explicitly toggles it (Phase 6.5
-  // will wire up the legacy #dashboardBtn). For now leave it built but
-  // not visible — testing can flip the `hidden` attribute manually.
+  // Dashboard is visible by default as an overlay on top of the video
+  // player. `startDashboardAutodisplay` hides it automatically during
+  // video segments unless the user manually toggled it.
   const panel = createDashboardPanel({
     container: shell.dashboardContent,
     stages: stagesR.value,
@@ -476,15 +609,67 @@ async function mountSearchPanel(config: MissionConfig, shell: ShellElements): Pr
   });
 }
 
+function renderChannelStrip(
+  config: MissionConfig,
+  shell: ShellElements,
+  panel: MocrvizPanel | null,
+): void {
+  const catalog = channelsFor(config.id);
+  shell.channelGrid.textContent = "";
+  if (catalog === null) {
+    shell.channelGrid.parentElement?.setAttribute("hidden", "");
+    return;
+  }
+
+  const buttons = new Map<number, HTMLButtonElement>();
+  const redacted = new Set(catalog.redacted);
+  for (const info of catalog.all) {
+    const wrap = document.createElement("div");
+    wrap.className = "buttondiv";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = `btn-ch${String(info.id)}`;
+    btn.className = "thirtybtn-channel";
+    btn.textContent = info.label;
+    btn.title = `${String(info.id)}. ${info.description}`;
+    btn.disabled = redacted.has(info.id) || !catalog.available.includes(info.id);
+    if (info.id === catalog.defaultChannel) btn.classList.add("is-active");
+    btn.addEventListener("click", () => {
+      if (btn.disabled || panel === null) return;
+      panel.setChannel(info.id);
+      for (const [id, button] of buttons) button.classList.toggle("is-active", id === info.id);
+    });
+    wrap.append(btn);
+    shell.channelGrid.append(wrap);
+    buttons.set(info.id, btn);
+  }
+}
+
 async function mountMocrvizPanel(
   config: MissionConfig,
   shell: ShellElements,
   ref: { value: number },
 ): Promise<void> {
-  if (config.features?.mocrviz !== true) return;
-  if (config.id !== "11" && config.id !== "13") return;
-  shell.mocrvizHost.hidden = false;
-  const mod = await import("../panels/mocrviz/index.js");
+  if (config.features?.mocrviz !== true) {
+    renderChannelStrip(config, shell, null);
+    return;
+  }
+  if (config.id !== "11" && config.id !== "13") {
+    renderChannelStrip(config, shell, null);
+    return;
+  }
+
+  // Render the production middle-strip immediately; audio-panel loading is
+  // allowed to lag/fail without leaving the layout empty.
+  renderChannelStrip(config, shell, null);
+
+  let mod: typeof import("../panels/mocrviz/index.js");
+  try {
+    mod = await import("../panels/mocrviz/index.js");
+  } catch (err) {
+    console.warn("[missionApp] failed to import MOCRviz panel", err);
+    return;
+  }
   const audioRoot = `/${config.id}/MOCRviz/MOCR_audio`;
   let panel: MocrvizPanel | null;
   try {
@@ -499,6 +684,24 @@ async function mountMocrvizPanel(
     return;
   }
   if (panel === null) return;
+
+  // Production default is Photography; MOCR audio is a right-column tab.
+  shell.mocrvizHost.hidden = true;
+  renderChannelStrip(config, shell, panel);
+
+  const photoTab = document.getElementById("photoTab");
+  const mocrTab = document.getElementById("mocrTab");
+  photoTab?.addEventListener("click", () => {
+    shell.mocrvizHost.hidden = true;
+    photoTab.classList.add("is-active");
+    mocrTab?.classList.remove("is-active");
+  });
+  mocrTab?.addEventListener("click", () => {
+    shell.mocrvizHost.hidden = false;
+    mocrTab.classList.add("is-active");
+    photoTab?.classList.remove("is-active");
+  });
+
   startTicker(ref, (seconds) => {
     panel.setClock(seconds, !shell.mocrvizHost.querySelector<HTMLAudioElement>("audio")?.paused);
   });
@@ -600,20 +803,28 @@ ready(() => {
     value: Number.isFinite(historicEpoch) ? Math.trunc((Date.now() - historicEpoch) / 1000) : 0,
   };
 
+  const liveModeRef = { value: true };
+
   // Listen for `airt:seek` from any source (GET input, navigator, future
   // deep-link parser) and rebroadcast it back into the seconds ref so
-  // tickers pick it up on next interval.
+  // tickers pick it up on next interval. Manual seeks intentionally exit
+  // live wall-clock mode; otherwise the next 1-Hz tick immediately snaps
+  // back to today's historic clock and makes visual QA impossible.
   document.addEventListener("airt:seek", (e) => {
     const seconds = (e as CustomEvent<{ seconds: number }>).detail.seconds;
-    if (Number.isFinite(seconds)) currentSecondsRef.value = seconds;
+    if (Number.isFinite(seconds)) {
+      currentSecondsRef.value = seconds;
+      liveModeRef.value = false;
+    }
   });
 
-  // Auto-advance the ref from the historic-launch wall clock when the
-  // user hasn't recently seeked. (Simple model for now: always advance.
-  // Phase 6.5 will add a "paused" toggle for the play/pause button.)
+  // Auto-advance the ref from the historic-launch wall clock only while
+  // in live mode. A future #realtimeBtn will restore `liveModeRef.value`.
   if (Number.isFinite(historicEpoch)) {
     window.setInterval(() => {
-      currentSecondsRef.value = Math.trunc((Date.now() - historicEpoch) / 1000);
+      if (liveModeRef.value) {
+        currentSecondsRef.value = Math.trunc((Date.now() - historicEpoch) / 1000);
+      }
     }, 1000);
   }
 
@@ -621,14 +832,17 @@ ready(() => {
   startClock(config, shell);
   wireGetInput(shell, currentSecondsRef);
   wireTabs(shell);
+  const overlayState = wireOverlays(shell);
   setActiveTab(shell, "transcript");
 
   void mountNavigator(config, shell, currentSecondsRef);
+  void mountVideoPlayer(config, shell, currentSecondsRef);
   void mountTranscriptPanel(config, shell, currentSecondsRef);
   void mountTocPanel(config, shell, currentSecondsRef);
   void mountCommentaryPanel(config, shell, currentSecondsRef);
   void mountPhotoPanel(config, shell, currentSecondsRef);
   void mountDashboardPanel(config, shell, currentSecondsRef);
+  void startDashboardAutodisplay(config, shell, currentSecondsRef, overlayState);
   void mountSearchPanel(config, shell);
   void mountMocrvizPanel(config, shell, currentSecondsRef);
   void mountDebugReadout(config, shell, currentSecondsRef);

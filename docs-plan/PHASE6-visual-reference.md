@@ -79,18 +79,21 @@ The production app is a **three-column** layout under the header:
 - Photo block: x=737–1666, width 929 (56%)
 - All three middle columns share height ≈ 861 px
 
-**Key insight that differs from the Phase 6 first-pass typed shell:**
-the photo viewer is **the big right-side area** with a thumbnail rail
-on the far-right edge. The **video** (YouTube iframe) only appears when
-the current GET hits a video segment — it shares the photo-viewer slot.
-The legacy class is `.app-with-tabs-block` (A11/A13) or `.photo-block`
-(A17). Mission Control Channels is a **narrow vertical strip** between
-video and photos, **not** a wide grid in a sidebar.
+**Corrected key insight (verified in Chrome against production):**
+the **video player lives in the left column**, underneath the Mission
+Status dashboard overlay. The dashboard is visible by default, but
+legacy `manageOverlaysAutodisplay()` hides it automatically when the
+current GET enters a video URL segment, revealing the YouTube player
+underneath; it reappears outside video segments unless the user manually
+toggled it. The photo viewer is still the big right-side area with a
+thumbnail rail on the far-right edge. Mission Control Channels is a
+**narrow vertical strip** between the video/transcript column and the
+photo column, **not** a wide grid in a sidebar.
 
-The typed shell currently lays out video on the left (~40%) and a side
-rail (~22%) with channels-on-top + photo-on-bottom. **Phase 6.5 must
-restructure to the production 3-column layout above** before
-Playwright visual diff can pass.
+The Phase 6 first-pass typed shell laid out video + transcript on the
+left and a wide side rail on the right with channels-on-top +
+photo-on-bottom. **Phase 6.5 restructures to the production 3-column
+layout above** before Playwright visual diff can pass.
 
 ---
 
@@ -130,25 +133,23 @@ just needs to give the canvas its full ~700 px width.
 
 ## Video / left-column detail
 
-When in a video segment, `#player` becomes a YouTube iframe and **takes
-over the photo-block area on the right** (the dashboard overlay slides
-in over the left "Mission Status" panel). When *not* in a video segment,
-the right photo area shows still photography.
+The left column top monitor contains `#player` and the Mission Status
+`.dashboard-overlay` in the same physical slot. The video iframe plays
+underneath; the dashboard overlay is shown by default and hides at
+specific times when the current GET is inside a video URL segment
+(legacy `manageOverlaysAutodisplay`). Manual dashboard toggles disable
+auto show/hide until the next seek.
 
-**The video iframe does NOT live in the left column in production.** It
-lives in the right (photo) area. The Phase 6 typed shell currently puts
-`#player` on the left, which is wrong.
-
-Left column instead holds:
-1. **Mission Status overlay** (top, currently visible) — dashboard:
-   mission day, phase, crew status, wake-up timer, distance/velocity.
-   Toggled via the `🎚` dashboard button. The `#dashboardContent`
-   element fills this slot.
-2. **Tab strip** — TRANSCRIPT / MISSION MILESTONES / COMMENTARY +
-   small action buttons (search, history, share, fullscreen, sound,
+Left column holds:
+1. **Video monitor + Mission Status overlay** — dashboard: mission day,
+   phase, crew status, wake-up timer, distance/velocity. Toggled via the
+   `🎚` dashboard button. The `#dashboardContent` element fills this
+   overlay, while `#player` remains underneath.
+2. **Tab strip** — TRANSCRIPT / MISSION MILESTONES / COMMENTARY + small
+   action buttons (search, history, share, fullscreen, sound,
    pause/play).
-3. **Tabbed text panel** — transcript / TOC / commentary scrolling
-   list (the `#utteranceTable`, `#commentaryTable`, `#iFrameTOC`).
+3. **Tabbed text panel** — transcript / TOC / commentary scrolling list
+   (the `#utteranceTable`, `#commentaryTable`, `#iFrameTOC`).
 
 ---
 
@@ -189,14 +190,13 @@ What works:
 
 What's wrong / not yet matching production:
 1. **Main layout is 2-column** (video-left, side-rail-right) but should
-   be **3-column** (text-left, channels-mid, photo-right).
-2. **Video player is on the left**; should be in the right "photo" slot
-   and only show when in a video segment.
-3. **Dashboard is hidden by default**; production shows it as the
-   default left-column content with a toggle button to hide.
-4. **Channels are in a grid** (a few rows × ~6 cols); should be a
-   single vertical strip.
-5. **Photo gallery is a horizontal scroll** below the photo viewer;
+   be **3-column** (video/transcript-left, channels-mid, photo-right).
+2. **Dashboard overlay behavior is incomplete**; production shows it by
+   default over the left-column video and auto-hides it when current GET
+   is inside a video URL segment unless manually toggled.
+3. **Channels are in a grid** (a few rows × ~6 cols); should be a single
+   vertical strip.
+4. **Photo gallery is a horizontal scroll** below the photo viewer;
    should be a vertical rail on the far-right edge.
 6. **No splash screen** at all yet; production starts with one.
 7. **No play/pause, sound, share, fullscreen, dashboard, search,
@@ -207,9 +207,10 @@ What's wrong / not yet matching production:
 
 **Phase 6.5 priorities (next session):**
 1. Restructure `src/app/shell.ts` from 2-col to 3-col grid.
-2. Move `#player` into the right slot; keep `#dashboardContent` as the
-   default left-column content.
-3. Convert channel grid to vertical strip in `.airt-channels__grid`.
+2. Keep `#player` in the left top monitor under the default-visible
+   `#dashboardContent` overlay; auto-hide dashboard during video URL
+   segments.
+3. Convert channel grid to vertical strip in `.airt-channels__list`.
 4. Convert photo gallery to vertical rail on the right edge of the photo block.
 5. Add the small-action button row (search, share, pause, sound,
    fullscreen, help) — these can be no-op handlers for now.
