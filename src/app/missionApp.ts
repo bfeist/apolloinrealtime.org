@@ -40,6 +40,7 @@ import { createSearchPanel } from "../panels/search/index.js";
 import type { MocrvizPanel } from "../panels/mocrviz/index.js";
 import { channelsFor } from "../panels/mocrviz/channels.js";
 import { renderShell, setActiveTab, type ShellElements } from "./shell.js";
+import { parseDeepLink } from "./deepLink.js";
 
 const CONFIGS: Record<string, MissionConfig> = {
   "11": a11Config,
@@ -805,6 +806,15 @@ ready(() => {
 
   const liveModeRef = { value: true };
 
+  // Deep-link params (`?t=HHH:MM:SS`, `?t=rt`, `?ch=N`). Mirrors legacy
+  // `initializePlayback`. A `t=` seek pins the ref and disables live
+  // mode so manual visual QA and Playwright diffs land on a stable GET.
+  const deepLink = parseDeepLink(window.location.search);
+  if (deepLink.seek?.kind === "seconds") {
+    currentSecondsRef.value = deepLink.seek.seconds;
+    liveModeRef.value = false;
+  }
+
   // Listen for `airt:seek` from any source (GET input, navigator, future
   // deep-link parser) and rebroadcast it back into the seconds ref so
   // tickers pick it up on next interval. Manual seeks intentionally exit
@@ -829,6 +839,13 @@ ready(() => {
   }
 
   const shell = renderShell(config);
+  // If a deep-link `?t=` pinned a specific GET, reflect it in the input
+  // immediately so the user/test can see the intent. Without this the
+  // input keeps its `defaultStartTimeId`-derived placeholder until the
+  // first tick lands.
+  if (deepLink.seek?.kind === "seconds") {
+    shell.getInput.value = secondsToTimeStr(deepLink.seek.seconds);
+  }
   startClock(config, shell);
   wireGetInput(shell, currentSecondsRef);
   wireTabs(shell);
