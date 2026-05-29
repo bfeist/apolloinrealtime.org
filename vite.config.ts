@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from "vite";
 import { resolve } from "node:path";
 import { existsSync, readFileSync } from "node:fs";
+import { rm } from "node:fs/promises";
 
 /**
  * URL strategy
@@ -74,6 +75,69 @@ const legacyOraclePlugin = (): Plugin => ({
   },
 });
 
+/**
+ * Production build only: delete legacy script files copied from public/{N}/
+ * by Vite's publicDir mechanism. These files are NOT referenced by the typed
+ * app bundle — they are dead weight from the legacy site that ships in the
+ * same public/ tree as the data assets (indexes/, img/, MOCRviz/data/).
+ *
+ * Kept in dist/{N}/:
+ *   lib/paper-full.js        — navigator engine (loaded dynamically)
+ *   indexes/**               — all CSV data (typed loaders)
+ *   img/**                   — mission patch + photo assets
+ *   MOCRviz/data/**          — tape_ranges.csv
+ *   MOCRviz/img/**           — tape images used by the MOCRviz panel
+ *   favicons/**              — site icons
+ *   favicon.ico, robots.txt, privacy.html
+ *
+ * Deleted from dist/{N}/:
+ *   index.js, navigator.js, ajax.js, styles.css, TOC.html,
+ *   navigator_dev.html, navigator_dev.js,
+ *   lib/* (except paper-full.js),
+ *   MOCRviz/MOCRviz.{html,js,css}, MOCRviz/js/
+ */
+const purgeLegacyAssets = (): Plugin => ({
+  name: "purge-legacy-assets",
+  apply: "build",
+  closeBundle: {
+    order: "post" as const,
+    async handler() {
+      const del = async (p: string) => rm(p, { recursive: true, force: true });
+      for (const mission of ["11", "13", "17"]) {
+        const b = resolve(__dirname, "dist", mission);
+        // Top-level legacy files
+        for (const f of [
+          "index.js",
+          "navigator.js",
+          "ajax.js",
+          "styles.css",
+          "TOC.html",
+          "navigator_dev.html",
+          "navigator_dev.js",
+        ]) {
+          await del(`${b}/${f}`);
+        }
+        // lib/ — keep only paper-full.js; delete everything else
+        const libDir = `${b}/lib`;
+        const libKeep = new Set(["paper-full.js"]);
+        if (existsSync(libDir)) {
+          const { readdirSync } = await import("node:fs");
+          for (const f of readdirSync(libDir)) {
+            if (!libKeep.has(f)) await del(`${libDir}/${f}`);
+          }
+        }
+        // MOCRviz — delete HTML/JS/CSS + js/ subdir; keep data/ and img/
+        const mocrDir = `${b}/MOCRviz`;
+        if (existsSync(mocrDir)) {
+          for (const f of ["MOCRviz.html", "MOCRviz.js", "MOCRviz.css", "js"]) {
+            await del(`${mocrDir}/${f}`);
+          }
+        }
+      }
+    },
+  },
+});
+
 export default defineConfig({
   root: ".",
   publicDir: "public",
@@ -86,7 +150,7 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
-  plugins: [trailingSlashRedirect(), legacyOraclePlugin()],
+  plugins: [trailingSlashRedirect(), legacyOraclePlugin(), purgeLegacyAssets()],
   build: {
     outDir: "dist",
     emptyOutDir: true,
