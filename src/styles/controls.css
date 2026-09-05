@@ -48,6 +48,7 @@
 }
 .airt-app-tab {
   flex: 0 1 auto;
+  padding-inline: 11px;
   white-space: nowrap;
 }
 .airt-tab:is(:hover, :active, .is-active),
@@ -104,6 +105,9 @@
 }
 
 @media (max-width: 640px) {
+  .airt-app-tab {
+    padding-inline: 8px;
+  }
   .airt-tabs-wrapper {
     grid-template-columns: minmax(0, 1fr);
   }
