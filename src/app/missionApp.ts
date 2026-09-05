@@ -397,6 +397,7 @@ async function mountTranscriptPanel(
   const panel = createTranscriptPanel({
     container: shell.transcriptWrapper,
     data,
+    speakerLabels: config.speakerLabels,
     onSeek: (timeId) => {
       seekTo(timeIdToSeconds(timeId));
     },
@@ -457,6 +458,7 @@ async function mountCommentaryPanel(
   const panel = createCommentaryPanel({
     container: shell.commentaryWrapper,
     data,
+    speakerLabels: config.speakerLabels,
     onSeek: (timeId) => {
       seekTo(timeIdToSeconds(timeId));
     },
@@ -632,6 +634,7 @@ async function mountSearchPanel(config: MissionConfig, shell: ShellElements): Pr
   ]);
   createSearchPanel({
     container: shell.searchResults,
+    speakerLabels: config.speakerLabels,
     sources: {
       ...(uttR.status === "fulfilled" && { utterances: uttR.value }),
       ...(comR.status === "fulfilled" && { commentary: comR.value }),

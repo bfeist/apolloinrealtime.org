@@ -20,6 +20,7 @@
  */
 
 import { delegate } from "../../dom/index.js";
+import { displaySpeakerLabel } from "../transcript/index.js";
 
 /** Options for {@link createCommentaryPanel}. */
 export interface CommentaryPanelOptions {
@@ -27,6 +28,7 @@ export interface CommentaryPanelOptions {
   container: HTMLElement;
   /** Parsed commentary data (from `src/data/commentaryData.ts`). */
   data: CommentaryData;
+  speakerLabels?: Readonly<Record<string, string>>;
   /** Called when the user clicks a commentary row. */
   onSeek: (timeId: string) => void;
   /**
@@ -68,6 +70,7 @@ export function createCommentaryPanel(options: CommentaryPanelOptions): Commenta
   const { container, data, onSeek } = options;
   const renderAttr = options.attributionRenderer ?? defaultAttribution;
   const activeBg = options.activeBackground ?? DEFAULT_ACTIVE_BG;
+  const speakerLabels = options.speakerLabels ?? {};
 
   container.textContent = "";
 
@@ -75,6 +78,7 @@ export function createCommentaryPanel(options: CommentaryPanelOptions): Commenta
   wrap.className = "commentary_container";
   const table = document.createElement("table");
   table.id = "commentaryTable";
+  table.className = "commentaryTable";
 
   for (const entry of data.entries) {
     const tr = document.createElement("tr");
@@ -94,7 +98,7 @@ export function createCommentaryPanel(options: CommentaryPanelOptions): Commenta
 
     if (entry.speaker !== "") {
       whoTd.className = `who ${comType}`;
-      whoTd.textContent = entry.speaker;
+      whoTd.textContent = displaySpeakerLabel(entry.speaker, speakerLabels);
       wordsTd.className = `spokenwords ${comType}`;
     } else {
       // Legacy: omit the `who` cell entirely and colspan the words.

@@ -57,6 +57,8 @@ interface MissionConfig {
   backgroundColorActive: string;
   /** Audio channel numbers that are redacted (`cRedactedChannelsArray`). A11/A13 only. */
   redactedChannels?: number[];
+  /** Legacy transcript role codes mapped to mission-specific display names. */
+  speakerLabels: Readonly<Record<string, string>>;
 
   // --- Feature flags ---
   /** Per-mission feature flags. Currently only `mocrviz` (typed MOCR audio panel). */

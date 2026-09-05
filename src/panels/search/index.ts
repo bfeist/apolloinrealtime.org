@@ -10,7 +10,7 @@
  */
 
 import { delegate, on } from "../../dom/index.js";
-import { utteranceTypeClass } from "../transcript/index.js";
+import { displaySpeakerLabel, utteranceTypeClass } from "../transcript/index.js";
 import type { UtteranceTypeClass } from "../transcript/index.js";
 
 /** Kind of search-index entry. Drives the result-row label + click action. */
@@ -44,14 +44,17 @@ export interface SearchSources {
  * photos (matches the legacy `gSearchData` concatenation order in
  * `processSearchData()`).
  */
-export function buildSearchIndex(sources: SearchSources): SearchItem[] {
+export function buildSearchIndex(
+  sources: SearchSources,
+  speakerLabels: Readonly<Record<string, string>> = {},
+): SearchItem[] {
   const out: SearchItem[] = [];
   if (sources.utterances) {
     for (const u of sources.utterances.entries) {
       out.push({
         timeId: u.timeId,
         timeStr: u.timeStr,
-        who: u.speaker,
+        who: displaySpeakerLabel(u.speaker, speakerLabels),
         words: u.words,
         uttType: utteranceTypeClass(u.extra, u.speaker),
         kind: "transcript",
@@ -63,7 +66,7 @@ export function buildSearchIndex(sources: SearchSources): SearchItem[] {
       out.push({
         timeId: c.timeId,
         timeStr: c.timeStr,
-        who: c.speaker,
+        who: displaySpeakerLabel(c.speaker, speakerLabels),
         words: c.text,
         uttType: "utt_pao",
         kind: "commentary",
@@ -119,6 +122,8 @@ export interface SearchPanelOptions {
   index?: readonly SearchItem[];
   /** Sources to build the index from if `index` not provided. */
   sources?: SearchSources;
+  /** Mission-specific legacy role-code display names. */
+  speakerLabels?: Readonly<Record<string, string>>;
   /** Callback when the user clicks a result. */
   onResult: (item: SearchItem) => void;
   /** Max hits to render. Default 500 (legacy cap). */
@@ -143,7 +148,8 @@ export function createSearchPanel(options: SearchPanelOptions): SearchPanelHandl
   const { container, onResult } = options;
   const maxHits = options.maxHits ?? 500;
   const debounceMs = options.debounceMs ?? 100;
-  const index: readonly SearchItem[] = options.index ?? buildSearchIndex(options.sources ?? {});
+  const index: readonly SearchItem[] =
+    options.index ?? buildSearchIndex(options.sources ?? {}, options.speakerLabels);
 
   container.textContent = "";
   const wrap = document.createElement("div");

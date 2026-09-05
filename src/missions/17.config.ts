@@ -23,6 +23,13 @@ export const a17Config: MissionConfig = {
   countdownStartDateModernSuffix: "-12-06 9:55:39pm -500",
 
   backgroundColorActive: "#222222",
+  speakerLabels: {
+    CDR: "Cernan",
+    CMP: "Evans",
+    LMP: "Schmitt",
+    PAO: "Public Affairs",
+    CC: "Mission Control",
+  },
 
   meta: {
     // Legacy A17 head <title> reads "Apollo 17 in Real-time" (hyphen+lower).

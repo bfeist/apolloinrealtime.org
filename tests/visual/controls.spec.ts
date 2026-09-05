@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-for (const mission of ["11", "13", "17"]) {
+const commanderNames = { "11": "Armstrong", "13": "Lovell", "17": "Cernan" } as const;
+
+for (const mission of ["11", "13", "17"] as const) {
   for (const width of [1440, 390]) {
     test(`A${mission} controls remain readable at ${String(width)}`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
@@ -11,6 +13,15 @@ for (const mission of ["11", "13", "17"]) {
       const transcriptCells = transcriptTable.locator("tr").first().locator("td");
       await expect(transcriptTable).toHaveCSS("border-collapse", "collapse");
       await expect(transcriptCells.first()).toHaveCSS("font-size", "13px");
+      const visibleSpeakers = await transcriptTable.locator(".who").allTextContents();
+      expect(visibleSpeakers).toContain(commanderNames[mission]);
+      expect(visibleSpeakers).toContain("Public Affairs");
+      if (mission !== "13") expect(visibleSpeakers).toContain("Mission Control");
+      expect(visibleSpeakers).not.toContain("CDR");
+      expect(visibleSpeakers).not.toContain("CMP");
+      expect(visibleSpeakers).not.toContain("LMP");
+      expect(visibleSpeakers).not.toContain("PAO");
+      expect(visibleSpeakers).not.toContain("CC");
       const transcriptGeometry = await transcriptCells.evaluateAll((cells) =>
         cells.map((cell) => {
           const style = getComputedStyle(cell);

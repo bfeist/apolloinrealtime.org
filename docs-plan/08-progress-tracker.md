@@ -2,19 +2,18 @@
 
 ## Resume here
 
-**2026-09-05: Transcript table visual-parity repair complete.** Shared transcript
-and commentary tables now use 13 px Roboto Mono cells, collapsed border-free
-spacing, content-sized timestamp/speaker columns, wrapping right-aligned speaker
-labels, and the remaining width for spoken text. A matching-GET live Apollo 13
-comparison measured production's approximately 76 px / 62 px first columns and
-confirmed zero cell borders. Local Apollo 13 inspection at 1440, 768, and 390 px
-showed the repaired hierarchy without transcript clipping; all six Apollo
-11/13/17 desktop/phone control cases pass with new geometry assertions.
-`npm run check` passes all 276 tests and `npm run build` passes. The live controls
-gate retains its previously documented unrelated 13 px local tab-label versus
-12 px production mismatch. Push the current branch to exercise the first dev
-deployment, then validate the landing page and all three mission routes on the
-staging host. No deployment has been triggered yet.
+**2026-09-05: Mission-specific speaker-name parity repair complete.** Transcript,
+commentary, and search displays now expand legacy role codes with each mission's
+crew roster: Armstrong/Collins/Aldrin for Apollo 11, Lovell/Swigert/Haise for
+Apollo 13, and Cernan/Evans/Schmitt for Apollo 17. `PAO` and `CC` display as
+Public Affairs and Mission Control, named controllers remain unchanged, and
+token-aware replacement avoids corrupting labels such as `MCC-H`. Apollo 13
+launch views at 1440 and 390 px visibly match production naming while retaining
+the compact border-free columns. All six Apollo 11/13/17 desktop/phone control
+cases pass, `npm run check` passes all 279 tests, and `npm run build` passes.
+Push the current branch to exercise the first dev deployment, then validate the
+landing page and all three mission routes on the staging host. No deployment has
+been triggered yet.
 
 Useful review routes:
 
@@ -109,6 +108,7 @@ preserved ingestion pipeline remain deferred beyond this release.
 
 | Date       | Work                                                                                                                                                                                    | Verification                                                                                                                                                                      |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-05 | Restored mission-specific transcript role-name substitution across transcript, commentary, and search displays, including PAO and Mission Control labels.                               | Live A13 naming reference and 1440/390 local review; six all-mission desktop/phone cases; `npm run check` (279) and build pass.                                                   |
 | 2026-09-05 | Matched shared transcript/commentary typography and three-column flow to production, removing table spacing and fixed column widths while restoring wrapped, right-aligned speakers.    | Live A13 measurement and 1440/768/390 local review; six desktop/phone mission cases; `npm run check` (276) and build pass. Control-reference gate retains its known tab-size gap. |
 | 2026-09-05 | Removed mistaken local commit `373f57af` from `main` and restored the three mission entry files it had deleted.                                                                         | `npm run test:all` passes lint, TypeScript, production build, and all 276 unit tests; the build emits entry pages for Apollo 11, 13, and 17.                                      |
 | 2026-09-05 | Added a dev-only GitHub Actions check, build, and DreamHost rsync workflow based on ISSIRT, using AiRT2's Node version, output path, and configured repository values.                  | `npm run check` passes 276 tests; workflow/docs formatting and `git diff --check` pass. Its initially blocked build was repaired by restoring the three mission entry files.      |

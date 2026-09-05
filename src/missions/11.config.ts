@@ -22,6 +22,13 @@ export const a11Config: MissionConfig = {
 
   backgroundColorActive: "#1e1e1e",
   redactedChannels: [1, 4, 10, 30, 31, 36, 37, 38, 39, 40, 41, 60],
+  speakerLabels: {
+    CDR: "Armstrong",
+    CMP: "Collins",
+    LMP: "Aldrin",
+    PAO: "Public Affairs",
+    CC: "Mission Control",
+  },
 
   meta: {
     title: "Apollo 11 in Real Time",

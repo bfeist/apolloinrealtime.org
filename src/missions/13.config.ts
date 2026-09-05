@@ -23,6 +23,13 @@ export const a13Config: MissionConfig = {
 
   backgroundColorActive: "#1e1e1e",
   redactedChannels: [1, 4, 10, 30, 31, 36, 37, 38, 39, 40, 41, 60],
+  speakerLabels: {
+    CDR: "Lovell",
+    CMP: "Swigert",
+    LMP: "Haise",
+    PAO: "Public Affairs",
+    CC: "Mission Control",
+  },
 
   meta: {
     title: "Apollo 13 in Real Time",

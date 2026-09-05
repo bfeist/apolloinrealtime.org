@@ -35,6 +35,7 @@ export type UtteranceTypeClass = "utt_pao" | "utt_capcom" | "utt_mocr" | "utt_cr
 export interface TranscriptPanelOptions {
   container: HTMLElement;
   data: UtteranceData;
+  speakerLabels?: Readonly<Record<string, string>>;
   onSeek: (timeId: string) => void;
   activeBackground?: string;
 }
@@ -58,6 +59,15 @@ const TRIM_THRESHOLD = 150;
     and load more rows in that direction. Mirrors the legacy "always
     have 50 rows above/below current" rule, applied to manual scroll. */
 const NEAR_EDGE_PX = 200;
+const SPEAKER_ROLE = /\b(CDR|CMP|LMP|PAO|CC)\b/g;
+
+/** Replace transcript role codes with the mission's legacy display names. */
+export function displaySpeakerLabel(
+  speaker: string,
+  labels: Readonly<Record<string, string>> = {},
+): string {
+  return speaker.replace(SPEAKER_ROLE, (role) => labels[role] ?? role);
+}
 
 /** DOM id for the utterance row representing `timeId`. */
 export function utteranceItemId(timeId: string): string {
@@ -76,7 +86,11 @@ export function utteranceTypeClass(speakerCode: string, speaker: string): Uttera
 }
 
 /** Build a single `<tr>` for the row at `index`. Pure; tested separately. */
-export function buildUtteranceRow(data: UtteranceData, index: number): HTMLTableRowElement {
+export function buildUtteranceRow(
+  data: UtteranceData,
+  index: number,
+  speakerLabels: Readonly<Record<string, string>> = {},
+): HTMLTableRowElement {
   const entry = data.entries[index];
   if (!entry) throw new Error(`[transcript] no entry at index ${String(index)}`);
   const type = utteranceTypeClass(entry.extra, entry.speaker);
@@ -94,7 +108,7 @@ export function buildUtteranceRow(data: UtteranceData, index: number): HTMLTable
 
   const whoTd = document.createElement("td");
   whoTd.className = `who ${type}`;
-  whoTd.textContent = entry.speaker;
+  whoTd.textContent = displaySpeakerLabel(entry.speaker, speakerLabels);
   tr.appendChild(whoTd);
 
   const wordsTd = document.createElement("td");
@@ -107,6 +121,7 @@ export function buildUtteranceRow(data: UtteranceData, index: number): HTMLTable
 
 export function createTranscriptPanel(options: TranscriptPanelOptions): TranscriptPanelHandle {
   const { container, data, onSeek } = options;
+  const speakerLabels = options.speakerLabels ?? {};
   const activeBg = options.activeBackground ?? DEFAULT_ACTIVE_BG;
 
   container.textContent = "";
@@ -137,7 +152,7 @@ export function createTranscriptPanel(options: TranscriptPanelOptions): Transcri
     if (e >= data.entries.length) e = data.entries.length - 1;
     table.textContent = "";
     const frag = document.createDocumentFragment();
-    for (let i = s; i <= e; i++) frag.appendChild(buildUtteranceRow(data, i));
+    for (let i = s; i <= e; i++) frag.appendChild(buildUtteranceRow(data, i, speakerLabels));
     table.appendChild(frag);
     start = s;
     end = e;
@@ -147,7 +162,8 @@ export function createTranscriptPanel(options: TranscriptPanelOptions): Transcri
     const newStart = Math.max(0, start - count);
     if (newStart === start) return;
     const frag = document.createDocumentFragment();
-    for (let i = newStart; i < start; i++) frag.appendChild(buildUtteranceRow(data, i));
+    for (let i = newStart; i < start; i++)
+      frag.appendChild(buildUtteranceRow(data, i, speakerLabels));
     // preserve scroll: measure first row offset before+after.
     const prevHeight = container.scrollHeight;
     const prevTop = container.scrollTop;
@@ -166,7 +182,8 @@ export function createTranscriptPanel(options: TranscriptPanelOptions): Transcri
     const newEnd = Math.min(data.entries.length - 1, end + count);
     if (newEnd === end) return;
     const frag = document.createDocumentFragment();
-    for (let i = end + 1; i <= newEnd; i++) frag.appendChild(buildUtteranceRow(data, i));
+    for (let i = end + 1; i <= newEnd; i++)
+      frag.appendChild(buildUtteranceRow(data, i, speakerLabels));
     table.appendChild(frag);
     end = newEnd;
   };

@@ -74,6 +74,12 @@ describe("buildSearchIndex", () => {
     expect(idx[0]?.uttType).toBe("utt_pao");
     expect(idx[1]?.uttType).toBe("utt_crew");
   });
+
+  it("uses mission-specific display names without changing speaker classification", () => {
+    const idx = buildSearchIndex({ utterances }, { PAO: "Public Affairs", CDR: "Lovell" });
+    expect(idx.map((item) => item.who)).toEqual(["Public Affairs", "Lovell"]);
+    expect(idx.map((item) => item.uttType)).toEqual(["utt_pao", "utt_crew"]);
+  });
 });
 
 describe("searchIndex", () => {
