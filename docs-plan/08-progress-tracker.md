@@ -2,12 +2,12 @@
 
 ## Resume here
 
-**2026-09-05: Repository history cleanup in progress. No production cutover.**
-The oversized legacy source/oracle trees, removed public legacy application
-files, and copied pre-pipeline snapshots are being removed from the current tree
-and expunged from Git history. The four adjacent Apollo repositories remain the
-source references. Resume this cleanup before release work in
-[05-migration-plan.md](05-migration-plan.md).
+**2026-09-05: Legacy ancestry repair in progress. No production cutover.**
+The complete filtered legacy graphs are present, but their branch tips were
+attached to one recent merge and produce a misleading main-branch timeline.
+Repair the four original import merges so they point to the granular filtered
+source histories, then revalidate every source graph before resuming release
+work in [05-migration-plan.md](05-migration-plan.md).
 
 Useful review routes:
 
@@ -28,7 +28,7 @@ Playback starts paused and the mission controls own playback intent.
 | Mission content     | Transcript, milestones, commentary, photography, search, Apollo 11 samples, Apollo 13 spacecraft information, and Apollo 17 biometrics are mounted in the typed app.                                                            |
 | MOCRviz             | Apollo 11/13 use the production interaction hierarchy with typed room selection, synchronized hover/seek previews, smooth activity/waveform motion, real audio/transcripts, and tape boundaries. Apollo 17 has no MOCR dataset. |
 | Photo sources       | The selected large photograph links to the highest-resolution source available for each mission without changing thumbnail seeking or timed progression.                                                                        |
-| Source preservation | Original website and processing sources are referenced from adjacent repositories; `public/{11,13,17}/` remains read-only runtime content. Pre-pipeline material is not stored in AiRT2.                               |
+| Source preservation | Adjacent repositories remain source references; their complete filtered commit graphs are retained under `legacy/*` refs. `public/{11,13,17}/` remains read-only runtime content; pre-pipeline material is excluded.            |
 | Release             | Not ready for cutover; the release audit and environment validation below remain open.                                                                                                                                          |
 
 ## Current verification evidence
@@ -52,6 +52,11 @@ seek/channel selection, exact-zero waveform baseline, complete mission-specific
 About content, and six Apollo 11/13 MOCR snapshots at 1440, 768, and 390 px plus
 four About snapshots at desktop and phone widths. Six local control cases and
 three live/local production-reference cases also pass.
+
+The history cleanup retained 353/353 Apollo 11 commits, 173/173 Apollo 13
+commits, 939/939 Apollo 17 commits, and 14/14 landing-site commits. A path audit
+found no reachable file outside the current 975-file AiRT2 path set. This was a
+repository-only change, so no new browser comparison was required.
 
 ## Remaining release work
 
@@ -77,17 +82,18 @@ ingestion pipeline remain deferred beyond this release.
 
 ## Session log
 
-| Date       | Work                                                                                                                                                                                         | Verification                                                                                                                                                                 |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-09-05 | Externalized original-site references, removed dead public legacy code, and moved build output to `.local/dist/`.                                                       | Exact mirror checks for 13 source trees; `npm run check` (276), build, built-payload audit, and six desktop/phone control cases pass.                                        |
-| 2026-09-05 | Moved the desktop Share and Play labels down with a 5 px top inset, retaining control height and icon placement.                                                                             | Visible A13 review; `npm run check` (276), build, and all six `controls.spec.ts` desktop/phone cases pass.                                                                   |
-| 2026-09-05 | Increased shared right-column top-tab horizontal padding to 11 px on desktop, retaining 8 px on phones and the original 38 px control height.                                                | Visible A13 desktop review; `npm run check` (276), build, and all six `controls.spec.ts` desktop/phone cases pass. Production gate has pre-existing 13 px text-tab mismatch. |
-| 2026-09-05 | Restored Apollo 11 Astromaterial Samples to its production-shaped introductory panel, including the five timed collection rows, source copy, and curation image.                             | Visible live/local desktop comparison at GET 109:34:00; mission-specific panel browser test; `npm run check` (276) and build pass.                                           |
-| 2026-09-05 | Sized top app tabs to their label content and prevented wrapping after the text-size increase.                                                                                               | `npm run check` (276), build, all six `controls.spec.ts` desktop/phone cases, and local browser tab-strip review pass.                                                       |
-| 2026-09-05 | Explicitly aligned shared and MOCR transcript-tab labels to the top-left of their inset control faces.                                                                                       | `npm run check` (276), build, six `controls.spec.ts` desktop/phone cases (A13 fixture passed on retry), and local browser review pass.                                       |
-| 2026-09-05 | Increased shared text-tab labels to 13 px and MOCR transcript-tab labels to 11 px following visual review, retaining all button dimensions and states.                                       | `npm run check` (276), build, and all six `controls.spec.ts` desktop/phone cases pass; desktop browser review confirmed contained labels.                                    |
-| 2026-09-05 | Force-regenerated and inspected all ten retained Apollo 11/13 MOCR and About visual baselines after the waveform rendering repair.                                                           | Six MOCR images updated, four About images byte-identical; subsequent unchanged-reference run passes all 12 focused MOCR cases.                                              |
-| 2026-09-05 | Replaced dim MOCR waveform strokes with the original solid blue filled envelope and retained a continuous one-pixel line through exact-zero samples.                                         | Legacy renderer/source comparison; visible A11/A13 checks; synthetic-silence regression and all 12 focused MOCR browser cases pass.                                          |
-| 2026-09-05 | Completed Apollo 11/13 MOCRviz visual/content parity: original About content and typography, waveform spacing, canvas-label removal, and compact controller/transcript layout.               | Matching-GET live A11/A13 review; 11 focused MOCR, 6 control, and 3 live-reference browser cases pass; `npm run check` (276) and build pass.                                 |
-| 2026-09-05 | Restored Apollo 11/13 MOCRviz production-style layout, hover/seek feedback, 10 Hz motion, native waveform scaling, transcript views, and phone reachability.                                 | Live A11/A13 comparison; 9 focused MOCR browser cases, 6 control cases, and 3 live control-reference cases pass; `npm run check` (276) and build pass.                       |
-| 2026-09-05 | Consolidated planning docs around current state and unfinished work; removed the two historical inventories and corrected adjacent stale references.                                         | Local Markdown links and Prettier pass; `npm run check` passes 276 tests; protected reference trees unchanged.                                                               |
+| Date       | Work                                                                                                                                                                                    | Verification                                                                                                                                                                 |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-05 | Removed copied pre-pipeline material and rewrote all refs to expunge removed legacy files while retaining the four source repositories' complete commit topology under namespaced refs. | Per-repository commit counts match all four sources; reachable-path audit, Git fsck, `npm run check` (276), and repository repack pass.                                      |
+| 2026-09-05 | Externalized original-site references, removed dead public legacy code, and moved build output to `.local/dist/`.                                                                       | Exact mirror checks for 13 source trees; `npm run check` (276), build, built-payload audit, and six desktop/phone control cases pass.                                        |
+| 2026-09-05 | Moved the desktop Share and Play labels down with a 5 px top inset, retaining control height and icon placement.                                                                        | Visible A13 review; `npm run check` (276), build, and all six `controls.spec.ts` desktop/phone cases pass.                                                                   |
+| 2026-09-05 | Increased shared right-column top-tab horizontal padding to 11 px on desktop, retaining 8 px on phones and the original 38 px control height.                                           | Visible A13 desktop review; `npm run check` (276), build, and all six `controls.spec.ts` desktop/phone cases pass. Production gate has pre-existing 13 px text-tab mismatch. |
+| 2026-09-05 | Restored Apollo 11 Astromaterial Samples to its production-shaped introductory panel, including the five timed collection rows, source copy, and curation image.                        | Visible live/local desktop comparison at GET 109:34:00; mission-specific panel browser test; `npm run check` (276) and build pass.                                           |
+| 2026-09-05 | Sized top app tabs to their label content and prevented wrapping after the text-size increase.                                                                                          | `npm run check` (276), build, all six `controls.spec.ts` desktop/phone cases, and local browser tab-strip review pass.                                                       |
+| 2026-09-05 | Explicitly aligned shared and MOCR transcript-tab labels to the top-left of their inset control faces.                                                                                  | `npm run check` (276), build, six `controls.spec.ts` desktop/phone cases (A13 fixture passed on retry), and local browser review pass.                                       |
+| 2026-09-05 | Increased shared text-tab labels to 13 px and MOCR transcript-tab labels to 11 px following visual review, retaining all button dimensions and states.                                  | `npm run check` (276), build, and all six `controls.spec.ts` desktop/phone cases pass; desktop browser review confirmed contained labels.                                    |
+| 2026-09-05 | Force-regenerated and inspected all ten retained Apollo 11/13 MOCR and About visual baselines after the waveform rendering repair.                                                      | Six MOCR images updated, four About images byte-identical; subsequent unchanged-reference run passes all 12 focused MOCR cases.                                              |
+| 2026-09-05 | Replaced dim MOCR waveform strokes with the original solid blue filled envelope and retained a continuous one-pixel line through exact-zero samples.                                    | Legacy renderer/source comparison; visible A11/A13 checks; synthetic-silence regression and all 12 focused MOCR browser cases pass.                                          |
+| 2026-09-05 | Completed Apollo 11/13 MOCRviz visual/content parity: original About content and typography, waveform spacing, canvas-label removal, and compact controller/transcript layout.          | Matching-GET live A11/A13 review; 11 focused MOCR, 6 control, and 3 live-reference browser cases pass; `npm run check` (276) and build pass.                                 |
+| 2026-09-05 | Restored Apollo 11/13 MOCRviz production-style layout, hover/seek feedback, 10 Hz motion, native waveform scaling, transcript views, and phone reachability.                            | Live A11/A13 comparison; 9 focused MOCR browser cases, 6 control cases, and 3 live control-reference cases pass; `npm run check` (276) and build pass.                       |
+| 2026-09-05 | Consolidated planning docs around current state and unfinished work; removed the two historical inventories and corrected adjacent stale references.                                    | Local Markdown links and Prettier pass; `npm run check` passes 276 tests; protected reference trees unchanged.                                                               |

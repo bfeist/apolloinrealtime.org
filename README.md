@@ -41,4 +41,5 @@ New application code belongs in `src/`, and runtime assets belong in `public/`.
 Processing sources and pre-pipeline data are intentionally not copied into this
 repository. Consult the adjacent `../Apollo_11`, `../Apollo_13`,
 `../Apollo17.org`, and `../apolloinrealtime.org` repositories for original
-website and processing source.
+website and processing source. Their filtered commit histories are retained in
+this repository under namespaced `legacy/*` branch and tag refs.

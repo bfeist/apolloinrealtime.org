@@ -58,7 +58,9 @@ live in `public/landing/`.
 `public/{11,13,17}/` is read-only during application and release work because
 it contains assets used by the typed app, not just obsolete scripts. Processing
 sources and pre-pipeline data are not stored in this repository; consult the
-adjacent mission repositories until a separate storage approach is added. Read
+adjacent mission repositories until a separate storage approach is added. The
+other repositories' filtered commit graphs are retained under namespaced
+`legacy/*` refs; do not delete those refs during cleanup. Read
 [07-repo-and-git-strategy.md](docs-plan/07-repo-and-git-strategy.md) for
 provenance and targeted restoration sources if drift is found.
 

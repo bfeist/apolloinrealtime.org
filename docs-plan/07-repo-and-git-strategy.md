@@ -17,6 +17,13 @@ stored in AiRT2. Consult the adjacent repositories until they are added through
 a separately approved storage mechanism. A future replacement pipeline must
 define and verify a new contract before changing runtime data.
 
+The complete commit topology from each adjacent repository is retained in
+namespaced `legacy/{apollo11,apollo13,apollo17,landing}/` branch and tag refs.
+Those histories are filtered to the current AiRT2 path set: commit metadata,
+parents, branches, and tags remain, while files absent from the current tree do
+not retain historical blobs. The legacy branch tips are also parents of the
+current main history so single-branch clones retain their provenance.
+
 If runtime drift is found, inspect a targeted diff against the appropriate
 adjacent webroot and restore only the affected files. The retired `/mobile/`
 applications, A13 `spacecraft_dev/`, and A17 `nominee/` remain out of scope.
