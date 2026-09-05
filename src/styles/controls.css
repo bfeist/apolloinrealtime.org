@@ -47,7 +47,8 @@
   flex: 1 1 0;
 }
 .airt-app-tab {
-  flex: 0 1 140px;
+  flex: 0 1 auto;
+  white-space: nowrap;
 }
 .airt-tab:is(:hover, :active, .is-active),
 .airt-app-tab:is(:hover, :active, .is-active, .selected) {
