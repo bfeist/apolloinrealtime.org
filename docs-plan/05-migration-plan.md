@@ -1,529 +1,71 @@
-# 05 — Migration plan (phased)
+﻿# 05 — Recovery and migration plan
 
-> **Agent:** Read [08-progress-tracker.md](08-progress-tracker.md) before
-> starting any work session. Agent operating rules (subagent delegation,
-> commit hygiene, what not to do) are in
-> [.github/copilot-instructions.md](../.github/copilot-instructions.md).
-> Update the tracker before ending every session.
+Read `08-progress-tracker.md` first; `README.md` defines the product. This plan replaces the abandoned phase checklist. The task is to recover a coherent Apollo in Real Time experience, not to maximize the count of typed modules.
 
-## Strategy (binding — read before phase work)
+## Strategy
 
-This is a **greenfield port**, not a gradual conversion. The new app is
-built end-to-end in `src/`. Production cutover is a separate concern from
-local development — in the dev server the new app already lives at the
-real mission URLs, and grows in place toward feature parity.
+Keep the useful vanilla TypeScript/ESM/Vite foundation and the shared data loaders. One app serves `/11/`, `/13/`, `/17/`; mission configuration/data represent genuine differences. A13 is the first comparison target, then generalize against A11 and A17. No framework, jQuery, peaks.js or runtime package dependencies. Vendored Paper.js and original images/data are allowed.
 
-### URL layout (in dev server)
+Production at `https://apolloinrealtime.org/{11,13,17}/` is the reference for visual hierarchy and behavior. `/legacy/{N}/` is the independent local oracle. Never modify `legacy/`, `legacy-src/`, `legacy-oracle/`, or `public/{N}/` to make comparisons pass. Preserve deep links and historical content.
 
-| URL                  | Source                                           | What it is                                                                                                                            |
-| -------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                  | `index.html`                                     | Landing placeholder + links to the other URLs                                                                                         |
-| `/11/` `/13/` `/17/` | `{N}/index.html` + `src/app/missionApp.ts`       | **The new typed app under construction.** This is where work happens.                                                                 |
-| `/legacy/11/` etc.   | `legacy-oracle/{N}/index.html` (via Vite plugin) | **Byte-for-byte legacy oracle**, for side-by-side comparison. Pristine; never edited. Assets are pulled from `public/{N}/`. Dev-only. |
-| `/dev/`              | `dev/index.html` + `src/dev/harness.ts`          | Per-module browser smoke tests (clock, CSV loader, ytplayer). Dev-only.                                                               |
+The owner's 2026-09-05 direction supersedes pixel-identical styling and the old MOCRviz MVP sign-off gate. Modest design differences are acceptable; overlapping controls, unreachable panes, fake data and missing core interactions are not.
 
-Bindings:
+## R1 — Replace contradictory documentation
 
-1. **The legacy code is reference-only and pristine.** `legacy/` (the
-   subtree imports of the four original repos), `legacy-src/{11,13,17}/`
-   (grep-convenience copy of the script/HTML files), and `public/{11,13,17}/`
-   (the served asset tree, including `index.js`, `navigator.js`, `ajax.js`,
-   `lib/*`, `MOCRviz/*`) are byte-for-byte copies of what
-   `apolloinrealtime.org/{N}/` serves. They are never edited. If anything
-   drifts, restore it from the sibling repos at `../Apollo_11`,
-   `../Apollo_13`, `../Apollo17.org`. The `legacy-oracle/{N}/index.html`
-   files are the same content, sitting at a separate path so Vite can
-   serve them at `/legacy/{N}/` without colliding with the typed app at
-   `/{N}/`.
-2. **The new typed app is built end-to-end in `src/` and lives at `/{N}/`
-   from now on.** It boots through `src/app/missionApp.ts` against the
-   typed `MissionConfig` and loads only typed ESM modules. It never
-   imports `public/{N}/index.js` / `navigator.js` / `ajax.js` / `lib/*`
-   (jQuery, peaks.js, etc.). Paper.js is loaded directly from the
-   vendored `public/{N}/lib/paper-full.js` because it is the navigator
-   engine; the typed renderer accepts an injected `PaperScopeLike`.
-3. **jQuery is never in the new code's bundle.** `src/dom/index.ts` is
-   the typed DOM shim; no `src/**` file ever imports jQuery. jQuery
-   exists in the repo only inside `public/{N}/lib/` because the legacy
-   oracle still loads it.
-4. **No "hybrid" runtime.** The typed app at `/{N}/` and the legacy
-   oracle at `/legacy/{N}/` are two independent pages; they share
-   nothing beyond the static assets in `public/{N}/` (indexes, photos,
-   MOCRviz audio data, vendored paper.js).
-5. **Production cutover is incremental, not a big bang.** As the typed
-   app at `/{N}/` reaches feature parity with the oracle at
-   `/legacy/{N}/`, the cutover is just `npm run build` shipping the
-   typed app at `/{N}/`. The atomic Phase 7 from earlier plan drafts
-   ("delete `public/{N}/index.js`, `navigator.js`, `ajax.js`, `lib/*`,
-   `MOCRviz/*.{html,js,css}` in one commit") still happens, but it is
-   purely a build-output decision — by then the typed app has been the
-   live site for some time.
+- Keep a short product contract, durable architecture decisions, source map, current plan and one truthful tracker.
+- Remove obsolete framework proposals, answered questions and stale instructions. Git retains historical drafts.
+- Retain detailed source analysis as reference, clearly distinguished from observed current behavior.
+- Remove deployment-ready claims until the product has actually been verified.
 
-Principle: **the new app's URL is the real URL from day one.** No URL
-swap at the end. The work shows up where users will eventually use it.
+## R2 — Restore the mission shell and shared timeline
 
-## Verification approach (applies every phase)
+- Homepage: compare with `https://apolloinrealtime.org/` and preserve its content and composition. Use the original landing imagery; no invented promotional copy.
+- Desktop: compact patch/title/date/GET beside a three-tier navigator; left video/dashboard above text tabs and transport; narrow channel strip for A11/A13; large right photo viewer with vertical thumbnails and mission-specific tabs. A17 uses two columns without an empty channel gutter.
+- Assign every region explicit sizing responsibilities. A media aspect ratio must not overflow its grid track. Give scrollable descendants `min-height: 0`; keep control rows visible.
+- On tablet/phone stack panels with useful explicit heights and normal page scrolling. Keep channels, all tabs, photography and MOCRviz reachable. No content-width horizontal overflow.
+- One playback state owns GET, play/pause, seek and mute. Date = historical launch epoch + selected GET. Every seek source updates the same state immediately. No logging-only callbacks.
+- Use the existing YouTube API loader to synchronize segment loads, seeks within a segment, play/pause and sound. Mission control sound and video sound must not compete.
+- Restore missing navigator data and useful labels at all three zoom levels.
+- Keep photo resolution suitable for the main viewer, scroll only the relevant pane, and expose shareable current-time URLs.
+- Restore A11 sample collections, A13 spacecraft information and A17 biometric readings from the original content/data. Do not treat these as disposable divergence.
 
-Four layers, lightest to heaviest:
+## R3 — Restore recognizable native MOCRviz
 
-### 1. Automated gates (run on every commit / `npm run check`)
+MOCRviz is a primary experience, not an audio-element demo. Build it as a normal typed right-hand panel with:
 
-```
-npm run check
-  ├─ tsc --noEmit          (TypeScript: type errors fail the build)
-  ├─ eslint src/          (lint: real bugs + style)
-  ├─ prettier --check     (formatting: diff must be empty)
-  └─ vitest run           (unit + browser tests)
-```
+- Real mission-specific channel names, availability, role descriptions and selection.
+- Original isometric room asset and correct clickable console positions.
+- Per-channel activity timeline using real CDN activity chunks, with GET cursor and seek.
+- Real binary audiowaveform peaks and playhead synchronized to tape-relative time.
+- Channel transcript where historical data exists, with clickable GETs.
+- Shared transport, correct tape bank/channel paths, tape boundary handling, unavailable-data and audio failure states.
 
-These run fast and gate every PR. They do **not** check "does the app look
-right" — that's the human and Playwright layers.
+Load expensive data lazily and bound caches. Abort/ignore stale loads when channels/tapes change. A missing historical recording must be visibly unavailable, never filled with fabricated waveform/activity/transcript. Original asset and data trees remain untouched.
 
-### 2. Progressive in-browser pages (run continuously during a phase)
+## R4 — Verify the result, then record evidence
 
-Each typed module should be exercisable in a real browser **the same day
-it lands**. Two surfaces:
+1. `npm run check` (strict typecheck, lint, formatting, unit tests) before every commit. Run `npm run build` for integration changes.
+2. Open Chrome tabs for production, local typed and local legacy sites. Match GET and viewport; dismiss splash and pause. Check all missions at desktop, and typed app at 768×1024 and 390×844. Record actual results and external-service failures separately.
+3. Exercise GET input, timeline, transcript/TOC/commentary/photo/search seek, play/pause/mute, tab switching and MOCR channel changes. Check that GET and historical date remain coherent and no controls overlap.
+4. Run Playwright screenshots and behavioral/layout assertions. Screenshot tests are blocking against reviewed **typed-app** baselines; production screenshots are the reference for human comparison, not an exact-pixel gate under the owner's revised goal. Never update baselines simply to make a failure disappear. Record intentional differences and inspect the images first.
 
-- **`/dev/` — module harness.** Imports each typed module directly from
-  `src/` and exposes button-driven smoke tests (input → output). No
-  mission config — pure module surface.
-- **`/11/`, `/13/`, `/17/` — the typed app itself.** Boots through
-  `src/app/missionApp.ts` against the typed `MissionConfig`, loading
-  **only** typed ESM modules. No legacy `index.js`, `ajax.js`, or
-  `navigator.js` — ever. This is the in-flight production app.
+### Fixed comparison GETs
 
-Rules:
+Use these established times unchanged (historical labels from the abandoned plan were unreliable; GET values are test coordinates):
 
-- The typed app at `/{N}/` is the in-flight production app. Phase 6
-  promotes the layout + CSS work so the page actually looks like a
-  mission page; the URL itself doesn't change.
-- The legacy oracle at `/legacy/{N}/` remains pristine. Never edit it
-  to integrate typed modules; restore it from the sibling repo if it
-  drifts.
-- Every typed module added to `src/engines/` or `src/panels/` MUST be
-  wired into all three mission apps (`src/app/missionApp.ts` already
-  switches on mission id) before that module is considered "done".
-  The author is the first user of their own module in context.
+| Snapshot    | A11        | A13        | A17        |
+| ----------- | ---------- | ---------- | ---------- |
+| pre-launch  | -002:00:00 | -002:00:00 | -002:00:00 |
+| launch      | 000:00:00  | 000:00:00  | 000:00:00  |
+| key-event-1 | 004:06:54  | 055:54:53  | 022:00:00  |
+| key-event-2 | 075:31:12  | 087:58:00  | 118:00:00  |
+| final-phase | 195:03:00  | 141:00:00  | 295:00:00  |
+| end         | 195:18:35  | 142:54:41  | 301:51:59  |
 
-### 3. Manual browser comparison (every phase exit)
+Three missions × six GETs × desktop 1440×900 / tablet 768×1024 / phone 390×844 = 54 views. Original Windows production references are in `tests/visual/baseline.spec.ts-snapshots/`. Typed snapshots are separate; these must never be described as automatically proving production parity. MOCRviz requires its own open-panel comparisons in A11/A13.
 
-Open the new app and the legacy oracle **side by side in two browser
-windows** at the same mission, same GET, same viewport:
+## Exit and later work
 
-```
-# Local dev server
-npm run dev  # -> http://localhost:5173/13/         (new typed app)
-#               http://localhost:5173/legacy/13/   (legacy oracle, pristine)
-# Prod:        https://apolloinrealtime.org/13/   (production live site)
-```
+Recovery can be called complete only when the repaired scope has browser evidence, useful controls, honest data states and green automated checks. List residual gaps explicitly. Staging/deployment is subsequent work; do not delete legacy references or ship merely because the build succeeds. Existing `deploy/` instructions are operational references, not readiness evidence.
 
-Things to explicitly check each phase:
-
-- Same GET displayed, same transcript / commentary / photo visible
-- Play/pause + scrub: clock advances, panels update together
-- Channel selector: audio channel switches
-- TOC: deep-link jumps to right GET
-- Photo panel: images load (lazy), click-through opens correctly
-- Dashboard panels: telemetry, crew status visible
-- Console: zero JS errors (browser DevTools)
-- Network tab: no 4xx media errors
-
-For phases that affect layout (3, 6): also check tablet and mobile viewport
-widths in DevTools responsive mode.
-
-### 4. Playwright visual regression (phase exit + pre-cutover)
-
-Playwright captures full-page screenshots at fixed GET snapshots and diffs
-them against the baseline set captured from production in Phase 0.
-
-```bash
-npm run test:visual             # run Playwright visual tests
-npm run test:visual -- --update-snapshots  # if an intentional change needs a new baseline
-```
-
-**Snapshot set per mission (Copilot picks these for narrative significance):**
-
-| Snapshot name | A11 GET    | A13 GET    | A17 GET    |
-| ------------- | ---------- | ---------- | ---------- |
-| `pre-launch`  | -002:00:00 | -002:00:00 | -002:00:00 |
-| `launch`      | 000:00:00  | 000:00:00  | 000:00:00  |
-| `key-event-1` | 004:06:54  | 055:54:53  | 022:00:00  |
-| `key-event-2` | 075:31:12  | 087:58:00  | 118:00:00  |
-| `final-phase` | 195:03:00  | 141:00:00  | 295:00:00  |
-| `end`         | 195:18:35  | 142:54:41  | 301:51:59  |
-
-(A11 key events: TLI + touchdown. A13 key events: O2 tank explosion +
-powering down CM. A17 key events: lunar orbit insertion + first EVA
-start + end of last EVA.)
-
-All three missions × 6 snapshots × 3 viewports (desktop 1440, tablet 768,
-phone 390) = 54 baseline images. Stored in
-`tests/visual/baseline.spec.ts-snapshots/`.
-
-The baselines were captured against the **legacy** `apolloinrealtime.org`
-pages in Phase 0; they are the regression oracle for the new app. Visual
-diffs are **informational** throughout all phases — they become a useful
-check-in tool once the typed app reaches visual parity with production,
-but are not a blocking gate at any phase exit.
-
-### Lint — yes, it matters here
-
-With ~3,000 lines of global-variable JS being **re-implemented** as typed
-modules (not converted, not lifted — re-implemented while reading the
-legacy as reference), the biggest risk category is **silent correctness
-bugs**: a column name typo that's only caught at runtime, an off-by-one in
-a binary search, an optional chain that masked a missing field. ESLint
-with strict TypeScript rules catches a meaningful fraction of these at
-commit time.
-
-Rule set used (in `eslint.config.js`, flat config):
-
-```js
-// flat config excerpt
-import tseslint from "typescript-eslint";
-
-export default tseslint.config(
-  tseslint.configs.strictTypeChecked, // includes no-explicit-any, no-unsafe-*
-  tseslint.configs.stylisticTypeChecked,
-  {
-    rules: {
-      "@typescript-eslint/no-unused-vars": "error",
-      "@typescript-eslint/no-floating-promises": "error",
-      "@typescript-eslint/no-unnecessary-condition": "error",
-      "no-console": ["warn", { allow: ["warn", "error"] }],
-    },
-  },
-);
-```
-
-Prettier runs separately (`eslint-config-prettier` turns off formatting
-rules so they don't conflict):
-
-```bash
-npm run format          # prettier --write src/
-npm run format:check    # CI: fails on any diff
-```
-
-Editor integration: recommend the ESLint + Prettier VS Code extensions with
-"format on save" and "fix all on save" enabled — that way lint errors
-surface in the editor before they ever hit the terminal.
-
-**`legacy-src/` and `public/{N}/*.js` are excluded from ESLint** (they are
-reference-only lifted code, never modified). Only `src/` is linted.
-
-## Phase 0 — Scaffolding + baseline capture
-
-- Stand up Vite + **TypeScript** (strict), ESLint (flat config,
-  `typescript-eslint` `strictTypeChecked`), Prettier (reuse the existing
-  `.prettierrc.json`), **Vitest** for unit tests. Wire them all into a
-  single `npm run check` script so the full gate is one command.
-- **Prettier and ESLint are enforced from commit #1.** All new code in
-  `src/` must pass `tsc + eslint + prettier --check` before merging.
-- **Pin the toolchain for longevity:** `.nvmrc`, exact (non-caret) versions in
-  `package.json`, commit the lockfile.
-- Stand up **Playwright** and capture baseline screenshots from production
-  (`apolloinrealtime.org/{11,13,17}/`) at the 18 GET snapshots defined in
-  the Verification section above (6 per mission × 3 viewports = 54 images).
-  These are the regression oracle for every subsequent phase.
-  **Do this before touching anything.**
-- Scaffold the test layout: `tests/unit/` (Vitest), `tests/browser/`
-  (Vitest browser mode / Playwright component — starts empty, grows per
-  phase), `tests/visual/baseline.spec.ts-snapshots/`.
-- Canonical base = **Apollo 13** (locked).
-- Wire `AiRT2/` to a staging URL (e.g. `airt2.apolloinrealtime.org` or a
-  Cloudflare Pages preview) so every phase is visible.
-
-**Exit criterion:** `npm run dev` serves a Vite shell; `npm run check`
-passes; 54 Playwright baseline screenshots checked in.
-
-## Phase 1 — Lift legacy oracles into the repo
-
-- Copy each mission's `_webroot/` contents into `public/{N}/` (and the
-  text-and-script files into `legacy-src/{N}/` for grep convenience).
-- Make `{N}/index.html` serve the legacy markup with its existing script
-  tags. No ESM yet.
-- Confirm each mission boots in dev exactly like production.
-
-This is the **last time** these files are written to. From here on,
-`public/{N}/` and `legacy-src/{N}/` are read-only reference. Any new code
-goes in `src/`.
-
-**Exit criterion:** All three missions boot identically to production at
-`/{11,13,17}/` from the local dev server.
-
-## Phase 2 — Typed mission config
-
-- Create `src/types/mission.ts` (`MissionConfig` type) and
-  `src/missions/{11,13,17}.config.ts` populated from each legacy
-  `var c*` block.
-- **Strip KeyCDN here:** the typed config carries a single `mediaRoot`
-  pointing at `media.apolloinrealtime.org`.
-- Inject `window.MISSION = {...}` into each legacy `<head>` via a Vite
-  plugin so the lifted `index.js` reads it (this is the one allowed
-  cross-cutting tweak — it's a head injection on top of the lift, not a
-  modification of `public/{N}/index.js`).
-
-**Exit criterion:** All three missions boot at `/{N}/` using only the
-typed mission config for per-mission constants; no KeyCDN references
-remain.
-
-## Phase 3 — Shared head + ESM entry stub
-
-- Replace the per-mission `<head>` with a shared builder
-  (`src/template/head.ts`) driven by `MissionConfig`. Both dev and build
-  apply the same transform.
-- Create `src/main.ts` (ESM entry) and `src/dom/index.ts` (typed DOM shim).
-  In Phase 3 `main.ts` just verifies the runtime context (`window.MISSION`
-  is set) and re-exports the DOM shim. It does **not** integrate with the
-  legacy `index.js`.
-- Create `/dev/{11,13,17}/index.html` + `src/dev/missionHarness.ts`. These
-  pages do **not** load legacy `index.js` / `ajax.js` / `navigator.js`.
-  They are the surface the rest of the migration is built on.
-
-**Exit criterion:** Shared head builder + `/dev/{N}/` shells live; the
-legacy `/{N}/` pages still boot identically to production (now with the
-typed head + injected mission config); `/dev/{N}/` shows mission name and
-a typed-clock readout.
-
-## Phase 4 — Extract shared engines (typed, tested)
-
-For each engine: implement in `src/` with Vitest unit tests, wire into
-`/dev/` (raw harness) and into all three `/dev/{N}/` pages it applies to.
-The legacy `public/{N}/*.js` files are **read for reference only** — they
-are never imported, called, or modified.
-
-1. **Clock + GET conversion** → `src/shell/clock.ts`.
-2. **CSV loader** → `src/data/csvLoader.ts`. Pipe-delimited fetch +
-   parse + cache-bust. Unit-tested against fixture CSVs.
-3. **YouTube player wrapper** → `src/engines/ytplayer/`.
-4. **Paper.js navigator** → `src/engines/navigator/` (`layout.ts` +
-   `renderer.ts` + `paperApi.ts`). Paper.js is vendored at
-   `public/{N}/lib/paper-full.js` and loaded via the shared head; the
-   typed renderer accepts an injected `PaperScopeLike` (no `npm install
-paper`).
-
-**Exit criterion:** All five typed reference modules exist in `src/` with
-Vitest tests and are exercisable at `/{N}/` for every mission they
-apply to.
-
-## Phase 4.5 — MOCRviz typed re-implementation
-
-> **Gate:** Before starting, take a reference screenshot of the MOCRviz
-> panel open in A11 and A13 at a known GET (legacy `/{N}/` only). This
-> is the before-state for Ben's verification.
-
-MOCRviz is a fundamental part of A11 and A13 today, embedded via an
-`<iframe>` whose internals are jQuery + peaks.js + per-channel MP3
-playback (`MOCRviz/MOCRviz.js`'s `gPlayer` + `loadChannelSoundfile()`).
-
-- Re-implement as a typed ESM panel at `src/panels/mocrviz/`. Assets
-  (waveform PNGs, channel MP3s, calibration JSON) stay under
-  `public/{N}/MOCRviz/` (reference data, not code).
-- No iframe; mount as a regular panel inside the typed app. Shares the
-  Phase 4 clock + CSV data engines.
-- No jQuery; no peaks.js (replace with the small subset we actually use —
-  static waveform PNG + a typed playhead overlay).
-- Lazy-load the panel module (it's a large code unit).
-- Gated by `mission.features.mocrviz` (true for A11/A13).
-- Unit-test the pure pieces: channel index, time-to-pixel mapping,
-  channel filename resolution.
-
-**Verification:** Mount the new ESM MOCRviz panel into `/11/` and `/13/`
-as soon as it loads at all (even before audio works), then iterate
-in-browser. After: scrub the typed clock forward and back, confirm the
-MOCRviz playhead and channel audio follow without lag. Compare the
-playhead position at fixed GETs to the oracle's `/legacy/{N}/` MOCRviz
-iframe. Update the Playwright snapshot set if needed.
-
-**Exit criterion:** Typed MOCRviz mounts on `/{11,13}/`, plays audio on
-at least the default channel, follows the typed clock when scrubbing,
-and visually matches the legacy waveform/playhead at the listed snapshot
-GETs.
-
-## Phase 5 — Data layer, navigator overlays, and panels
-
-Phase 5 has three sub-tracks. Each must pass `npm run check` before the
-next starts. All work happens in `src/` and `/{N}/`. **Nothing in
-`public/{N}/`, `legacy-src/{N}/`, `legacy/`, or `legacy-oracle/` is
-modified.**
-
-### Track A — Typed CSV data loaders
-
-A typed loader + row type per CSV the legacy app reads. All loaders live
-in `src/data/`; TypeScript row types in `src/types/data.d.ts`. Each has
-Vitest unit tests against fixture CSVs and is wired into the `/{N}/`
-page (current entry at the live GET, refreshed per second). Loaders:
-`csvLoader`, `tocData`, `missionStagesData`, `videoSegmentData`,
-`commentaryData`, `utteranceData`, `photoData`, `videoUrlData`,
-`crewStatusData`, `telemetryData`, `orbitData`.
-
-### Track B — Navigator data overlays
-
-Extend `renderer.ts` with draw groups that consume the typed data loaders.
-Additive: the existing renderer API and tests are unchanged. Each overlay
-gets unit tests and is wired into the `/{N}/` navigator section.
-
-Draw order mirrors the legacy `drawTier1` / `drawTier2`:
-
-1. **Mission-stage ticks** (`missionStagesData`): half-height tick at each
-   stage start in tier 1; tick + stage-name label in tier 2 within the
-   visible window. Stroke `"grey"`, text `"lightgrey"`.
-2. **Video-segment rectangles** (`videoSegmentData`): filled rectangle at
-   the bottom of each tier (height
-   `= tierHeight / gHeightVideoRectDenominator`). Regular: fill `"#010047"`
-   / stroke `"blue"`. 3D/graph: fill `"#270047"` / stroke `"#4D0062"`.
-3. **Photo ticks** (`photoData`): bottom-aligned tick in each tier.
-   Color `"#00C000"`.
-4. **TOC ticks + labels** (`tocData`): one-third-height tick from the
-   bottom in tiers 2 and 3. Level-1 items get a text label.
-   Tick `"orange"`, label `"#999999"`.
-
-### Track C — Typed panels
-
-A typed panel per legacy panel, in `src/panels/`. Each is jQuery-free,
-iframe-free, mounted at `/{N}/`, and unit-tested where it has
-non-trivial pure logic (utterance-class mapping, telemetry interpolation,
-search index/match, photo URL parsing, wake-up countdown, etc.). Panels:
-TOC, transcript, commentary, photo, telemetry, crew status, dashboard,
-search.
-
-**Exit criterion (Phase 5):** All 11 data loaders, all four navigator
-overlay types, and all eight panels live in `src/`. `/{N}/` mounts every
-one of them. `npm run check` passes. The new app at `/{N}/` is
-behaviorally close to the oracle at `/legacy/{N}/` at the snapshot GETs
-(panels show the right content; only the page chrome/layout differs
-because Phase 6 hasn't built that yet).
-
-## Phase 6 — Production HTML shell + CSS + responsive
-
-Phase 6 grows the current diagnostic-readout shell at `/{N}/` into the
-real mission page. The legacy oracle at `/legacy/{N}/` remains unchanged.
-
-- Author **one** HTML shell template in `src/app/shell.ts` (or an
-  `index.html` partial driven by `MissionConfig`) that composes the
-  header (logo + mission title + GET input + navigator), the video block
-  (with player + search/dashboard overlays), the tabs (transcript / TOC /
-  commentary), the channel selector, and footer.
-- Author the **unified stylesheet** in `src/styles/base.css` +
-  `src/styles/panels/*.css`. Per-mission accents come from CSS custom
-  properties keyed off `<body data-mission="{N}">`. Per-mission stylesheet
-  (`src/styles/missions/{N}.css`) only contains overrides; target < 100
-  lines each.
-- **Wire the typed engines and panels into the shell** inside
-  `src/app/missionApp.ts`: clock ticking, navigator mounted on
-  `#navCanvas`, video player mounted, channel selector hooked to
-  MOCRviz/audio scheduler, panels mounted into their tabs,
-  search/dashboard overlays wired, deep-link GET parsing.
-- **Add responsive breakpoints** (phone-portrait, phone-landscape,
-  tablet, desktop). This phase owns the work the old `/mobile/` subdir
-  used to do. The unified app must be usable end-to-end on a phone.
-- The diagnostic-readout view of `missionApp.ts` shrinks to a debug
-  toggle (or moves into `/dev/`) once the real shell is in place.
-
-**Verification:** Side-by-side `/{N}/` vs `/legacy/{N}/` at every
-snapshot GET and every viewport (phone, tablet, desktop). Playwright
-visual diff is **informational** from this phase onward (not a blocking
-exit gate — solidifying pixels before the design reaches parity just
-creates churn). The `tests/visual/visual.spec.ts` spec exists and
-captures typed-app snapshots; run `npm run test:visual:update` when
-the design is stable enough to lock in.
-
-**Exit criterion:** `/{N}/` is the production app: one base stylesheet,
-three tiny override files, the typed shell composes every engine and
-panel, the app is usable and navigable at phone/tablet/desktop viewports
-and visually close enough to production that users can orient themselves.
-
-## Phase 7 — Production cutover
-
-The typed app at `/{N}/` has been the dev-server reality since Phase 3.
-Production cutover is shipping it. The legacy script files in
-`public/{N}/` and the `legacy-oracle/` HTML stay in the repo for one
-more release as a rollback path; the **build output** is the new app only.
-
-Sequence:
-
-1. **Pre-flight:** Full Playwright suite green at every viewport + every
-   snapshot GET against the built output served locally
-   (`npx vite preview`). All 54 baselines pass. Manual deep-link spot
-   check at every snapshot GET in every mission.
-2. **Configure the build to exclude legacy and oracle.** The Vite config
-   already does not list `legacy-oracle/` in `rollupOptions.input` and
-   the `legacyOraclePlugin` is dev-only. Verify `dist/` after build:
-   `/{N}/index.html` is the typed app; no `legacy/` paths; no oracle
-   HTML. Confirm `public/{N}/index.js`, `navigator.js`, `ajax.js`,
-   `lib/jquery*`, `MOCRviz/*.{html,js,css}` are NOT referenced by
-   anything in `dist/`. They may still copy through `publicDir` — if so,
-   add `vite-plugin-static-copy` exclusions or move the legacy script
-   files out of `publicDir` and the oracle plugin out of dev simultaneously.
-3. **Deploy** the built `dist/` to `apolloinrealtime.org`. Add 301
-   redirects for `/{N}/mobile/*` → `/{N}/` and 410/301 for retired
-   `spacecraft_dev/` and `nominee/` paths.
-4. Keep the **previous apolloinrealtime.org build** (separate hosting
-   slot / branch) in a hot rollback slot for one week.
-5. Monitor analytics, share-link traffic, console errors.
-6. After the rollback window closes, **delete the legacy script payloads
-   from the repo** in one commit: `public/{11,13,17}/{index.js,
-navigator.js, ajax.js, TOC.html, navigator_dev.{html,js}}`,
-   `public/{N}/lib/` (jQuery + jQuery plugins; Paper.js stays only if
-   still vendored as a runtime), `public/{N}/MOCRviz/*.{html,js,css}`
-   (waveform PNGs + audio + calibration JSON in `MOCRviz/data/` and
-   `MOCRviz/img/` stay — they're reference data the typed MOCRviz reads),
-   `public/{N}/styles.css`, plus `legacy-oracle/`, `legacy-src/`, and
-   the `legacyOraclePlugin` block in `vite.config.ts`. `legacy/` (the
-   four subtree-imported repos) stays committed — permanent reference,
-   never deleted.
-
-**Exit criterion:** Four weeks post-cutover with no regression reports;
-legacy script payloads removed from the repo.
-
-## Phase 8 — Cleanup + future missions
-
-- Bundle audit to prove the shipped output is dependency-free (no jQuery,
-  no peaks.js; Paper.js vendored if still needed).
-- Add `src/missions/{8,12,14,15,16}.config.ts` + `public/{N}/` payloads
-  (indexes/, img/, MOCRviz data assets) as their data becomes ready. The
-  typed mission-config + standardized CSV schema work done in earlier
-  phases makes this drop-in.
-- Tighten the responsive layout based on real-world phone usage data.
-
-## Parallel: data-ingestion track (uv + Python 3)
-
-Runs alongside Phases 1–7, not blocking them. **Replaces** the old Python
-rather than migrating it (00-C9). Only transcript generation and
-photo-timing correction are ongoing tools; the rest of the old scripts
-are reference-only.
-
-- **P-1** Stand up `pipeline/` with **uv** (`uv venv`, `uv.lock`), Python
-  3.12+, ruff + black + mypy, pinned. Define the `airt-ingest` CLI
-  skeleton.
-- **P-2** Define + lock the canonical CSV schema in `docs/csv-schemas.md`
-  (mirrored by `src/types/data.d.ts`); define the standardized
-  per-mission input layout in `docs/data-inputs.md`.
-- **P-3** Implement A13 first (matches canonical base): `transcripts`,
-  `photo-timing`, `build`, `validate`. Reproduce A13's `indexes/` from
-  standardized inputs and diff against the committed CSVs to prove
-  parity.
-- **P-4** Implement A11 then A17.
-- **P-5** Optional: improve transcription (newer Whisper models) — a
-  content decision, not tooling; deferred.
-
-May be delegated to a sub-agent — see the open follow-ups in 06. Network
-(scraping) and GPU (transcription) needs affect where it runs.
-
-## Estimated complexity (not time)
-
-| Phase                      | Complexity  | Risk                                 |
-| -------------------------- | ----------- | ------------------------------------ |
-| 0 — scaffold + baselines   | low         | low                                  |
-| 1 — lift legacy oracles    | low         | low                                  |
-| 2 — mission config         | medium      | low                                  |
-| 3 — head + ESM entry stub  | medium      | low                                  |
-| 4 — engines                | high        | medium                               |
-| 4.5 — MOCRviz typed        | medium-high | medium (audio + waveform sync)       |
-| 5 — data, overlays, panels | medium      | low                                  |
-| 6 — production shell + CSS | high        | medium-high (full layout + phone)    |
-| 7 — atomic cutover         | low (code)  | medium-high (URL/SEO/share-link/DNS) |
-| 8 — cleanup + new missions | varies      | low                                  |
-| Data-ingestion track       | medium      | low (parallel, non-blocking)         |
-
-The risk concentration is in Phases 4, 4.5, 6, and 7.
+After product acceptance: verify built output, deep links, hosting redirects, rollback and mobile use on staging. Keep prior production available for rollback. Future missions and the Python ingestion replacement remain separate tracks documented in `04-data-and-content-strategy.md`.

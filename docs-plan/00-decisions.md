@@ -1,83 +1,40 @@
-# 00 — Locked decisions
+﻿# 00 — Architectural and scope decisions
 
-Answers from Ben on 2026-05-28. These are the inputs the rest of the plan
-is now built against. If any change, the other docs need a sweep.
+Original decisions came from Ben in May 2026. The September 2026 salvage
+request updates the visual target and authorizes completing MOCRviz. This
+file holds durable decisions; progress belongs only in the tracker.
 
-| #    | Decision                           | Choice                                                                                                                                                                                                                                                  |
-| ---- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1   | Stack                              | **Vanilla + ESM + Vite + TypeScript** (no React)                                                                                                                                                                                                        |
-| A2   | jQuery                             | **Rip it out.** Replace with small typed vanilla DOM helpers during extraction. No jQuery in the shipped app.                                                                                                                                           |
-| A2b  | Longevity principle                | **Zero runtime dependencies in shipped output.** Build output is plain static JS+CSS+HTML that never needs upgrading. TS/Vite are build-time only and compile away. Pin + vendor the toolchain. Goal: another 15 years of running untouched.            |
-| B3   | UX goal                            | **Pixel-identical first, redesign later**                                                                                                                                                                                                               |
-| B4   | URL stability                      | **Absolute requirement** — every existing deep link must survive cutover                                                                                                                                                                                |
-| B5   | Mobile site (`/mobile/` subfolder) | **Drop it.** Make the unified app responsive enough                                                                                                                                                                                                     |
-| B6   | Side apps                          | **MOCRviz = refactor** (fundamental part of A11/A13; de-iframe it). **spacecraft_dev = discard** (confirmed throwaway prototype: `spacecraft.{html,css,js}`). **nominee = retire.**                                                                     |
-| C7   | Canonical base                     | **Apollo 13**                                                                                                                                                                                                                                           |
-| C8   | Cutover                            | (not asked — default: big-bang DNS swap. Revisit if needed.)                                                                                                                                                                                            |
-| C9   | Data pipeline                      | **Replace, don't migrate.** Old Python was loose, per-mission, mostly run-once/experimental. Build a new ingestion pipeline (uv + Python 3) with standardized naming + schema. Only **transcripts** and **photo-timing corrections** run going forward. |
-| D10  | Future missions                    | **Yes — A8 / A12 / A14 / A15 / A16 design targets.** Mission-config + `public/{N}/` convention must make these cheap to add                                                                                                                             |
-| E11  | Hosting                            | **Same static host as today** (no infra change)                                                                                                                                                                                                         |
-| E11b | Media CDN                          | **KeyCDN dropped.** Media served from `media.apolloinrealtime.org` directly. Remove all KeyCDN config/commented URLs.                                                                                                                                   |
-| E12  | Server-side bits                   | (not asked — assumed none. Flag during Phase 1 if any surface)                                                                                                                                                                                          |
-| F13  | Tests                              | **Vitest** for unit (CSV loader, clock math, GET conversion) + **progressively added browser tests** (Vitest browser mode / Playwright) + Playwright visual regression against production screenshots. Tests grow per phase.                            |
-| F14  | Repo location                      | **Fresh `AiRT2` repo** that imports the **full history of all four legacy repos** via `git subtree` under `legacy/<name>/` prefixes (preserves the decade for gource). Local for now; GitHub + Actions later. See [07](07-repo-and-git-strategy.md).    |
+| ID   | Decision                                                                                                                                                                                                                                                                    |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1   | Vanilla TypeScript, ESM, Vite. No React or other application framework.                                                                                                                                                                                                     |
+| A2   | Remove jQuery from the typed app; use browser DOM APIs and the small typed `src/dom/` helpers.                                                                                                                                                                              |
+| A2b  | Ship static HTML/CSS/JS with no new runtime package dependencies. Existing Paper.js remains vendored and pinned. Pin build tools and lockfiles for repeatable rebuilds. YouTube and the media host remain explicit external services.                                       |
+| B3   | **Updated September 2026:** preserve the recognizable legacy layout and experience; exact pixel equality is unnecessary. Broken CSS and missing visualization behavior must be repaired.                                                                                    |
+| B4   | Existing mission, time, and channel links must survive cutover. Preserve mission metadata and share previews.                                                                                                                                                               |
+| B5   | Retire separate `/mobile/` apps. The unified application must be usable on phones and tablets.                                                                                                                                                                              |
+| B6   | Refactor MOCRviz into a lazy typed panel, without the legacy application iframe/jQuery/peaks.js. Preserve each mission's assets and positions. `spacecraft_dev/` is discarded; `nominee/` is retired.                                                                       |
+| C7   | Apollo 13 is the first reference for shared implementation. Verify Apollo 11 and 17 independently. The historical implementation order was 17, 11, 13.                                                                                                                      |
+| C8   | Eventual production cutover is all missions together, as previously requested. Shipping the typed build is distinct from local development at the real mission paths. Hosting changes and rollback details must be verified at release time; this recovery does not deploy. |
+| C9   | Replace the old Python tooling with a future uv + Python 3.12+ ingestion pipeline. Ben runs it interactively initially. Unify the WhisperX harness; do not re-transcribe content as part of tooling work.                                                                   |
+| D10  | All other Apollo missions are future design targets, including 8, 9, 10, 12, 14, 15, and 16. Do not add missions before recovering the current three. MOCRviz requires real available recordings.                                                                           |
+| E11  | Continue static hosting; do not introduce an application server.                                                                                                                                                                                                            |
+| E11b | Typed media URLs use `media.apolloinrealtime.org`, not KeyCDN. Historical copies remain pristine, including historical URL text.                                                                                                                                            |
+| F13  | Unit tests cover meaningful logic; real browser checks cover interactions; production screenshots guide recognizable parity; reviewed typed snapshots catch regressions. The plan defines current gates.                                                                    |
+| F14  | Keep the fresh AiRT2 repo and preserved legacy histories. Source trees remain read-only. Remote publication and GitHub Actions are later work.                                                                                                                              |
 
-## The longevity principle (why TS + Vite is not a maintenance burden)
+## Longevity
 
-Ben's core requirement: this site has run ~15 years with minimal updates and
-works like a charm. That property must survive the rewrite. There's an
-apparent tension with adding TypeScript and Vite — resolved like this:
+TypeScript and Vite are authoring/build tools. Their output runs as static
+files without a package manager or application server on the host. Keeping
+the runtime small and vendoring Paper.js reduces moving parts, but does not
+remove the external YouTube/media dependency or guarantee future browser
+compatibility. Do not promise that tooling pinning guarantees byte-identical
+builds across operating systems.
 
-- **The shipped artifact is plain static JS + CSS + HTML with zero runtime
-  dependencies.** TypeScript compiles to JS and disappears. Vite is a
-  build-time bundler and disappears. Once built and deployed, there is
-  nothing to upgrade — exactly like today.
-- **Runtime third-party code is vendored and pinned, not npm-installed at
-  runtime.** Paper.js (the navigator engine) is kept as a pinned vendored
-  copy. We don't chase its releases. If it works, it ships, untouched.
-- **Ripping out jQuery reduces long-term risk**, not increases it. jQuery
-  2.1.4 (2015) is itself a frozen dependency today; replacing it with a few
-  dozen lines of typed vanilla DOM helpers means one fewer black box.
-- **The dev toolchain (Node, Vite, TS, Vitest) can rot freely** without
-  affecting the live site, because the live site is just files. We pin the
-  toolchain (`.nvmrc`, exact versions in `package.json`, committed lockfile)
-  so a rebuild years later is reproducible, but we are never forced to
-  rebuild. No package-upgrade chores on any cadence.
+## Salvage authorization
 
-In short: TypeScript and Vite buy us correctness and a good authoring
-experience during the rewrite, then get out of the way. The deployed site is
-as dependency-free and durable as the current one — more so, once jQuery is
-gone.
-
-## Knock-on impacts vs. the original plan
-
-- **TypeScript** everywhere in `src/`. Adds `tsconfig.json`, type-checking
-  in CI, `.ts` files. Mission config and CSV schemas become typed contracts
-  (see [03](03-architecture-options.md), [04](04-data-and-content-strategy.md)).
-- **jQuery removal** is now an explicit goal woven through Phases 3–5, not a
-  someday Phase-8 cleanup. A small `src/dom/` helper module replaces it.
-- **MOCRviz** is no longer an opaque carry-through. It becomes a panel in
-  the new architecture and the iframe coupling gets removed. See updated
-  [04-data-and-content-strategy.md](04-data-and-content-strategy.md) and a
-  new phase in [05-migration-plan.md](05-migration-plan.md).
-- **Mobile** is removed from scope entirely. Responsive CSS becomes a
-  Phase-6 requirement, not a Phase-8 maybe.
-- **Data pipeline is replaced, not migrated.** The old Python is reference
-  material only. A new uv-based ingestion pipeline with a standardized
-  schema produces the `indexes/` CSVs. Only transcript generation and
-  photo-timing correction are ongoing tools. See updated
-  [04-data-and-content-strategy.md](04-data-and-content-strategy.md).
-- **KeyCDN is removed** from all config; media resolves to
-  `media.apolloinrealtime.org` directly.
-- **Tests grow progressively.** Vitest unit tests land with the first
-  extracted engine; browser tests follow per panel; Playwright visual
-  regression baselines are captured in Phase 0.
-- **Multiple future missions** means the mission-config schema and the
-  `public/{N}/` layout are first-class typed abstractions, not just a
-  refactor convenience. The CSV schema is designed for unknown future
-  missions (loader treats all mission-specific columns as optional).
-
-## Still-open follow-ups
-
-See [06-open-questions.md](06-open-questions.md) — the original questions
-are now marked closed and a short list of remaining ones is at the bottom.
+The old plan deferred MOCR visualization behind a separate audio-MVP
+sign-off. Ben's request to salvage the layout and MOCRviz supersedes that
+gate. Implement and inspect the room, channel activity, waveform, transcript,
+and synchronized audio using existing source/data references. Record actual
+limitations rather than declaring placeholders complete.
