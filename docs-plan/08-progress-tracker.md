@@ -2,7 +2,7 @@
 
 ## Resume here
 
-**2026-09-05: media synchronization repair complete and verified. No production cutover.** Play/pause is now the canonical intent even when a late YouTube state transition contradicts an earlier command; both the main and video-surface controls expose the same state. YouTube controls, keyboard/fullscreen UI, annotations and captions are disabled, with the dynamically loaded captions module explicitly unloaded. A browser regression proves Apollo 13 photography advances across real launch timestamps and freezes with the mission clock on pause. `npm run check` passes 276 tests, `npm run build` passes, and 11 focused A11/A13/A17 browser cases pass across desktop/tablet/phone. Visible local A13 review confirmed photo progression, synchronized control state, caption-free settled playback and pause. No snapshots were updated. YouTube may still impose transient provider branding inside its cross-origin iframe; the supported player parameters cannot remove required branding. Continue the remaining release audit below; preserve the prior navigator correction. Read this file, `05-migration-plan.md`, then `README.md`.
+**2026-09-05: high-resolution photo links complete and verified. No production cutover.** The selected large photograph is now a keyboard-accessible new-window link to the highest-resolution source available for each mission: Apollo 11 NASA HR/LPI print imagery, Apollo 13 LPI print imagery, and Apollo 17 4175/2100 imagery. Thumbnail seeking and timed photo progression are unchanged. Preserve the completed photo-link, media synchronization and navigator corrections. Read this file, `05-migration-plan.md`, then `README.md`.
 
 The local app at `http://localhost:5173/` has the restored original homepage. Use `/13/?t=055:54:53&ch=14` to review MOCRviz, `/11/?t=109:34:00` for sample collections, and `/17/?t=118:00:00` for dashboard/biometrics. Playback starts paused; the mission controls own playback intent.
 
@@ -14,7 +14,7 @@ The local app at `http://localhost:5173/` has the restored original homepage. Us
 | Recovery R1 - docs                   | done                     | Product contract, source map, architectural decisions, concise plan/tracker; obsolete 02/03/06 removed.                    |
 | Recovery R2 - shell and interactions | done for corrected scope | Prior recovery plus production button faces/layout, readable channels, original A11 labels/order and live activity colors. |
 | Recovery R3 - MOCRviz                | done for recovery scope  | Native room, actual channel catalogs, activity, waveform, synchronized channel transcript/search and correct media paths.  |
-| Recovery R4 - verification           | done for corrected scope | 270 unit tests; build; 82 browser cases in one unchanged-reference run; 3 direct live-site comparisons; 91 screenshots.    |
+| Recovery R4 - verification           | done for corrected scope | 276 unit tests; build; 82 browser cases in one unchanged-reference run; 3 direct live-site comparisons; 91 screenshots.    |
 | Cutover (old 7)                      | not ready                | Remaining release work below; no reference deletion or deployment.                                                         |
 | Future missions / ingestion          | deferred                 | Preserve scope in 00 and 04.                                                                                               |
 
@@ -26,6 +26,7 @@ The local app at `http://localhost:5173/` has the restored original homepage. Us
 - Fixed video/grid overlap that hid controls, negative GET clipping, channel-strip phone overflow, photo caption sizing, and panel scrolling that moved the entire page.
 - Replaced independent wall-clock display and logging-only callbacks with `MissionPlayback`, immediate shared seeks, pause/play/mute and same-file YouTube seeking. Historical dates show explicit UTC.
 - Reconciled YouTube's actual state with canonical play/pause intent on every event/tick, synchronized both visible play surfaces, added an advancing-photo browser regression, and suppressed captions plus configurable player UI.
+- Made the selected large photograph an accessible new-window link to each mission's highest-resolution available source, while retaining the smaller display image for responsive layout and performance.
 - Restored navigator detail data and labels at all three levels. Dashboard visibility now uses actual footage intervals, not continuous YouTube audio file ranges.
 - Rebuilt MOCRviz around actual tape activity chunks, binary audiowaveform data, original faded console image/coordinates and channel transcripts. Corrected CDN roots and A11 channel metadata. Requests cancel on channel changes and activity cache is bounded.
 - Restored A11 sample collections and indexed NASA photographs/catalogs/papers, A13 spacecraft text/video, and A17 heart/metabolic recordings. Untimed collections remain browsable without invented GETs.
@@ -37,9 +38,17 @@ The local app at `http://localhost:5173/` has the restored original homepage. Us
 
 Chrome live/local/local-legacy comparisons: A11 `075:31:12`, A13 `055:54:53`, A17 `118:00:00`; live root compared with corrected local root. Also reviewed A13 MOCR at the incident, A11 sample details with loaded NASA photos, A13 spacecraft rotation and A17 biometric readings. At A17 `118:00:00`, Cernan is 139.2 bpm / 1746.1 btu/hr, Schmitt 114.3 / 1524.7, matching the original data.
 
-Automated browser coverage includes all three widths, no horizontal overflow, no video/control/text overlap, GET seek and pause persistence, transcript/search/photo navigation, MOCR selection/CDN URL, sample/spacecraft tabs, photo deep links and dashboard behavior. Screenshots cover 54 mission views, six MOCR views, and three homepage views. YouTube content is hidden only for shell screenshots so local dashboard/controls remain visible; screenshots cannot prove external audio delivery.
+Automated browser coverage includes all three widths, no horizontal overflow, no video/control/text overlap, GET seek and pause persistence, transcript/search/photo navigation, MOCR selection/CDN URL, sample/spacecraft tabs, photo deep links, high-resolution photo popups and dashboard behavior. Screenshots cover 54 mission views, six MOCR views, and three homepage views. YouTube content is hidden only for shell screenshots so local dashboard/controls remain visible; screenshots cannot prove external audio delivery.
 
 ## Exact verification record
+
+High-resolution photo-link repair: `npm run check` passes 276 tests; build
+passes; 11 focused browser cases pass across all three missions at desktop,
+tablet and phone widths, including exact high-resolution URL, new-window and
+security-attribute assertions. A visible Apollo 13 click opened the 3900 x
+3900 LPI print image in a separate Chrome tab. Representative Apollo 11,
+Apollo 13 and Apollo 17 high-resolution URLs returned HTTP 200. No screenshot
+references changed.
 
 Button correction: `npm run check` passes 270 tests; build passes; the three
 direct live/local control comparisons pass, including original channel label
@@ -63,7 +72,7 @@ The record below describes the earlier recovery pass, before this correction:
 ## Remaining release work (do not hide these)
 
 1. Conduct long-session listening tests across YouTube and MOCR tape boundaries, slow buffering, autoplay rejection, connection loss and mission end. The shared clock currently continues while external media buffers; synchronous media commands and bounded drift correction are implemented, but this is not a complete buffering state machine.
-2. Finish the release feature audit against the product contract: mission entry/splash behavior, complete project credits/help, photo enlargement/download interactions, and mission-specific ancillary overlays. The new samples panel uses preserved local indexes and NASA links; it does not reproduce the obsolete live MoonDB chemistry interface.
+2. Finish the release feature audit against the product contract: mission entry/splash behavior, complete project credits/help, photo download interactions, and mission-specific ancillary overlays. The new samples panel uses preserved local indexes and NASA links; it does not reproduce the obsolete live MoonDB chemistry interface.
 3. Audit URL/asset coverage and actual date handling on target browsers, especially old redirects, photo aliases and historical mission-date edge cases. Normal mission, GET/channel and tested photo links work; this is not evidence that every historical URL has been checked.
 4. Verify real phones and staging host, keyboard navigation, full-screen behavior, production cache/redirect rules, rollback and Linux screenshot baselines before cutover. The retired `/mobile/` and development side apps stay retired.
 
@@ -79,3 +88,4 @@ Modest intentional visual changes: stacked tablet/phone panels, readable accessi
 | 2026-09-05 | Restored legacy navigator half-hour ticks, vertical detail labels and centered playback time-label geometry. | `npm run check` (272 tests); build; Apollo 13 production/local desktop review; nine A11/A13/A17 responsive recovery cases at 1440/768/390 pass. |
 | 2026-09-05 | Corrected the mission-time cursor plate to use Paper's true text bounds. | `npm run check` (272 tests); build; visible local Apollo 13 launch-state review. |
 | 2026-09-05 | Repaired canonical transport/YouTube reconciliation, synchronized play controls, verified timed photo advancement, and suppressed captions/player UI. | `npm run check` (276 tests); build; 11 focused responsive browser cases; visible local Apollo 13 play/pause/photo/media review. |
+| 2026-09-05 | Restored large-photo links to the highest-resolution available Apollo 11/13/17 sources with accessible new-window behavior. | `npm run check` (276 tests); build; 11 focused responsive browser cases; visible Apollo 13 click opened the 3900 x 3900 source in a separate tab. |

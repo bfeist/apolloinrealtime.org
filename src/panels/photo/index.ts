@@ -28,6 +28,8 @@ export interface PhotoUrls {
   thumb: string;
   /** Larger image shown in the selected-photo area. */
   full: string;
+  /** Highest-resolution image available, opened from the selected photo. */
+  highRes: string;
 }
 
 /** Mission-specific URL builder. */
@@ -166,7 +168,14 @@ export function createPhotoPanel(options: PhotoPanelOptions): PhotoPanelHandle {
     img.src = urls.full;
     img.alt = entry.photoId;
     img.className = "selectedPhoto";
-    block.appendChild(img);
+    const link = document.createElement("a");
+    link.href = urls.highRes;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.className = "selectedPhotoLink";
+    link.setAttribute("aria-label", `Open full-resolution photo ${entry.photoId} in a new window`);
+    link.appendChild(img);
+    block.appendChild(link);
     block.appendChild(cap);
     block.appendChild(meta);
     photoDiv.appendChild(block);

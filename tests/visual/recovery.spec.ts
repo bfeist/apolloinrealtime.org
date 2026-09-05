@@ -136,6 +136,43 @@ test("recovery mission-specific panels and photo deep links", async ({ page }) =
   await expect(page.locator(".airt-dashboard-overlay")).toBeVisible();
 });
 
+test("recovery selected photos link to each mission's highest-resolution image", async ({
+  page,
+}) => {
+  const cases = [
+    {
+      url: "/11/?img=AS11-40-5874",
+      expected: /\/A11\/images\/NASA_photos\/AS11-40-5874HR\.jpg$/,
+    },
+    {
+      url: "/13/?img=AS13-62-8880",
+      expected: /\/A13\/images\/lpi_mirror\/print\/AS13\/62\/8880\.jpg$/,
+    },
+    {
+      url: "/17/?t=118:23:37",
+      expected: /\/A17\/images\/flight\/4175\/AS17-134-20377\.jpg$/,
+    },
+  ];
+
+  for (const photoCase of cases) {
+    await page.goto(photoCase.url);
+    const link = page.locator(".selectedPhotoLink");
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute("href", photoCase.expected);
+    await expect(link).toHaveAttribute("target", "_blank");
+    await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  }
+
+  await page.goto("/13/?img=AS13-62-8880");
+  const link = page.locator(".selectedPhotoLink");
+  const expectedUrl = await link.getAttribute("href");
+  const popupPromise = page.waitForEvent("popup");
+  await link.click();
+  const popup = await popupPromise;
+  expect(popup.url()).toBe(expectedUrl);
+  await popup.close();
+});
+
 for (const mission of ["11", "13"]) {
   for (const width of [1440, 768, 390]) {
     test(`recovery MOCR screenshot A${mission} at ${String(width)}`, async ({ page }) => {

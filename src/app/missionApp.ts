@@ -484,14 +484,15 @@ function photoResolverFor(config: MissionConfig): PhotoUrlResolver {
         return {
           thumb: `${lpi}/thumb/AS13/${parts.rollNum}/${parts.imgNum}.jpg`,
           full: `${lpi}/medium/AS13/${parts.rollNum}/${parts.imgNum}.jpg`,
+          highRes: `${lpi}/print/AS13/${parts.rollNum}/${parts.imgNum}.jpg`,
         };
       }
       if (entry.supportingFilename !== "") {
         const url = `${mediaRoot}/images/supporting/${entry.supportingFilename}`;
-        return { thumb: url, full: url };
+        return { thumb: url, full: url, highRes: url };
       }
       const url = `${alsj}/${entry.filename}`;
-      return { thumb: url, full: url };
+      return { thumb: url, full: url, highRes: url };
     }
 
     if (config.id === "11") {
@@ -504,16 +505,17 @@ function photoResolverFor(config: MissionConfig): PhotoUrlResolver {
             ? `${mediaRoot}/images/NASA_photos/${entry.filename}`
             : entry.supportingFilename ||
               `${lpi}/resources/apollo/images/print/AS11/${parts.rollNum}/${parts.imgNum}.jpg`;
-        return { thumb, full };
+        return { thumb, full, highRes: full };
       }
       if (entry.supportingFilename !== "") {
         return {
           thumb: entry.supportingFilename,
           full: entry.supportingFilename,
+          highRes: entry.supportingFilename,
         };
       }
       const url = `${mediaRoot}/images/NASA_photos/${entry.filename}`;
-      return { thumb: url, full: url };
+      return { thumb: url, full: url, highRes: url };
     }
 
     // A17
@@ -524,6 +526,7 @@ function photoResolverFor(config: MissionConfig): PhotoUrlResolver {
     return {
       thumb: `${mediaRoot}/images/${subdir}/100/${base}.jpg`,
       full: `${mediaRoot}/images/${subdir}/${fullSize}/${base}.jpg`,
+      highRes: `${mediaRoot}/images/${subdir}/${fullSize}/${base}.jpg`,
     };
   };
 }
