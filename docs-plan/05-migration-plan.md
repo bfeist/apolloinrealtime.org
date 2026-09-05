@@ -97,6 +97,7 @@ not establish MOCRviz behavior; inspect the open MOCR panel on Apollo 11 and 13.
 
 ## Deferred beyond release
 
-Future Apollo missions and the replacement ingestion pipeline are separate work.
+Future Apollo missions and rebuilding the preserved ingestion pipeline are
+separate work.
 Their scope is recorded in [00-decisions.md](00-decisions.md) and
 [04-data-and-content-strategy.md](04-data-and-content-strategy.md).

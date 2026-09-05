@@ -2,13 +2,13 @@
 
 ## Resume here
 
-**2026-09-05: GitHub repository consolidation complete. No production cutover.**
-`https://github.com/bfeist/apolloinrealtime.org` is now the canonical remote and
-uses the rewritten `main` as its default branch. All 17 source branch lines are
-published as `legacy/<source>/<branch>` alongside the retained tags and internal
-provenance refs. The Apollo 11, 13, and 17 repositories have prominent
-abandonment notices linking to the consolidated repository. Resume long-session
-media resilience work in [05-migration-plan.md](05-migration-plan.md).
+**2026-09-05: Legacy mission-data and Python-pipeline preservation complete.**
+Resume long-session media resilience work in
+[05-migration-plan.md](05-migration-plan.md). The recovered source archive now
+lives under `mission-data/`, while legacy Python processes and branch variants
+live under `pipeline/`; rebuilding those processes remains deferred. The
+existing runtime trees remain read-only, the unrelated root mission-index
+deletions remain user work, and no production cutover is authorized.
 
 Useful review routes:
 
@@ -21,16 +21,16 @@ Playback starts paused and the mission controls own playback intent.
 
 ## Current state
 
-| Area                | State                                                                                                                                                                                                                           |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Shared application  | One vanilla TypeScript/ESM/Vite app serves Apollo 11, 13, and 17 with mission-specific configuration and data.                                                                                                                  |
-| Homepage            | Original wording, mission photography, insignia, Saturn V background, launch dates, and forum link are restored.                                                                                                                |
-| Shell and timeline  | Responsive shared shell, three-tier navigator, synchronized GET/date/seeks, transport controls, video/dashboard behavior, and mission-specific layouts are implemented.                                                         |
-| Mission content     | Transcript, milestones, commentary, photography, search, Apollo 11 samples, Apollo 13 spacecraft information, and Apollo 17 biometrics are mounted in the typed app.                                                            |
-| MOCRviz             | Apollo 11/13 use the production interaction hierarchy with typed room selection, synchronized hover/seek previews, smooth activity/waveform motion, real audio/transcripts, and tape boundaries. Apollo 17 has no MOCR dataset. |
-| Photo sources       | The selected large photograph links to the highest-resolution source available for each mission without changing thumbnail seeking or timed progression.                                                                        |
-| Source preservation | Complete filtered source graphs are retained under `legacy/*` refs; imported default histories are connected through their original `main` merges. Runtime `public/{11,13,17}/` remains read-only.                              |
-| Release             | Not ready for cutover; the release audit and environment validation below remain open.                                                                                                                                          |
+| Area                | State                                                                                                                                                                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Shared application  | One vanilla TypeScript/ESM/Vite app serves Apollo 11, 13, and 17 with mission-specific configuration and data.                                                                                                                     |
+| Homepage            | Original wording, mission photography, insignia, Saturn V background, launch dates, and forum link are restored.                                                                                                                   |
+| Shell and timeline  | Responsive shared shell, three-tier navigator, synchronized GET/date/seeks, transport controls, video/dashboard behavior, and mission-specific layouts are implemented.                                                            |
+| Mission content     | Transcript, milestones, commentary, photography, search, Apollo 11 samples, Apollo 13 spacecraft information, and Apollo 17 biometrics are mounted in the typed app.                                                               |
+| MOCRviz             | Apollo 11/13 use the production interaction hierarchy with typed room selection, synchronized hover/seek previews, smooth activity/waveform motion, real audio/transcripts, and tape boundaries. Apollo 17 has no MOCR dataset.    |
+| Photo sources       | The selected large photograph links to the highest-resolution source available for each mission without changing thumbnail seeking or timed progression.                                                                           |
+| Source preservation | Complete filtered graphs remain under `legacy/*`; 1,935 non-runtime source files and 179 pipeline/support files are restored with exact commit/blob manifests and branch overlays. Runtime `public/{11,13,17}/` remains read-only. |
+| Release             | Not ready for cutover; the release audit and environment validation below remain open.                                                                                                                                             |
 
 ## Current verification evidence
 
@@ -67,6 +67,16 @@ source branches have canonical aliases. In particular,
 `legacy/apollo17/develop` has the same 919-commit topology as the source branch;
 the other non-default live source branches also match their source commit counts.
 
+The source-data recovery audited 4,452 retained entries across every original
+branch tip against the two manifests with no missing mapping. A content-hash
+audit matched all 2,101 byte-exact files; the remaining 13 pipeline copies differ
+only because embedded ADS, Hugging Face, and Flickr credentials were replaced
+with an explicit redaction placeholder. No Python remains in `mission-data/`,
+and `npm run check` passes all 276 tests. Apollo 17's 21,065-file
+`! Previous Steps` OCR/scratch tree remains only in its adjacent legacy
+repository by request. No browser or build verification was required because
+application code and runtime files did not change.
+
 ## Remaining release work
 
 1. Run long-session YouTube/MOCR listening tests across tape boundaries, slow
@@ -86,14 +96,15 @@ the other non-default live source branches also match their source commit counts
    effect of local repair.
 
 The detailed order and evidence requirements are in
-[05-migration-plan.md](05-migration-plan.md). Future missions and the replacement
-ingestion pipeline remain deferred beyond this release.
+[05-migration-plan.md](05-migration-plan.md). Future missions and rebuilding the
+preserved ingestion pipeline remain deferred beyond this release.
 
 ## Session log
 
 | Date       | Work                                                                                                                                                                                    | Verification                                                                                                                                                                  |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-09-05 | Published stable `legacy/<source>/<branch>` aliases for all 17 locally or remotely known branches from Apollo 11, Apollo 13, Apollo 17, and the original landing repository.           | Remote audit finds all 17 aliases; Apollo 17 `develop` retains all 919 commits; every live non-default branch count matches its source; Git fsck passes.                    |
+| 2026-09-05 | Recovered retained branch-tip mission sources into `mission-data/` and separated every legacy Python process plus branch variant into `pipeline/`, without rebuilding the toolchain.    | 4,452 retained branch entries mapped; 2,101 files match source blobs exactly; 13 credential-bearing copies are intentionally redacted; `npm run check` (276) passes.          |
+| 2026-09-05 | Published stable `legacy/<source>/<branch>` aliases for all 17 locally or remotely known branches from Apollo 11, Apollo 13, Apollo 17, and the original landing repository.            | Remote audit finds all 17 aliases; Apollo 17 `develop` retains all 919 commits; every live non-default branch count matches its source; Git fsck passes.                      |
 | 2026-09-05 | Published the rewritten repository to `bfeist/apolloinrealtime.org`, made `main` the GitHub default, and added linked abandonment notices to the Apollo 11, 13, and 17 repositories.    | Remote HEAD resolves to `main`; all legacy refs were pushed; the three notice commits are published; GitHub's 23-commit activity figure matches the selected one-week window. |
 | 2026-09-05 | Repaired the four original import merge parents so granular filtered legacy histories appear at their actual import points instead of beneath one recent multi-parent merge.            | `main` reaches 1,516 commits; all source commit counts, merge-parent mapping, path audit, Git fsck, and `npm run check` (276) pass.                                           |
 | 2026-09-05 | Removed copied pre-pipeline material and rewrote all refs to expunge removed legacy files while retaining the four source repositories' complete commit topology under namespaced refs. | Per-repository commit counts match all four sources; reachable-path audit, Git fsck, `npm run check` (276), and repository repack pass.                                       |

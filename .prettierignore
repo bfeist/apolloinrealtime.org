@@ -1,6 +1,7 @@
 .local
 node_modules
 public
+mission-data
 pipeline
 tests/visual/**/*-snapshots/**
 playwright-report

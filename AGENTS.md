@@ -11,8 +11,8 @@ Begin every session with these reads, in order:
 Read [00-decisions.md](docs-plan/00-decisions.md) for architectural
 constraints and [PHASE6-visual-reference.md](docs-plan/PHASE6-visual-reference.md)
 before changing layout. The tracker is the only current-status document.
-Finish the active release task before moving to future missions, the data
-pipeline, or deployment. User instructions take precedence over older docs.
+Finish the active release task before moving to future missions, rebuilding the
+data pipeline, or deployment. User instructions take precedence over older docs.
 
 ## Product standard
 
@@ -56,11 +56,12 @@ live in `public/landing/`.
 ## Reference trees and git hygiene
 
 `public/{11,13,17}/` is read-only during application and release work because
-it contains assets used by the typed app, not just obsolete scripts. Processing
-sources and pre-pipeline data are not stored in this repository; consult the
-adjacent mission repositories until a separate storage approach is added. The
-other repositories' filtered commit graphs are retained under namespaced
-`legacy/*` refs; do not delete those refs during cleanup. Read
+it contains assets used by the typed app, not just obsolete scripts. Preserved
+non-runtime sources and intermediates live in `mission-data/`; legacy Python
+processes live in `pipeline/` and are not yet a working replacement pipeline.
+Their manifests point back to the adjacent source repositories and exact source
+blobs. The other repositories' filtered commit graphs are retained under
+namespaced `legacy/*` refs; do not delete those refs during cleanup. Read
 [07-repo-and-git-strategy.md](docs-plan/07-repo-and-git-strategy.md) for
 provenance and targeted restoration sources if drift is found.
 

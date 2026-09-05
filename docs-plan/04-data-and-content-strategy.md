@@ -34,17 +34,26 @@ and `/{N}/MOCRviz/` are case-sensitive. Preserve photo identifiers, filenames,
 attribution, and source links. Do not add KeyCDN URLs or CDN-switching logic to
 the typed app.
 
-## Processing material
+## Preserved processing material
 
-Mission-specific processing scripts, raw inputs, working files, and historical
-intermediates are intentionally not copied into AiRT2. Consult the adjacent
-mission repositories for the available processing source until a separate
-storage mechanism is approved. The runtime inputs under `public/` remain part of
-this repository.
+Mission-specific raw inputs, working files, editorial sources, and historical
+intermediates are preserved under `mission-data/{11,13,17}/`. Legacy Python
+processes are separated under `pipeline/{11,13,17}/` with their original paths
+and branch-specific variants. The manifests in those two roots map each file to
+its original repository, branch snapshot, path, and Git blob.
+
+Apollo 17's 21,000-file `! Previous Steps` OCR/scratch tree remains in the
+adjacent legacy repository and is intentionally not duplicated. The retained
+archive prioritizes the mission CSVs and the other usable source material.
+
+These files are provenance snapshots, not runtime inputs and not a working
+replacement pipeline. The typed app continues to consume the unchanged files
+under `public/`. Embedded credentials found in the old scripts were replaced by
+an explicit redaction placeholder; no other pipeline repair was attempted.
 
 ## Future ingestion work
 
-The replacement ingestion pipeline is deferred and does not block release.
+The replacement ingestion pipeline rebuild is deferred and does not block release.
 Existing CSVs remain the runtime input until a separately verified pipeline can
 regenerate equivalent output.
 

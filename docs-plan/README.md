@@ -84,6 +84,8 @@ another. Future missions opt in only when real datasets are available.
 | `src/panels/`                 | Typed feature panels, including MOCRviz                               |
 | `src/styles/`                 | Shared layout, tokens, panel styles, and small mission overrides      |
 | `public/{11,13,17}/`          | Read-only assets and data used by the typed app                       |
+| `mission-data/{11,13,17}/`    | Preserved non-runtime inputs, working data, and branch variants       |
+| `pipeline/{11,13,17}/`        | Preserved legacy Python processes; not yet a supported toolchain      |
 | Adjacent Apollo repositories  | Original website and processing source; browser references            |
 | `tests/`                      | Unit, browser, and visual verification                                |
 
