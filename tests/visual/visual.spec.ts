@@ -70,25 +70,18 @@ async function gotoTypedAppAtGet(page: Page, mission: MissionId, get: string): P
     waitUntil: "domcontentloaded",
   });
 
-  // Wait up to 15 s for at least one transcript row. This is the signal
-  // that the utterance CSV has loaded and the transcript panel has
-  // rendered. If the mission has no utterances at this GET (shouldn't
-  // happen for any snapshot GET), we fall through after the timeout.
-  await page
-    .locator(
-      "#transcriptWrapper tr, #transcriptWrapper .utt_pao, " +
-        "#transcriptWrapper .utt_capcom, #transcriptWrapper .utt_mocr, " +
-        "#transcriptWrapper .utt_crew",
+  await expect(page.locator("#transcriptWrapper tr").first()).toBeAttached();
+  await expect(page.locator("#photoGallery button").first()).toBeAttached();
+  await expect(page.locator(".selectedPhoto")).toBeVisible();
+  await expect
+    .poll(
+      () =>
+        page.locator(".selectedPhoto").evaluate((node) => (node as HTMLImageElement).naturalWidth),
+      { timeout: 20000, message: "The actual historical photo must load before capture" },
     )
-    .first()
-    .waitFor({ timeout: 15_000 })
-    .catch(() => {
-      // Pre-launch GETs may have no utterance rows yet — that's expected.
-      // Let the 2-second settle below handle timing.
-    });
-
-  // Let all other async panels (photo, dashboard, navigator overlays) settle.
-  await page.waitForTimeout(2_000);
+    .toBeGreaterThan(0);
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(1500);
 }
 
 for (const mission of Object.keys(SNAPSHOTS) as MissionId[]) {
@@ -97,11 +90,16 @@ for (const mission of Object.keys(SNAPSHOTS) as MissionId[]) {
       test(`typed A${mission} ${snap.name} ${vp.name}`, async ({ page }) => {
         await page.setViewportSize({ width: vp.width, height: vp.height });
         await gotoTypedAppAtGet(page, mission, snap.get);
-        const buf = await page.screenshot({
-          fullPage: false, // viewport only — avoids huge files from overflow:hidden content
-          animations: "disabled",
-        });
-        expect(buf).toMatchSnapshot([`typed`, `a${mission}`, `${snap.name}-${vp.name}.png`]);
+        await expect(page).toHaveScreenshot(
+          [`typed`, `a${mission}`, `${snap.name}-${vp.name}.png`],
+          {
+            fullPage: true,
+            animations: "disabled",
+            // YouTube posters/ads/player chrome vary independently of our code.
+            // Hide only the remote iframe, preserving our dashboard above it.
+            stylePath: "tests/visual/screenshot.css",
+          },
+        );
       });
     }
   }

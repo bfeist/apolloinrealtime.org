@@ -9,6 +9,9 @@ interface YTPlayer {
   getPlayerState(): number;
   setPlaybackQuality(quality: string): void;
   loadVideoById(videoId: string, startSeconds?: number): void;
+  cueVideoById(videoId: string, startSeconds?: number): void;
+  mute(): void;
+  unMute(): void;
   getVideoUrl(): string;
 }
 

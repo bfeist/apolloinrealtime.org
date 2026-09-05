@@ -1,17 +1,27 @@
-# Visual regression baselines
+# Browser verification
 
-Captured from production (`apolloinrealtime.org`) in Phase 0 by
-`tests/visual/baseline.spec.ts`. Stored as Playwright snapshots under
-`tests/visual/baseline.spec.ts-snapshots/baseline/`. Re-run with:
+`npm run test:visual` runs local behavioral checks and compares the typed app
+with its own reviewed screenshots. `npm run test:visual:update` deliberately
+replaces those screenshots; inspect changes before committing them.
 
-```bash
-npm run test:baseline   # rewrite baselines from prod
-npm run test:visual     # diff local app vs baselines
-```
+- `visual.spec.ts`: 54 full-page views (three missions, six fixed GETs, three
+  viewports). Exact coordinates are in docs-plan/05-migration-plan.md.
+- `recovery.spec.ts`: shared transport, seek sources, photo deep links,
+  mission-specific content, no horizontal overflow or overlapping controls,
+  real MOCR data paths, plus six MOCR panel screenshots.
+- `baseline.spec.ts-snapshots`: original production references. They are
+  separate from typed screenshots; the local test does NOT compare their
+  pixels automatically. Use them and live production for human comparison.
 
-Snapshot set per `docs-plan/05-migration-plan.md`:
+YouTube embeds are hidden in shell snapshots because posters, ads and player
+chrome vary independently of this repository. Local controls and dashboard
+remain visible in those screenshots. Photo and MOCR requests still use the actual
+historical services. Capture waits for the selected photo to load; investigate
+network failures before changing a baseline.
 
-- Six GET points per mission (pre-launch, launch, key-event-1,
-  key-event-2, final-phase, end)
-- Three viewports (desktop 1440, tablet 768, phone 390)
-- 54 images total (3 missions × 6 × 3)
+Windows screenshots are platform-specific. Recapture and review on the
+cutover CI host before using Linux as the release gate. Keep the dev server
+stable during runs: HMR caused by concurrent source edits can reset a test.
+
+`npm run test:baseline` overwrites production references; it is not a routine
+verification command. Never overwrite the production oracle to match new code.

@@ -9,9 +9,7 @@
  * appear greyed out and can't be selected; descriptions are shown on
  * hover.
  *
- * For now this module exports the A13 catalog (the canonical base). A11
- * has a different lineup (fewer channels; different labels). Adding A11
- * is a follow-up entry in this file.
+ * Mission catalogs preserve the genuine role differences between A11 and A13.
  */
 
 /** Short and long names of one channel. */
@@ -228,12 +226,189 @@ const A13_CHANNELS: MissionChannels = {
   defaultChannel: 14, // CAPCOM
 };
 
-// A11 has the same MOCR positions but the legacy code has a separate
-// catalog. The shape is identical; populating it from
-// `public/11/MOCRviz/MOCRviz.js` `cTrackInfo` is mechanical and can be
-// done when A11 MOCRviz is wired in.
+// Apollo 11 has distinct INCO, EECOM, ALSEP and LM positions. Descriptions
+// are transcribed from public/11/MOCRviz/MOCRviz.js, not borrowed from A13.
+const A11_ENTRIES: readonly (readonly [number, string, string])[] = [
+  [1, "HR1", ""],
+  [2, "FOD", "Overall responsibility for the mission interface to program Management."],
+  [3, "MSN DIR", "The primary interface between NASA Headquarters and the Flight Control Team."],
+  [
+    4,
+    "DOD MGR",
+    "Primary interface with NASA for any Department of Defense support required during a mission, including recovery ships and DoD controlled tracking resources.",
+  ],
+  [
+    5,
+    "PROCEDURES",
+    "Operations and Procedures Officer – Supervised the application of mission rules and detailed implementation of the Mission Control Center/Ground Operational Support Systems mission control procedures.",
+  ],
+  [
+    6,
+    "ASST FD",
+    "Responsible to the Flight Director for detailed control of the mission and assumed the duties of the Flight Director in his absence.",
+  ],
+  [
+    7,
+    "FLIGHT-L",
+    "Left seat - Responsible to the Mission Director for detailed control of the mission from launch (tower clear) to splashdown and assumed the duties of the Mission Director in his absence. In real time was responsible to take any actions needed for crew safety and mission success.",
+  ],
+  [
+    8,
+    "FLIGHT-R",
+    "Right seat - Responsible to the Mission Director for detailed control of the mission from launch (tower clear) to splashdown and assumed the duties of the Mission Director in his absence. In real time was responsible to take any actions needed for crew safety and mission success.",
+  ],
+  [
+    9,
+    "FAO",
+    "The FAO planned and supported crew activities, checklists, procedures and schedules.",
+  ],
+  [
+    10,
+    "NETWORK-L",
+    "Network Controller - Had detailed operational control of the world wide Ground Operational Support System (GOSS), which included the tracking stations. (left seat)",
+  ],
+  [
+    11,
+    "NETWORK",
+    "Network Controller - Had detailed operational control of the world wide Ground Operational Support System (GOSS), which included the tracking stations. (right seat)",
+  ],
+  [
+    12,
+    "SURGEON",
+    "Directed all operational medical activities and crew’s medical status. (left seat)",
+  ],
+  [
+    13,
+    "SURGEON-R",
+    "Directed all operational medical activities and crew’s medical status. (right seat)",
+  ],
+  [
+    14,
+    "CAPCOM",
+    "Spacecraft Communicator – or Capsule Communicator - An astronaut who provided all the voice communications between the ground and the spacecraft. (left seat)",
+  ],
+  [
+    15,
+    "CAPCOM-R",
+    "Spacecraft Communicator – or Capsule Communicator - An astronaut who provided all the voice communications between the ground and the spacecraft. (right seat)",
+  ],
+  [
+    16,
+    "INCO",
+    "Instrumentation and Communications Officer – With the advent of dual spacecraft operations, lunar surface operations, science TV, and extensive data recovery, a new operating position was added, beginning with the Apollo 11 mission.",
+  ],
+  [
+    17,
+    "EECOM",
+    "Electrical, Environmental and Consumables Manager - Monitored cryogenic levels for fuel cells, and cabin cooling systems; electrical distribution systems; cabin pressure control systems; and vehicle lighting systems. EECOM originally stood for Electrical, Environmental and COMmunication systems",
+  ],
+  [
+    18,
+    "GNC",
+    "Guidance, Navigation, and Controls Systems Engineer - Monitored all vehicle guidance, navigation and control systems. Also responsible for propulsion systems such as the Service Propulsion System and Reaction Control System (RCS).",
+  ],
+  [
+    19,
+    "RETRO",
+    "Retrofire Officer - Drew up abort plans and was responsible for determination of retrofire times. During lunar missions the RETRO planned and monitored Trans Earth Injection (TEI) maneuvers, where the Apollo Service Module fired its engine to return to Earth from the Moon.",
+  ],
+  [
+    20,
+    "FIDO",
+    "Flight Dynamics Officer - Responsible for the flight path of the space vehicle, both atmospheric and orbital. During lunar missions the FDO was also responsible for the lunar trajectory. The FDO monitored vehicle performance during the powered flight phase and assessed abort modes, calculated orbital maneuvers and resulting trajectories, and monitored vehicle flight profile and energy levels during re-entry.",
+  ],
+  [
+    21,
+    "GUIDO",
+    "Guidance Officer - Monitored onboard navigational systems and onboard guidance computer software. Responsible for determining the position of the spacecraft in space. One well-known Guidance officer was Steve Bales, who gave the GO call when the Apollo 11 guidance computer came close to overloading during the first lunar descent. (left seat)",
+  ],
+  [
+    22,
+    "GUIDO-R",
+    "Guidance Officer - Monitored onboard navigational systems and onboard guidance computer software. Responsible for determining the position of the spacecraft in space. One well-known Guidance officer was Steve Bales, who gave the GO call when the Apollo 11 guidance computer came close to overloading during the first lunar descent. (right seat)",
+  ],
+  [23, "CCATS LD", "Communications, Command and Telemetry Support, Command Load Controller."],
+  [24, "CCATS RTC", "Communications, Command and Telemetry Support, Real-Time Command Controller."],
+  [25, "CCATS CMD", "Communications, Command and Telemetry Support, Command Controller."],
+  [
+    26,
+    "CCATS TIC",
+    "Communications, Command and Telemetry Support, Telemetry Instrumentation Contoller.",
+  ],
+  [27, "CCATS TM", "Communications, Command and Telemetry Support, Telemetry Controller."],
+  [28, "TRACK", "Instrumentation Tracking Controller."],
+  [29, "TRACK-R", "Instrumentation Tracking Controller, Unified S-Band."],
+  [30, "HR1 VOX", ""],
+  [31, "HR2", ""],
+  [
+    32,
+    "RECOVERY",
+    "NASA Recovery Officer - In charge of the Recovery Operations Control Room (ROCR).",
+  ],
+  [
+    33,
+    "RCVY ASST",
+    "NASA Assistant Recovery Officer - Taking the lead for interfacing with other ROCR personnel.",
+  ],
+  [
+    34,
+    "RCVY STUS",
+    "Recovery Operations Control Room (ROCR), Recovery Status Monitor - Assembling and displaying, on ROCR group displays, information on recovery force positions and status, pertinent recovery weather data and significant mission events.",
+  ],
+  [
+    35,
+    "RCVY ST 2",
+    "Recovery Operations Control Room (ROCR), Evaluator / Display Controller - Assimilating and evaluating all data necessary to select the most desirable target points for any situation and recommending them to the Recovery Officer.",
+  ],
+  [36, "DOD COORD", ""],
+  [37, "DOD PRI OP", ""],
+  [38, "DOD MGR RC", ""],
+  [39, "DOD EXEC", ""],
+  [40, "DOD COMM 1", ""],
+  [41, "DOD PIO", ""],
+  [42, "COMM TECH", ""],
+  [43, "COMM CTRL", ""],
+  [44, "SPACE ENV", "Supplied information on meteorological and space radiation."],
+  [
+    45,
+    "COMP SUP",
+    "Apollo Guidance Computer Supervisor is in overall control of the RTCC Complex and its associated mission computers Often pronounced 'computer soup'.",
+  ],
+  [
+    46,
+    "SPAN",
+    "Spacecraft Analysis Room - Official interface for the Manager of the Apollo Spaceflight Program Office. Located on the 3rd floor the mission control building.",
+  ],
+  [
+    47,
+    "BOOSTER",
+    "Monitored and evaluated performance of propulsion-related aspects of the launch vehicle during prelaunch and ascent. During the Apollo program there were three Booster positions, who worked only until Trans Lunar Injection (TLI); after that, their consoles were vacated. Booster had the power to send an abort command to the spacecraft. All Booster technicians were employed at the Marshall Space Flight Center and reported to JSC for the launches. (left seat)",
+  ],
+  [
+    48,
+    "BOOSTER-C",
+    "Monitored and evaluated performance of propulsion-related aspects of the launch vehicle during prelaunch and ascent. During the Apollo program there were three Booster positions, who worked only until Trans Lunar Injection (TLI); after that, their consoles were vacated. Booster had the power to send an abort command to the spacecraft. All Booster technicians were employed at the Marshall Space Flight Center and reported to JSC for the launches. (center seat)",
+  ],
+  [
+    49,
+    "BOOSTER-R",
+    "Monitored and evaluated performance of propulsion-related aspects of the launch vehicle during prelaunch and ascent. During the Apollo program there were three Booster positions, who worked only until Trans Lunar Injection (TLI); after that, their consoles were vacated. Booster had the power to send an abort command to the spacecraft. All Booster technicians were employed at the Marshall Space Flight Center and reported to JSC for the launches. (right seat)",
+  ],
+  [50, "FLIGHT", "FD clean voice-only recording of Flight Director [R]"],
+  [51, "AFD CONF", "Assistant Flight Director - Comm line."],
+  [52, "GOSS 2", "Ground Operational Support System (GOSS) - Comm line."],
+  [53, "ALSEP EAO 2", ""],
+  [54, "MOCR DYN", "Comm line."],
+  [55, "GOSS CONF", "Ground Operational Support System (GOSS) - Comm line."],
+  [56, "GOSS 4", "Ground Operational Support System (GOSS) - Comm line."],
+  [57, "CONTROL", "Lunar Module Guidance, Navigation, and Controls Systems Engineer."],
+  [58, "TELCOM", "Lunar Module Electrical, Environmental and Consumables Management Engineer."],
+  [59, "EXPMT AO", "Experiments Officer."],
+  [60, "HR2 VOX", ""],
+];
+
 const A11_CHANNELS: MissionChannels = {
-  all: buildAll(A13_ENTRIES), // TEMP: A13 catalog stand-in until A11 catalog imported
+  all: buildAll(A11_ENTRIES),
   available: A13_CHANNELS.available,
   redacted: A13_CHANNELS.redacted,
   defaultChannel: 14,

@@ -142,7 +142,8 @@ export function createCommentaryPanel(options: CommentaryPanelOptions): Commenta
     if (el === null || el === activeEl) return;
     if (activeEl !== null) activeEl.style.backgroundColor = "";
     el.style.backgroundColor = activeBg;
-    el.scrollIntoView({ block: "nearest" });
+    container.scrollTop +=
+      el.getBoundingClientRect().top - container.getBoundingClientRect().top - 24;
     activeEl = el;
   };
 

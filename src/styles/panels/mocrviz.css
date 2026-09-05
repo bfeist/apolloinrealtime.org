@@ -1,0 +1,236 @@
+﻿/* Scoped so mission chrome and legacy reference styles cannot change the room. */
+.mocrviz-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  padding: 8px;
+  overflow: auto;
+  color: #ccc;
+  background: #080808;
+  font-family: "Roboto Mono", monospace;
+  font-size: 11px;
+  box-sizing: border-box;
+}
+.mocrviz-panel[hidden] {
+  display: none;
+}
+.mocrviz-panel button {
+  font: inherit;
+  cursor: pointer;
+}
+.mocrviz-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 29px;
+}
+.mocrviz-heading {
+  color: #7cb7e0;
+  letter-spacing: 1px;
+  font-size: 11px;
+}
+.mocrviz-clock {
+  margin-left: auto;
+  white-space: nowrap;
+}
+.mocrviz-panel .mocrviz-play {
+  color: #ddd;
+  background: #252525;
+  border: 1px solid #555;
+  padding: 5px 9px;
+  white-space: nowrap;
+}
+.mocrviz-timeline {
+  display: block;
+  width: 100%;
+  flex: none;
+  cursor: crosshair;
+}
+.mocrviz-instruction {
+  color: #999;
+  font-size: 10px;
+  margin: 4px 0 10px;
+}
+.mocrviz-bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  flex: 1;
+  min-height: 340px;
+}
+.mocrviz-controls {
+  min-width: 0;
+}
+.mocrviz-room {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 746 / 419;
+  container-type: inline-size;
+}
+.mocrviz-room-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.mocrviz-panel .mocrviz-console {
+  position: absolute;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 0;
+  padding: 0;
+  background: #292929;
+  color: #aaa;
+  font-weight: bold;
+  font-size: clamp(7px, 2.7cqw, 16px);
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+.mocrviz-panel .mocrviz-console.is-speaking {
+  background: #737373;
+  color: #080808;
+}
+.mocrviz-panel .mocrviz-console.is-active,
+.mocrviz-panel .mocrviz-console:hover {
+  background: #7cb7e0;
+  color: #000;
+  outline: 1px solid #c7e8ff;
+}
+.mocrviz-channel-name {
+  margin: 3px 0 6px;
+  font-size: 13px;
+  color: #7cb7e0;
+}
+.mocrviz-channel-description {
+  margin: 0 0 10px;
+  color: #a4a4a4;
+  font-size: 10px;
+  line-height: 1.45;
+}
+.mocrviz-channel-details summary {
+  color: #aebac2;
+  cursor: pointer;
+  margin-bottom: 7px;
+}
+.mocrviz-panel .mocrviz-channel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+  gap: 3px;
+}
+.mocrviz-panel .mocrviz-channel {
+  min-width: 0;
+  padding: 4px 2px;
+  background: #242424;
+  color: #999;
+  border: 1px solid #333;
+  border-radius: 2px;
+  font-size: 9px;
+  overflow-wrap: anywhere;
+}
+.mocrviz-panel .mocrviz-channel.is-speaking {
+  color: #eee;
+  background: #414141;
+}
+.mocrviz-panel .mocrviz-channel.is-active,
+.mocrviz-panel .mocrviz-channel:hover {
+  background: #7cb7e0;
+  color: #000;
+  border-color: #7cb7e0;
+}
+.mocrviz-transcript-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 300px;
+  max-height: 600px;
+}
+.mocrviz-transcript-title {
+  color: #7cb7e0;
+  font-size: 12px;
+  margin: 3px 0 10px;
+}
+.mocrviz-transcript-search {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid #444;
+  color: #ddd;
+  background: #171717;
+  padding: 7px;
+  font: inherit;
+}
+.mocrviz-transcript {
+  position: relative;
+  flex: 1;
+  min-height: 180px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 5px 0;
+  color: #aaa;
+  scrollbar-width: thin;
+}
+.mocrviz-panel .mocrviz-utterance {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 6px;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #191919;
+  border-radius: 0;
+  padding: 6px 4px;
+  text-align: left;
+  color: #aaa;
+  background: transparent;
+  font-size: 10px;
+  line-height: 1.45;
+}
+.mocrviz-utterance time {
+  color: #7e8c95;
+  white-space: nowrap;
+}
+.mocrviz-panel .mocrviz-utterance.is-active {
+  background: #214557;
+  color: #eee;
+}
+.mocrviz-panel .mocrviz-utterance:hover {
+  background: #222;
+}
+.mocrviz-transcript-note {
+  color: #777;
+  font-size: 9px;
+  margin: 5px 0;
+}
+.mocrviz-panel .mocrviz-status {
+  margin: 8px 0 0;
+  color: #777;
+  font-size: 10px;
+}
+.mocrviz-panel .mocrviz-audio {
+  display: none;
+}
+@media (max-width: 700px) {
+  .mocrviz-panel {
+    height: auto;
+    min-height: 650px;
+  }
+  .mocrviz-bottom {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mocrviz-room {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .mocrviz-transcript-panel {
+    height: 340px;
+    flex: none;
+  }
+  .mocrviz-toolbar {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .mocrviz-heading {
+    letter-spacing: 0;
+  }
+}

@@ -31,9 +31,10 @@ const trailingSlashRedirect = (): Plugin => ({
   configureServer(server) {
     server.middlewares.use((req, _res, next) => {
       const url = req.url ?? "";
-      if (url !== "/" && !url.endsWith("/") && !url.includes("?") && !/\.[^/]+$/.test(url)) {
-        req.url = url + "/";
-      }
+      // Only application routes are directories. Rewriting /@vite/client
+      // bypasses Vite's client transform and breaks every dynamic CSS import.
+      const match = /^(\/(?:11|13|17|dev|legacy\/(?:11|13|17)))(\?.*)?$/.exec(url);
+      if (match) req.url = `${match[1]}/${match[2] ?? ""}`;
       next();
     });
   },
@@ -56,7 +57,7 @@ const legacyOraclePlugin = (): Plugin => ({
     };
     server.middlewares.use((req, res, next) => {
       const url = req.url ?? "";
-      const m = /^\/legacy\/(11|13|17)\/(.*)$/.exec(url);
+      const m = /^\/legacy\/(11|13|17)\/([^?]*)(\?.*)?$/.exec(url);
       if (!m) return next();
       const [, mission, rest] = m;
       // bare /legacy/{N}/ \u2192 serve the oracle HTML
@@ -69,7 +70,7 @@ const legacyOraclePlugin = (): Plugin => ({
       }
       // /legacy/{N}/<asset> \u2192 rewrite to /{N}/<asset> so Vite serves it
       // from public/{N}/
-      req.url = `/${mission}/${rest}`;
+      req.url = `/${mission}/${rest}${m[3] ?? ""}`;
       next();
     });
   },

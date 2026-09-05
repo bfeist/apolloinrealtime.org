@@ -1,0 +1,4 @@
+/* Isolate external YouTube chrome without covering the local dashboard. */
+#player {
+  visibility: hidden !important;
+}

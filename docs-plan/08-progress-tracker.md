@@ -2,7 +2,7 @@
 
 ## Resume here
 
-**2026-09-05: the recovery implementation is complete; final screenshot verification is in progress. No production cutover.** Read this file, `05-migration-plan.md`, then `README.md`. The owner requested recognizable production layouts and explicitly corrected the homepage: use the actual live content, not invented copy.
+**2026-09-05: the recovery pass is implemented and verified. No production cutover.** Read this file, `05-migration-plan.md`, then `README.md`. The owner requested recognizable production layouts and explicitly corrected the homepage: use the actual live content, not invented copy.
 
 The local app at `http://localhost:5173/` has the restored original homepage. Use `/13/?t=055:54:53&ch=14` to review MOCRviz, `/11/?t=109:34:00` for sample collections, and `/17/?t=118:00:00` for dashboard/biometrics. Playback starts paused; the mission controls own playback intent.
 
@@ -14,7 +14,7 @@ The local app at `http://localhost:5173/` has the restored original homepage. Us
 | Recovery R1 - docs                   | done                    | Product contract, source map, architectural decisions, concise plan/tracker; obsolete 02/03/06 removed.                                                                                   |
 | Recovery R2 - shell and interactions | done for recovery scope | All three missions, desktop/tablet/phone; shared GET/transport, navigator, real seek callbacks, historical clock, photography, share/help, mission-specific panels and original homepage. |
 | Recovery R3 - MOCRviz                | done for recovery scope | Native room, actual channel catalogs, activity, waveform, synchronized channel transcript/search and correct media paths.                                                                 |
-| Recovery R4 - verification           | in progress             | 267 unit tests, check/build and 4 built-app smoke tests pass; 76 browser cases pass on capture. Final saved-screenshot comparison pending.                                                |
+| Recovery R4 - verification           | done for recovery scope | Check: 267 tests; build; 4 built-app smoke tests; all 76 browser cases verified, including 63 screenshots. See exact run details below.                                                   |
 | Cutover (old 7)                      | not ready               | Remaining release work below; no reference deletion or deployment.                                                                                                                        |
 | Future missions / ingestion          | deferred                | Preserve scope in 00 and 04.                                                                                                                                                              |
 
@@ -35,6 +35,16 @@ Chrome live/local/local-legacy comparisons: A11 `075:31:12`, A13 `055:54:53`, A1
 
 Automated browser coverage includes all three widths, no horizontal overflow, no video/control/text overlap, GET seek and pause persistence, transcript/search/photo navigation, MOCR selection/CDN URL, sample/spacecraft tabs, photo deep links and dashboard behavior. Screenshots cover 54 mission views, six MOCR views, and three homepage views. YouTube content is hidden only for shell screenshots so local dashboard/controls remain visible; screenshots cannot prove external audio delivery.
 
+## Exact verification record
+
+- `npm run check`: typecheck, ESLint, Prettier and 267 tests pass.
+- `npm run build`: final source builds successfully.
+- Built-output preview smoke: four cases pass (seek sources, A11/A13 MOCR and mission-specific panels/photo links).
+- Browser suite: 76 cases exercised. After the final font-alignment fix, 62 passed against saved references and 14 showed intentional transcript-position changes. Reviewed those differences (confined to transcript panes), updated those references, then all 14 passed twice (28 checks). The original failing A17 desktop view also passed three consecutive checks. This is the exact verification sequence, not a claim of one final uninterrupted 76-case run.
+- 54 shell, six MOCR and three homepage screenshots are saved. Production reference images remain unchanged. Selected historical photos must actually load before capture; external YouTube imagery is hidden with `tests/visual/screenshot.css`, leaving local overlays visible.
+- The font fix re-anchors the active transcript after font loading. Manual transcript pagination now listens to the actual scrolling container.
+- Protected `legacy/`, `legacy-src/`, `legacy-oracle/` and `public/{11,13,17}/` have no diff.
+
 ## Remaining release work (do not hide these)
 
 1. Conduct long-session listening tests across YouTube and MOCR tape boundaries, slow buffering, autoplay rejection, connection loss and mission end. The shared clock currently continues while external media buffers; synchronous media commands and bounded drift correction are implemented, but this is not a complete buffering state machine.
@@ -46,6 +56,6 @@ Modest intentional visual changes: stacked tablet/phone panels, readable accessi
 
 ## Session log
 
-| Date       | Work                                                                                                                                 | Verification                                                                                                      |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| 2026-09-05 | Audited and consolidated plans; restored shared layout/playback, native MOCRviz, mission-specific content and original landing page. | Check: 267 tests; build; 4 preview smoke tests; 76 browser cases on capture. Final screenshot comparison pending. |
+| Date       | Work                                                                                                                                 | Verification                                                                                                                      |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-05 | Audited and consolidated plans; restored shared layout/playback, native MOCRviz, mission-specific content and original landing page. | 267 unit tests; build; 4 preview smoke tests; 76 browser cases verified with reviewed screenshot references and targeted repeats. |

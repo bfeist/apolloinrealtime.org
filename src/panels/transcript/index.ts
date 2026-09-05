@@ -149,13 +149,13 @@ export function createTranscriptPanel(options: TranscriptPanelOptions): Transcri
     const frag = document.createDocumentFragment();
     for (let i = newStart; i < start; i++) frag.appendChild(buildUtteranceRow(data, i));
     // preserve scroll: measure first row offset before+after.
-    const prevHeight = wrap.scrollHeight;
-    const prevTop = wrap.scrollTop;
+    const prevHeight = container.scrollHeight;
+    const prevTop = container.scrollTop;
     table.insertBefore(frag, table.firstChild);
     start = newStart;
     // re-anchor scrollTop so the user stays visually put.
     suppressScroll = true;
-    wrap.scrollTop = prevTop + (wrap.scrollHeight - prevHeight);
+    container.scrollTop = prevTop + (container.scrollHeight - prevHeight);
     // release on next frame so smooth scroll doesn't trigger edge re-fetch.
     requestAnimationFrame(() => {
       suppressScroll = false;
@@ -182,15 +182,15 @@ export function createTranscriptPanel(options: TranscriptPanelOptions): Transcri
     suppressScroll = true;
     if (distFromStart > distFromEnd) {
       // trim from top — preserve visual position of activeEl
-      const prevTop = activeEl?.offsetTop ?? wrap.scrollTop;
+      const prevTop = activeEl?.offsetTop ?? container.scrollTop;
       for (let i = 0; i < toRemove; i++) {
         const first = table.firstElementChild;
         if (!first) break;
         first.remove();
       }
       start += toRemove;
-      const newTop = activeEl?.offsetTop ?? wrap.scrollTop;
-      wrap.scrollTop = wrap.scrollTop - (prevTop - newTop);
+      const newTop = activeEl?.offsetTop ?? container.scrollTop;
+      container.scrollTop = container.scrollTop - (prevTop - newTop);
     } else {
       // trim from bottom — no scroll adjustment needed
       for (let i = 0; i < toRemove; i++) {
@@ -211,10 +211,11 @@ export function createTranscriptPanel(options: TranscriptPanelOptions): Transcri
   });
 
   // Manual scroll: extend the window when the user reaches an edge.
-  const offScroll = on(wrap, "scroll", () => {
+  const offScroll = on(container, "scroll", () => {
     if (suppressScroll) return;
-    const nearTop = wrap.scrollTop < NEAR_EDGE_PX;
-    const nearBottom = wrap.scrollHeight - wrap.scrollTop - wrap.clientHeight < NEAR_EDGE_PX;
+    const nearTop = container.scrollTop < NEAR_EDGE_PX;
+    const nearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight < NEAR_EDGE_PX;
     if (nearTop && start > 0) prepend(PREPEND_CHUNK);
     if (nearBottom && end < data.entries.length - 1) append(APPEND_CHUNK);
   });
@@ -250,7 +251,8 @@ export function createTranscriptPanel(options: TranscriptPanelOptions): Transcri
     if (activeEl !== null && activeEl !== el) activeEl.style.backgroundColor = "";
     el.style.backgroundColor = activeBg;
     suppressScroll = true;
-    el.scrollIntoView({ block: "center" });
+    container.scrollTop +=
+      el.getBoundingClientRect().top - container.getBoundingClientRect().top - 24;
     requestAnimationFrame(() => {
       suppressScroll = false;
     });
@@ -260,11 +262,26 @@ export function createTranscriptPanel(options: TranscriptPanelOptions): Transcri
     trim();
   };
 
+  // Font loading changes row heights after the initial seek. Re-anchor once
+  // the real font metrics are available instead of leaving the active line adrift.
+  const alignAfterFonts = (): void => {
+    if (!activeEl || !container.clientHeight) return;
+    suppressScroll = true;
+    container.scrollTop +=
+      activeEl.getBoundingClientRect().top - container.getBoundingClientRect().top - 24;
+    requestAnimationFrame(() => {
+      suppressScroll = false;
+    });
+  };
+  void document.fonts.ready.then(alignAfterFonts);
+  document.fonts.addEventListener("loadingdone", alignAfterFonts);
+
   const renderedCount = (): number => (start === -1 ? 0 : end - start + 1);
 
   const destroy = (): void => {
     off();
     offScroll();
+    document.fonts.removeEventListener("loadingdone", alignAfterFonts);
     container.textContent = "";
     activeEl = null;
     activeIndex = -1;

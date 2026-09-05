@@ -37,12 +37,16 @@ describe("parseDeepLink", () => {
   });
 
   it("drops malformed t values silently", () => {
+    expect(parseDeepLink("?t=001:60:00").seek).toBeNull();
+    expect(parseDeepLink("?t=001:00:60").seek).toBeNull();
     expect(parseDeepLink("?t=not-a-time")).toEqual({ seek: null, channel: null });
     expect(parseDeepLink("?t=12:34")).toEqual({ seek: null, channel: null });
     expect(parseDeepLink("?t=12345")).toEqual({ seek: null, channel: null });
   });
 
   it("parses ?ch=N as a positive integer", () => {
+    expect(parseDeepLink("?ch=61").channel).toBeNull();
+    expect(parseDeepLink("?ch=2.5").channel).toBeNull();
     expect(parseDeepLink("?ch=12")).toEqual({ seek: null, channel: 12 });
     expect(parseDeepLink("?ch=0")).toEqual({ seek: null, channel: null });
     expect(parseDeepLink("?ch=-1")).toEqual({ seek: null, channel: null });

@@ -122,7 +122,9 @@ export function createPhotoPanel(options: PhotoPanelOptions): PhotoPanelHandle {
 
   for (const entry of data.entries) {
     const urls = resolveUrls(entry);
-    const item = document.createElement("div");
+    const item = document.createElement("button");
+    item.type = "button";
+    item.setAttribute("aria-label", `View photo ${entry.photoId} at ${entry.timeStr}`);
     item.className = "galleryItemContainer";
     item.id = galleryItemId(entry.timeId);
     item.dataset.timeid = entry.timeId;
@@ -182,7 +184,7 @@ export function createPhotoPanel(options: PhotoPanelOptions): PhotoPanelHandle {
     if (el === null || el === activeEl) return;
     if (activeEl !== null) activeEl.classList.remove("selected");
     el.classList.add("selected");
-    el.scrollIntoView({ block: "nearest", inline: "nearest" });
+    gallery.scrollTop += el.getBoundingClientRect().top - gallery.getBoundingClientRect().top - 8;
     activeEl = el;
     const idx = data.byTimeId.get(timeId);
     if (idx !== undefined) {

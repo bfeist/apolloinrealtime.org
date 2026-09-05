@@ -6,7 +6,7 @@
   width: 100%;
   border-collapse: collapse;
   font-family: var(--airt-font-mono);
-  font-size: 0.9em; /* matches production .utteranceTable font-size */
+  font-size: 12px;
   color: var(--airt-fg-secondary);
 }
 
@@ -31,7 +31,7 @@ tr.commentary:hover {
 tr.utterance > td,
 tr.commentary > td {
   padding: 3px;
-  font-size: 0.9em;
+  font-size: inherit;
   line-height: 1.3;
 }
 

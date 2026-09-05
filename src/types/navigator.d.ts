@@ -210,6 +210,7 @@ interface NavigatorOverlays {
   videoSegments?: VideoSegmentsData;
   photos?: PhotoData;
   toc?: TocData;
+  utterances?: UtteranceData;
 }
 
 interface NavigatorRendererOptions {

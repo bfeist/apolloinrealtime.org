@@ -158,7 +158,8 @@ export function createTocPanel(options: TocPanelOptions): TocPanelHandle {
     if (el === null || el === activeEl) return;
     if (activeEl !== null) activeEl.style.background = "";
     el.style.background = activeBg;
-    el.scrollIntoView({ block: "nearest" });
+    container.scrollTop +=
+      el.getBoundingClientRect().top - container.getBoundingClientRect().top - 24;
     activeEl = el;
   };
 

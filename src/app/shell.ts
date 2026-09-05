@@ -1,38 +1,7 @@
-/**
- * Typed production shell for /{11,13,17}/.
- *
- * Three-column production layout (Phase 6.5 — matches measured
- * apolloinrealtime.org/{N}/ at 1667×1005):
- *
- *   ┌─────────────────────────────────────────────────────────────────┐
- *   │ HEADER  (compact info ~30%  |  navigator canvas ~70%)            │
- *   ├──────────────────┬────────┬────────────────────────────────────┤
- *   │ LEFT  (~40%)     │ CHAN   │ RIGHT  (~56%)                       │
- *   │  • dashboard     │ narrow │  • photo viewer (default)           │
- *   │    overlay       │ vert.  │  • or video iframe (in seg)          │
- *   │  • tabs          │ ~70px  │  • far-right thumbnail rail          │
- *   │  • transcript /  │ strip  │                                      │
- *   │    TOC / commen. │        │                                      │
- *   └──────────────────┴────────┴────────────────────────────────────┘
- *
- * Stable mount-point IDs (typed engines/panels target these):
- *   #navCanvas              navigator (Paper.js)
- *   #player                 YouTube iframe player slot
- *   #missionElapsedTime     GET input
- *   #GETBtn                 GET "GO" button
- *   #historicalDate / #historicalTime  / #modernDate / #modernTime
- *                           clock readouts
- *   #transcriptTab / #tocTab / #commentaryTab
- *                           text-tab buttons
- *   #transcriptWrapper / #tocWrapper / #commentaryWrapper
- *                           text-tab content hosts
- *   #thirtytrack-container  audio channel strip
- *   #photoGallery           thumbnail rail
- *   #photodiv               main photo viewer
- *   #dashboardContent       mission-status dashboard slot
- *   #searchResultsTable     search overlay slot
- *   #mocrviz-host           MOCRviz audio controller slot
- *   #debug-host             ?debug=1 readout host
+/** Typed shared mission shell.
+ * Desktop: navigator header; video/controls/text left, channel strip center,
+ * photography or Mission Control right. Tablet/phone use normal page flow.
+ * IDs below are the stable mount points consumed by missionApp.
  */
 
 import { secondsToTimeStr } from "../shell/clock.js";
@@ -197,7 +166,6 @@ function buildHtml(config: MissionConfig, debug: boolean): string {
   // Per-mission right-column tab labels (legacy `app-tab` strip).
   const photoTabLabel = config.id === "17" ? "Photography" : "Photography";
   const showMocrTab = config.id === "11" || config.id === "13";
-  const showSpacecraftTab = config.id === "13";
 
   return `
 <div class="airt-app" role="application" aria-label="${missionName}">
@@ -216,7 +184,7 @@ function buildHtml(config: MissionConfig, debug: boolean): string {
           <span id="historicalDate" class="airt-clock__date"></span>
           <span id="historicalTime" class="airt-clock__time"></span>
         </div>
-        <div class="airt-clock__row airt-clock__row--modern" title="If the mission had launched this year">
+        <div class="airt-clock__row airt-clock__row--modern" hidden>
           <span id="modernDate" class="airt-clock__date"></span>
           <span id="modernTime" class="airt-clock__time"></span>
         </div>
@@ -247,6 +215,7 @@ function buildHtml(config: MissionConfig, debug: boolean): string {
         <!-- video player (always present, plays underneath the overlay) -->
         <div id="player-iframe-wrapper" class="airt-player-wrapper">
           <div id="player" class="airt-player"></div>
+          <button id="videoPlaybackBtn" class="airt-video-playback" type="button" aria-label="Toggle mission playback" title="Play or pause the mission"></button>
         </div>
         <!-- dashboard overlay sits on top of the player; auto-hides when
              current GET is inside a video segment (legacy
@@ -269,8 +238,8 @@ function buildHtml(config: MissionConfig, debug: boolean): string {
       </div>
 
       <div class="airt-tabs-wrapper">
-        <div class="airt-button-row">
-          <button id="transcriptTab" class="airt-tab is-active" type="button" role="tab" aria-selected="true"
+        <div class="airt-button-row" role="tablist" aria-label="Mission text">
+          <button id="transcriptTab" class="airt-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="transcriptWrapper"
                   title="Every word spoken on the mission">Transcript</button>
           <button id="tocTab" class="airt-tab" type="button" role="tab" aria-selected="false"
                   title="Points of interest throughout the mission">Mission Milestones</button>
@@ -278,10 +247,13 @@ function buildHtml(config: MissionConfig, debug: boolean): string {
                   title="Description of events and post-mission interviews with the crew">Commentary</button>
         </div>
         <div class="airt-button-row airt-button-row--small">
-          <button id="searchBtn" class="airt-action-btn" type="button" title="Search mission" aria-label="Search">🔍</button>
-          <button id="dashboardBtn" class="airt-action-btn" type="button" title="Show/hide Mission Status" aria-label="Dashboard">🎚</button>
+          <button id="searchBtn" class="airt-action-btn" type="button" title="Search mission" aria-label="Search">⌕</button>
+          <button id="dashboardBtn" class="airt-action-btn" type="button" title="Show/hide Mission Status" aria-label="Dashboard">▤</button>
           <button id="playPauseBtn" class="airt-action-btn" type="button" title="Play/Pause" aria-label="Play/Pause">⏸</button>
           <button id="soundBtn" class="airt-action-btn" type="button" title="Sound on/off" aria-label="Sound">🔊</button>
+          <button id="realtimeBtn" class="airt-action-btn" type="button" title="Sync to today's clock" aria-label="Sync to today's clock">↺</button>
+          <button id="shareBtn" class="airt-action-btn" type="button" title="Share this moment" aria-label="Share this moment">↗</button>
+          <button id="aboutBtn" class="airt-action-btn" type="button" title="How to explore" aria-label="How to explore">?</button>
           <button id="fullscreenBtn" class="airt-action-btn" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
         </div>
       </div>
@@ -308,7 +280,9 @@ function buildHtml(config: MissionConfig, debug: boolean): string {
       <div class="airt-right__tabs">
         <button id="photoTab" class="airt-app-tab is-active" type="button">${escapeHtml(photoTabLabel)}</button>
         ${showMocrTab ? `<button id="mocrTab" class="airt-app-tab" type="button">Mission Control Audio</button>` : ""}
-        ${showSpacecraftTab ? `<button id="spacecraftTab" class="airt-app-tab" type="button">Spacecraft Details</button>` : ""}
+        ${config.id === "13" ? `<button id="spacecraftTab" class="airt-app-tab" type="button">Spacecraft</button>` : ""}
+        ${config.id === "11" ? `<button id="samplesTab" class="airt-app-tab" type="button">Astromaterial Samples</button>` : ""}
+
       </div>
       <div class="airt-right__body">
         <!-- big viewer (photodiv) + far-right vertical thumbnail rail (photoGallery) -->
@@ -317,10 +291,26 @@ function buildHtml(config: MissionConfig, debug: boolean): string {
 
         <!-- MOCRviz audio host overlays when MOCR tab is active -->
         <div id="mocrviz-host" class="airt-mocrviz-host" hidden></div>
+        ${config.id === "13" ? `<div id="spacecraft-host" class="airt-mocrviz-host" hidden></div>` : ""}
+        ${config.id === "11" ? `<div id="samples-host" class="airt-mocrviz-host" hidden></div>` : ""}
       </div>
     </section>
   </main>
 
+  <dialog id="shareDialog" class="airt-dialog">
+    <form method="dialog"><button class="airt-btn" aria-label="Close share dialog">Close</button></form>
+    <h2>Share this moment</h2>
+    <label for="shareUrl">Copy this link to return to the same mission time and channel.</label>
+    <input id="shareUrl" type="text" readonly />
+  </dialog>
+  <dialog id="aboutDialog" class="airt-dialog">
+    <form method="dialog"><button class="airt-btn" aria-label="Close instructions">Close</button></form>
+    <h2>Explore ${missionName}</h2>
+    <p>Press Play to follow the mission. Enter a Ground Elapsed Time, click the timeline, or select a transcript line, milestone or photograph to jump to that moment.</p>
+    <p>The three timeline rows zoom from the whole mission to individual events. Move across a row to explore; click to seek. Search finds words in transcripts, commentary and photo captions.</p>
+    ${showMocrTab ? "<p>Select a Mission Control channel to hear that console. The activity timeline, waveform and transcript follow the same mission clock. Photography returns to the spacecraft audio.</p>" : ""}
+    <p><a href="https://apolloinrealtime.org/${config.id}/" target="_blank" rel="noopener">Original website and historical project credits</a></p>
+  </dialog>
   <div id="debug-host" class="airt-debug" ${debug ? "" : "hidden"}></div>
 </div>`.trim();
 }

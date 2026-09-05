@@ -8,9 +8,7 @@
  *   ?t=rt          stay in live "real-time" mode (no manual seek)
  *   ?ch=N          select MOCR channel N (integer; A11/A13 only)
  *
- * Other legacy params (`?img=...`) are not handled yet — they require
- * the photo data to be loaded before the seek target is known, which is
- * a separate, async concern.
+ * Photo IDs (`?img=...`) are resolved by missionApp after photo data loads.
  */
 
 import { timeStrToSeconds } from "../shell/clock.js";
@@ -47,7 +45,14 @@ function parseSeek(raw: string | null): DeepLinkParams["seek"] {
   const body = negative ? v.slice(1) : v;
   if (!/^\d{1,3}:\d{2}:\d{2}$/.test(body)) return null;
   const [hh, mm, ss] = body.split(":");
-  if (hh === undefined || mm === undefined || ss === undefined) return null;
+  if (
+    hh === undefined ||
+    mm === undefined ||
+    ss === undefined ||
+    Number(mm) > 59 ||
+    Number(ss) > 59
+  )
+    return null;
   const padded = `${hh.padStart(3, "0")}:${mm}:${ss}`;
   const seconds = timeStrToSeconds(padded) * (negative ? -1 : 1);
   return Number.isFinite(seconds) ? { kind: "seconds", seconds } : null;
@@ -55,6 +60,7 @@ function parseSeek(raw: string | null): DeepLinkParams["seek"] {
 
 function parseChannel(raw: string | null): number | null {
   if (raw === null) return null;
-  const n = Number.parseInt(raw, 10);
-  return Number.isFinite(n) && n > 0 ? n : null;
+  if (!/^\d+$/.test(raw)) return null;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 && n <= 60 ? n : null;
 }

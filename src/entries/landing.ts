@@ -1,2 +1,2 @@
-// Landing-page entry. Phase 0 placeholder.
-export {};
+﻿// Keep mission links and content in HTML so entry works before JavaScript loads.
+import "../styles/landing.css";

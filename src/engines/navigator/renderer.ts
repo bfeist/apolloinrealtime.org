@@ -1,27 +1,7 @@
 /**
- * Paper.js navigator renderer (Phase 4).
- *
- * Draws the structural skeleton of the three-tier navigator on top of the
- * pure math in `./layout.ts`:
- *
- *   - the three tier border rectangles,
- *   - the tier-1 and tier-2 "nav boxes" (zoom-pane indicators) with their
- *     dimming alpha rects and the bezier zoom-fade curves,
- *   - the red playback cursor and the (hover) nav cursor, each with a
- *     rounded time-label in tier 3,
- *   - the `onMouseMove` / `onMouseUp` / `onMouseLeave` interaction wiring,
- *     delegating hit-testing to `hitTestMouseMove` / `hitTestMouseClick`.
- *
- * Mirrors the active drawing code in `legacy-src/{11,13,17}/navigator.js`
- * (`drawTier1NavBox`, `drawTier2NavBox`, `drawCursor`, `drawNavCursor`,
- * `redrawAll`, and the `paper.view.onMouse*` handlers). The data overlays
- * (mission-stage ticks, video-segment rectangles, photo ticks, tier-3
- * scrolling content) depend on mission data arrays that are not yet in the
- * typed pipeline; they are deferred to Phase 5 data wiring.
- *
- * Paper.js is injected as a {@link PaperScopeLike} (see `./paperApi.ts`);
- * this module never references a global `paper` and has no import of the
- * library, per the wire-up lesson in `/memories/repo/airt2.md`.
+ * Three-scale mission navigator. Each zoom window shows the same mission data
+ * at a finer time scale: stages, events, media and transcript activity.
+ * Paper.js is injected; all datasets and seek callbacks belong to the caller.
  */
 
 import { secondsToTimeStr } from "../../shell/clock.js";
@@ -86,6 +66,7 @@ export class NavigatorRenderer {
 
   private mounted = false;
   private currentSeconds = 0;
+  private hoverPoint: NavigatorPoint | null = null;
   /** Derived from the tier-1 nav box; anchors tier 2. (`gTier2StartSeconds`) */
   private tier2StartSeconds = 0;
   /** Derived from the tier-2 nav box; anchors tier 3. (`gTier3StartSeconds`) */
@@ -169,6 +150,10 @@ export class NavigatorRenderer {
   render(currentSeconds: number): void {
     if (!this.mounted) return;
     this.currentSeconds = currentSeconds;
+    if (this.hoverPoint) {
+      this.handleMouseMove(this.hoverPoint);
+      return;
+    }
     const layout = this.layout();
 
     this.drawTierBorders(layout);
@@ -208,6 +193,7 @@ export class NavigatorRenderer {
 
   private handleMouseMove(point: { x: number; y: number }): void {
     if (!this.navCursorGroup) return;
+    this.hoverPoint = point;
     const layout = this.layout();
     this.navCursorGroup.removeChildren();
 
@@ -221,6 +207,8 @@ export class NavigatorRenderer {
       this.tier3StartSeconds = this.drawTier2NavBox(layout, hit.seconds, this.tier2StartSeconds);
     }
 
+    this.drawTierBorders(layout);
+    this.drawTierOverlays(layout, this.tier2StartSeconds);
     this.drawCursor(layout, this.currentSeconds, this.cursorGroup, NAVIGATOR_COLORS.cursor, false);
     this.drawCursor(layout, hit.seconds, this.navCursorGroup, NAVIGATOR_COLORS.navCursor, true);
     this.paper.view.draw();
@@ -228,13 +216,20 @@ export class NavigatorRenderer {
 
   private handleMouseUp(point: { x: number; y: number }): void {
     const layout = this.layout();
+    if (point.y < 0 || point.y > layout.height) return;
     const hit = hitTestMouseClick(layout, point, this.tier2StartSeconds, this.tier3StartSeconds);
-    this.render(hit.seconds);
-    this.options.onSeek?.(hit.seconds);
+    const seconds = Math.max(
+      -layout.countdownSeconds,
+      Math.min(layout.missionDurationSeconds, hit.seconds),
+    );
+    this.hoverPoint = null;
+    this.render(seconds);
+    this.options.onSeek?.(seconds);
     this.handleMouseLeave();
   }
 
   private handleMouseLeave(): void {
+    this.hoverPoint = null;
     this.navCursorGroup?.removeChildren();
     this.render(this.currentSeconds);
   }
@@ -363,7 +358,7 @@ export class NavigatorRenderer {
     const rightAlphaRect = new this.paper.Rectangle(
       navBoxX + navBoxWidth,
       tierTop,
-      tierWidth - navBoxX + navBoxWidth,
+      Math.max(0, tierLeft + tierWidth - navBoxX - navBoxWidth),
       tierHeight,
     );
     const rightAlphaPath = this.paper.Path.RoundRectangle(rightAlphaRect, cornerSize);
@@ -390,7 +385,7 @@ export class NavigatorRenderer {
     const rightCurve = new this.paper.Path({
       segments: [
         [navBoxX + navBoxWidth, tierTop + tierHeight / 2],
-        [nextTierWidth, nextTierTop],
+        [nextTierLeft + nextTierWidth, nextTierTop],
         [navBoxX + navBoxWidth, nextTierTop],
       ],
       strokeColor: "white",
@@ -436,12 +431,13 @@ export class NavigatorRenderer {
     group.removeChildren();
 
     const tier1X = tier1SecondsToX(layout, seconds);
-    this.addLine(group, tier1X, layout.tier1.top, layout.tier1.height, color);
+    this.addLine(group, tier1X, layout.tier1.top, layout.tier1.top + layout.tier1.height, color);
 
     const tier2X = tier2SecondsToX(layout, seconds, this.tier2StartSeconds);
     this.addLine(group, tier2X, layout.tier2.top, layout.tier2.top + layout.tier2.height, color);
 
     const tier3X = tier3SecondsToX(layout, seconds, this.tier3StartSeconds);
+    if (tier3X < layout.tier3.left || tier3X > layout.tier3.left + layout.tier3.width) return;
     this.addLine(group, tier3X, layout.tier3.top, layout.tier3.top + layout.tier3.height, color);
 
     const label = new this.paper.PointText({
@@ -453,7 +449,7 @@ export class NavigatorRenderer {
     });
     label.content = secondsToTimeStr(seconds);
     let labelX = tier3X - label.bounds.width / 2;
-    if (clampLabel) {
+    if (clampLabel || tier3X < 60 || tier3X > layout.width - 60) {
       if (labelX < 5) labelX = 5;
       else if (labelX > layout.width - label.bounds.width - 5) {
         labelX = layout.width - label.bounds.width - 5;
@@ -485,219 +481,182 @@ export class NavigatorRenderer {
     group.addChild(line);
   }
 
-  /**
-   * Append data overlay items to the tier groups (called from `render()` after
-   * `drawTierBorders` has cleared each group and redrawn the border).
-   *
-   * No-ops when `options.overlays` is absent, preserving the Phase-4 baseline
-   * behavior and leaving all existing unit tests unaffected.
-   *
-   * Tier-2 overlays are viewport-dependent; they use the `tier2StartSeconds`
-   * computed by `drawTier1NavBox()` in the same render cycle. Tier-2 content
-   * therefore updates every second when driven by the mission clock. Hover-only
-   * refresh (without a full `render()`) is a planned follow-up.
-   *
-   * Mirrors the data-drawing sections of `drawTier1()` and `drawTier2()` in
-   * the legacy `navigator.js`.
-   */
+  /** Draw all three levels against their current zoom-window anchors. */
   private drawTierOverlays(layout: NavigatorLayout, tier2StartSeconds: number): void {
     const { overlays } = this.options;
     if (!overlays) return;
-    if (!this.tier1Group || !this.tier2Group) return;
-
-    const { countdownSeconds } = layout;
-
-    // ── Tier 1: mission-stage ticks ──────────────────────────────────────────
-    if (overlays.stages) {
-      for (const stage of overlays.stages.stages) {
-        const x =
-          layout.tier1.left + (stage.seconds + countdownSeconds) * layout.tier1.pixelsPerSecond;
-        if (x < layout.tier1.left || x > layout.tier1.left + layout.tier1.width) continue;
-        this.addLine(
-          this.tier1Group,
-          x,
-          layout.tier1.top,
-          layout.tier1.top + layout.tier1.height / 2,
-          NAVIGATOR_COLORS.overlayStageStroke,
+    const levels: [PaperGroup | null, TierLayout, number, NavigatorTier][] = [
+      [this.tier1Group, layout.tier1, -layout.countdownSeconds, 1],
+      [this.tier2Group, layout.tier2, tier2StartSeconds, 2],
+      [this.tier3Group, layout.tier3, this.tier3StartSeconds, 3],
+    ];
+    for (const [group, tier, start, level] of levels) {
+      if (!group) continue;
+      const end = start + tier.width * tier.secondsPerPixel;
+      const bottom = tier.top + tier.height;
+      const right = tier.left + tier.width;
+      const xFor = (seconds: number): number =>
+        tier.left + (seconds - start) * tier.pixelsPerSecond;
+      for (const segment of overlays.videoSegments?.segments ?? []) {
+        const left = Math.max(tier.left + 1, xFor(segment.startSeconds));
+        const segmentRight = Math.min(right - 1, xFor(segment.endSeconds));
+        if (segmentRight <= left) continue;
+        const height = tier.height / VIDEO_RECT_HEIGHT_DENOM;
+        const rect = this.paper.Path.Rectangle(
+          left,
+          bottom - height,
+          segmentRight - left,
+          Math.max(1, height - 1),
+        );
+        rect.fillColor = segment.extra
+          ? NAVIGATOR_COLORS.overlayVideo3dFill
+          : NAVIGATOR_COLORS.overlayVideoFill;
+        rect.strokeColor = segment.extra
+          ? NAVIGATOR_COLORS.overlayVideo3dStroke
+          : NAVIGATOR_COLORS.overlayVideoStroke;
+        group.addChild(rect);
+      }
+      if (level > 1) this.drawTimeTicks(group, tier, start, end, layout, level);
+      for (const stage of overlays.stages?.stages ?? []) {
+        if (stage.seconds > end || stage.endSeconds < start) continue;
+        const x = Math.max(tier.left + 1, xFor(stage.seconds));
+        const rowBottom = tier.top + tier.height / (level === 3 ? 3 : 2);
+        if (stage.seconds >= start)
+          this.addLine(group, x, tier.top, rowBottom, NAVIGATOR_COLORS.overlayStageStroke);
+        const stageRight = Math.min(right - 2, xFor(stage.endSeconds));
+        this.addLabel(
+          group,
+          stage.name,
+          x + 2,
+          rowBottom - (level === 3 ? 5 : 1),
+          (level === 1 ? 7 : level === 2 ? 8 : 10) + layout.fontScaleFactor,
+          NAVIGATOR_COLORS.overlayStageText,
+          stageRight - x - 4,
         );
       }
-    }
-
-    // ── Tier 1: video-segment rectangles ─────────────────────────────────────
-    if (overlays.videoSegments) {
-      const { top, left, height, pixelsPerSecond } = layout.tier1;
-      const rectHeight = height / VIDEO_RECT_HEIGHT_DENOM;
-      const rectTop = top + height - rectHeight;
-      for (const seg of overlays.videoSegments.segments) {
-        const startX = left + (seg.startSeconds + countdownSeconds) * pixelsPerSecond;
-        const segWidth = (seg.endSeconds - seg.startSeconds) * pixelsPerSecond;
-        if (segWidth <= 0) continue;
-        const rect = this.paper.Path.Rectangle(startX, rectTop, segWidth, rectHeight);
-        if (seg.extra !== "") {
-          rect.fillColor = NAVIGATOR_COLORS.overlayVideo3dFill;
-          rect.strokeColor = NAVIGATOR_COLORS.overlayVideo3dStroke;
-        } else {
-          rect.fillColor = NAVIGATOR_COLORS.overlayVideoFill;
-          rect.strokeColor = NAVIGATOR_COLORS.overlayVideoStroke;
-        }
-        this.tier1Group.addChild(rect);
-      }
-    }
-
-    // ── Tier 1: photo ticks ───────────────────────────────────────────────────
-    if (overlays.photos) {
-      const { top, left, height, width, pixelsPerSecond } = layout.tier1;
-      const barHeight = height / PHOTO_TICK_HEIGHT_DENOM;
-      const tierBottom = top + height;
-      for (const photo of overlays.photos.entries) {
-        const x = left + (photo.seconds + countdownSeconds) * pixelsPerSecond;
-        if (x < left || x > left + width) continue;
+      for (const photo of overlays.photos?.entries ?? []) {
+        if (photo.seconds < start) continue;
+        if (photo.seconds > end) break;
         this.addLine(
-          this.tier1Group,
-          x,
-          tierBottom - barHeight,
-          tierBottom,
+          group,
+          xFor(photo.seconds),
+          bottom - tier.height / PHOTO_TICK_HEIGHT_DENOM,
+          bottom,
           NAVIGATOR_COLORS.overlayPhotoTick,
         );
       }
-    }
-
-    // ── Tier 2: video-segment rectangles (viewport-clipped) ──────────────────
-    const tier2 = layout.tier2;
-    const secondsOnTier2 = tier2.width * tier2.secondsPerPixel;
-    const tier2Bottom = tier2.top + tier2.height;
-
-    if (overlays.videoSegments) {
-      const rectHeight = tier2.height / VIDEO_RECT_HEIGHT_DENOM - 2;
-      const rectTop = tier2.top + tier2.height - tier2.height / VIDEO_RECT_HEIGHT_DENOM;
-      for (const seg of overlays.videoSegments.segments) {
-        if (seg.startSeconds > tier2StartSeconds + secondsOnTier2) continue;
-        if (seg.endSeconds < tier2StartSeconds) continue;
-        let startX = tier2.left + (seg.startSeconds - tier2StartSeconds) * tier2.pixelsPerSecond;
-        let segWidth = (seg.endSeconds - seg.startSeconds) * tier2.pixelsPerSecond;
-        if (startX < 0) segWidth -= Math.abs(startX);
-        if (startX < tier2.left + 1) startX = tier2.left + 1;
-        if (segWidth > tier2.width - startX - 1) segWidth = tier2.width - startX + tier2.left - 1;
-        if (segWidth <= 0) continue;
-        const rect = this.paper.Path.Rectangle(startX, rectTop, segWidth, rectHeight);
-        if (seg.extra !== "") {
-          rect.fillColor = NAVIGATOR_COLORS.overlayVideo3dFill;
-          rect.strokeColor = NAVIGATOR_COLORS.overlayVideo3dStroke;
-        } else {
-          rect.fillColor = NAVIGATOR_COLORS.overlayVideoFill;
-          rect.strokeColor = NAVIGATOR_COLORS.overlayVideoStroke;
-        }
-        this.tier2Group.addChild(rect);
-      }
-    }
-
-    // ── Tier 2: photo ticks ───────────────────────────────────────────────────
-    if (overlays.photos) {
-      const barHeight = tier2.height / PHOTO_TICK_HEIGHT_DENOM;
-      for (const photo of overlays.photos.entries) {
-        const secondsFromLeft = photo.seconds - tier2StartSeconds;
-        if (secondsFromLeft > secondsOnTier2) break; // entries are time-sorted
-        if (secondsFromLeft < 0) continue;
-        const x = tier2.left + secondsFromLeft * tier2.pixelsPerSecond;
-        this.addLine(
-          this.tier2Group,
-          x,
-          tier2Bottom - barHeight,
-          tier2Bottom,
-          NAVIGATOR_COLORS.overlayPhotoTick,
-        );
-      }
-    }
-
-    // ── Tier 2: half-hour time ticks ─────────────────────────────────────────
-    {
-      const totalSpan = layout.missionDurationSeconds + countdownSeconds;
-      const halfHourCount = Math.ceil(totalSpan / 1800);
-      for (let i = 0; i < halfHourCount; i++) {
-        // Absolute seconds in signed T-0 space (i=0 = start of countdown)
-        const tickSeconds = i * 1800 - countdownSeconds;
-        const secondsFromLeft = tickSeconds - tier2StartSeconds;
-        if (secondsFromLeft > secondsOnTier2) break;
-        if (secondsFromLeft < 0) continue;
-        const x = tier2.left + secondsFromLeft * tier2.pixelsPerSecond;
-        this.addLine(this.tier2Group, x, tier2.top, tier2Bottom, NAVIGATOR_COLORS.overlayTimeTick);
-      }
-    }
-
-    // ── Tier 2: TOC ticks + level-1 labels ───────────────────────────────────
-    if (overlays.toc) {
-      const barHeight = tier2.height / TOC_TICK_HEIGHT_DENOM;
-      for (const entry of overlays.toc.entries) {
-        const secondsFromLeft = entry.seconds - tier2StartSeconds;
-        if (secondsFromLeft < 0 || secondsFromLeft > secondsOnTier2) continue;
-        const x = tier2.left + secondsFromLeft * tier2.pixelsPerSecond;
-        this.addLine(
-          this.tier2Group,
-          x,
-          tier2Bottom - barHeight,
-          tier2Bottom,
-          NAVIGATOR_COLORS.overlayTocTick,
-        );
-        if (entry.level === 1) {
-          const text = new this.paper.PointText({
-            justification: "left",
-            fontFamily: FONT_FAMILY,
-            fontSize: 8 + layout.fontScaleFactor,
-            fillColor: NAVIGATOR_COLORS.overlayTocText,
-          });
-          const textY = tier2Bottom - barHeight + 2;
-          text.point = { x: x + 2, y: textY };
-          text.content = entry.label;
-          const bg = this.paper.Path.Rectangle(
-            x,
-            textY - text.bounds.height,
-            text.bounds.width + 4,
-            text.bounds.height + 2,
-          );
-          bg.fillColor = "black";
-          bg.strokeColor = "black";
-          this.tier2Group.addChild(bg);
-          this.tier2Group.addChild(text);
-        }
-      }
-    }
-
-    // ── Tier 2: mission-stage ticks + labels ─────────────────────────────────
-    if (overlays.stages) {
-      for (const stage of overlays.stages.stages) {
-        if (stage.seconds > tier2StartSeconds + secondsOnTier2) continue;
-        if (stage.endSeconds < tier2StartSeconds) continue;
-        let x = tier2.left + (stage.seconds - tier2StartSeconds) * tier2.pixelsPerSecond;
-        const drawTick = x >= tier2.left + 1;
-        if (!drawTick) x = tier2.left + 1;
-        if (drawTick) {
+      if (level === 3) {
+        for (const utterance of overlays.utterances?.entries ?? []) {
+          if (utterance.seconds < start) continue;
+          if (utterance.seconds > end) break;
+          const isPao = utterance.speaker === "PAO";
+          const height = (tier.height / 14) * (isPao ? 1.5 : 1);
           this.addLine(
-            this.tier2Group,
-            x,
-            tier2.top,
-            tier2.top + tier2.height / 2,
-            NAVIGATOR_COLORS.overlayStageStroke,
+            group,
+            xFor(utterance.seconds),
+            bottom - height,
+            bottom,
+            isPao ? "grey" : utterance.speaker === "CC" ? "lightgrey" : "CadetBlue",
           );
         }
-        const text = new this.paper.PointText({
-          justification: "left",
-          fontFamily: FONT_FAMILY,
-          fontSize: 8 + layout.fontScaleFactor,
-          fillColor: NAVIGATOR_COLORS.overlayStageText,
-        });
-        const textY = tier2.top + tier2.height / 2 - 3;
-        text.point = { x: x + 2, y: textY };
-        text.content = stage.name;
-        const bg = this.paper.Path.Rectangle(
-          x,
-          textY - text.bounds.height,
-          text.bounds.width + 4,
-          text.bounds.height + 2,
-        );
-        bg.fillColor = "black";
-        this.tier2Group.addChild(bg);
-        this.tier2Group.addChild(text);
+      }
+      if (level === 1) continue;
+      let eventIndex = 0;
+      const labelEnds = [tier.left, tier.left];
+      for (const entry of overlays.toc?.entries ?? []) {
+        const row = eventIndex++ % 2;
+        if (entry.seconds < start || entry.seconds > end) continue;
+        const x = xFor(entry.seconds);
+        const top =
+          level === 2
+            ? bottom - tier.height / TOC_TICK_HEIGHT_DENOM
+            : tier.top + tier.height / 3 + (row * tier.height) / 4.2;
+        const eventBottom = level === 2 ? bottom : top + 12 + layout.fontScaleFactor;
+        this.addLine(group, x, top, eventBottom, NAVIGATOR_COLORS.overlayTocTick);
+        if (level === 2 && entry.level !== 1) continue;
+        if (x < (labelEnds[row] ?? tier.left)) continue;
+        labelEnds[row] =
+          x +
+          2 +
+          this.addLabel(
+            group,
+            entry.label,
+            x + 2,
+            level === 2 ? top + 2 : eventBottom - 2,
+            (level === 2 ? 8 : 10) + layout.fontScaleFactor,
+            NAVIGATOR_COLORS.overlayTocText,
+            right - x - 4,
+          );
       }
     }
+  }
+
+  /** GET-aligned ticks, including countdown; adapt spacing to keep labels readable. */
+  private drawTimeTicks(
+    group: PaperGroup,
+    tier: TierLayout,
+    start: number,
+    end: number,
+    layout: NavigatorLayout,
+    level: NavigatorTier,
+  ): void {
+    const intervals = [60, 120, 300, 600, 1800, 3600, 7200, 14400];
+    const interval = intervals.find((step) => step * tier.pixelsPerSecond >= 100) ?? 28800;
+    for (
+      let seconds = Math.ceil(start / interval) * interval;
+      seconds <= end;
+      seconds += interval
+    ) {
+      const x = tier.left + (seconds - start) * tier.pixelsPerSecond;
+      const bottom = tier.top + tier.height;
+      this.addLine(group, x, tier.top, bottom, NAVIGATOR_COLORS.overlayTimeTick);
+      this.addLabel(
+        group,
+        secondsToTimeStr(seconds),
+        x + 3,
+        level === 3 ? bottom - tier.height / 6 - 3 : bottom - 2,
+        7 + layout.fontScaleFactor,
+        "#888888",
+        tier.left + tier.width - x - 5,
+      );
+    }
+  }
+
+  /** Fit labels inside their actual stage or viewport instead of painting beyond it. */
+  private addLabel(
+    group: PaperGroup,
+    content: string,
+    x: number,
+    y: number,
+    fontSize: number,
+    color: string,
+    availableWidth: number,
+  ): number {
+    if (availableWidth < fontSize * 2) return 0;
+    const text = new this.paper.PointText({
+      justification: "left",
+      fontFamily: FONT_FAMILY,
+      fontSize,
+      fillColor: color,
+    });
+    text.point = { x, y };
+    text.content = content;
+    if (text.bounds.width > availableWidth) {
+      const length = Math.max(
+        1,
+        Math.floor((content.length * availableWidth) / text.bounds.width) - 1,
+      );
+      text.content = content.slice(0, length) + "\u2026";
+    }
+    const background = this.paper.Path.Rectangle(
+      x - 1,
+      y - text.bounds.height,
+      text.bounds.width + 2,
+      text.bounds.height + 1,
+    );
+    background.fillColor = "black";
+    group.addChild(background);
+    group.addChild(text);
+    return text.bounds.width + 8;
   }
 }

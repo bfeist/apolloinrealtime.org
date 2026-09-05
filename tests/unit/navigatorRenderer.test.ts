@@ -502,3 +502,82 @@ describe("NavigatorRenderer overlay support", () => {
     expect(NAVIGATOR_COLORS.overlayVideo3dFill).toBe("#270047");
   });
 });
+
+function labelsIn(paper: FakePaper, group: number): string[] {
+  return groupAt(paper, group).children.flatMap((item) =>
+    typeof item === "object" &&
+    item !== null &&
+    "content" in item &&
+    typeof item.content === "string"
+      ? [item.content]
+      : [],
+  );
+}
+
+describe("navigator detail and zoom navigation", () => {
+  it("draws stage and event labels in the detail tier, with media and transcript ticks", () => {
+    const paper = makeFakePaper(A13.width, A13.height);
+    const utterance: UtteranceEntry = {
+      seconds: 3600,
+      timeId: "0010000",
+      timeStr: "001:00:00",
+      speaker: "CC",
+      words: "Go",
+      extra: "",
+    };
+    const r = new NavigatorRenderer(paper, {
+      ...A13,
+      overlays: {
+        stages: makeStages(),
+        videoSegments: makeVideoSegments(),
+        photos: makePhotos(),
+        toc: makeToc(),
+        utterances: { entries: [utterance], timeIds: [utterance.timeId], byTimeId: new Map() },
+      },
+    });
+    r.mount(CANVAS);
+    r.render(3600);
+    expect(labelsIn(paper, 4)).toContain("Launch");
+    const colors = groupAt(paper, 4).children.map((item) => (item as PaperItem).strokeColor);
+    expect(colors).toContain(NAVIGATOR_COLORS.overlayVideoStroke);
+    expect(colors).toContain(NAVIGATOR_COLORS.overlayPhotoTick);
+    expect(colors).toContain("lightgrey");
+    r.render(12000);
+    expect(labelsIn(paper, 0)).toContain("Earth orbit");
+    expect(labelsIn(paper, 4)).toContain("Earth orbit");
+  });
+
+  it("hover redraws zoomed data, preserves the preview on clock ticks, and seeks the visible detail", () => {
+    const paper = makeFakePaper(A13.width, A13.height);
+    const onSeek = vi.fn();
+    const r = new NavigatorRenderer(paper, { ...A13, onSeek, overlays: { toc: makeToc() } });
+    r.mount(CANVAS);
+    const layout = computeLayout(A13);
+    const point = {
+      x: layout.tier1.left + (7200 + A13.countdownSeconds) * layout.tier1.pixelsPerSecond,
+      y: layout.tier1.top + 1,
+    };
+    expect(labelsIn(paper, 4)).not.toContain("Orbit");
+    paper.lastTool?.onMouseMove?.({ point });
+    expect(labelsIn(paper, 4)).toContain("Orbit");
+    expect(labelsIn(paper, 4)).not.toContain("Launch");
+    paper.lastTool?.onMouseMove?.({
+      point: { x: layout.tier2.left + layout.tier2.width / 2, y: layout.tier2.top + 5 },
+    });
+    r.render(1);
+    expect(labelsIn(paper, 4)).toContain("Orbit");
+    paper.lastTool?.onMouseUp?.({ point: { x: layout.tier3.width / 2, y: layout.tier3.top + 5 } });
+    expect(onSeek.mock.calls[0]?.[0]).toBeCloseTo(7200, 4);
+  });
+
+  it("clamps clicks in the whole-mission margins to valid mission time", () => {
+    const paper = makeFakePaper(A13.width, A13.height);
+    const onSeek = vi.fn();
+    const r = new NavigatorRenderer(paper, { ...A13, onSeek });
+    r.mount(CANVAS);
+    paper.lastTool?.onMouseUp?.({ point: { x: 0, y: 5 } });
+    expect(onSeek).toHaveBeenLastCalledWith(-A13.countdownSeconds);
+    paper.lastTool?.onMouseUp?.({ point: { x: A13.width, y: 5 } });
+    expect(onSeek).toHaveBeenLastCalledWith(A13.missionDurationSeconds);
+  });
+});

@@ -1,0 +1,198 @@
+﻿/* Preserve the production landing page's composition, assets, and typography.
+   Source: legacy/landing/_website/_webroot/styles.css. */
+:root {
+  color-scheme: dark;
+  font-family: "Roboto Mono", monospace;
+  font-size: 16px;
+  color: #999;
+  background: #131313;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  min-width: 280px;
+  min-height: 100vh;
+  background: #131313 url("/landing/background_1080_30percent.jpg") center top / cover no-repeat;
+}
+
+img {
+  border: none;
+  vertical-align: middle;
+}
+
+a,
+a:visited {
+  color: #9ee9ff;
+}
+
+a:focus-visible {
+  outline: 3px solid #9ee9ff;
+  outline-offset: 8px;
+}
+
+.landing-header {
+  padding: 2em 3em 0 2em;
+}
+
+.landing-header__content {
+  display: flex;
+  align-items: flex-start;
+  padding-right: 3em;
+  text-shadow:
+    1px 1px 1px #000,
+    1px 1px 9px #000;
+}
+
+.landing-header__patch {
+  flex: none;
+  width: 7em;
+  height: 7em;
+  object-fit: contain;
+  margin-right: 20px;
+}
+
+.landing-header__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-family: "Michroma", sans-serif;
+  font-weight: 400;
+  font-size: 2.1em;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.landing-header__heading span {
+  flex: none;
+  background: #fff;
+  color: #000;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 2px 12px 4px;
+  margin-left: 20px;
+  border-radius: 5px;
+  text-shadow: none;
+  line-height: normal;
+}
+
+.landing-header__copy p {
+  font-size: 0.8em;
+  color: #fff;
+}
+
+.landing-header__introduction {
+  margin-top: 1.1em;
+}
+
+.landing-header__copy .landing-header__material {
+  color: #5e92a6;
+}
+
+.landing-header__selection {
+  margin-top: 1em;
+}
+
+.landing-missions {
+  width: 100%;
+  text-align: center;
+  margin-top: 5em;
+  padding: 0 20px 40px;
+}
+
+.landing-missions__grid {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+
+.landing-mission {
+  display: block;
+  flex: 0 1 295px;
+  min-width: 0;
+  text-decoration: none;
+}
+
+.landing-mission:hover {
+  filter: brightness(1.2);
+}
+
+.landing-mission img {
+  width: 100%;
+  height: auto;
+}
+
+.landing-mission h2 {
+  margin-top: 0.5em;
+  font-family: "Michroma", sans-serif;
+  color: #fff;
+  font-size: 1.4em;
+  font-weight: 400;
+}
+
+.landing-mission p {
+  font-size: 0.9em;
+  color: #919191;
+}
+
+.landing-forum {
+  font-size: 0.8em;
+  margin-top: 2em;
+}
+
+@media (max-width: 760px) {
+  .landing-header {
+    padding: 24px 20px 0;
+  }
+
+  .landing-header__content {
+    padding-right: 0;
+  }
+
+  .landing-header__patch {
+    width: 72px;
+    height: 72px;
+    margin-right: 14px;
+  }
+
+  .landing-header__heading {
+    font-size: 1.5em;
+    gap: 10px;
+  }
+
+  .landing-header__heading span {
+    margin-left: 0;
+    font-size: 0.65rem;
+    padding: 3px 8px 4px;
+  }
+
+  .landing-header__copy p {
+    font-size: 0.75em;
+    line-height: 1.6;
+  }
+
+  .landing-missions {
+    margin-top: 3em;
+  }
+
+  .landing-missions__grid {
+    flex-direction: column;
+    align-items: center;
+    gap: 42px;
+  }
+
+  .landing-mission {
+    flex: none;
+    width: min(295px, 100%);
+  }
+
+  .landing-forum {
+    margin-top: 3em;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+  }
+}

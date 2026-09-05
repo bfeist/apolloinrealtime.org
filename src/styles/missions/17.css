@@ -11,3 +11,9 @@ body[data-mission="17"] .airt-main {
 body[data-mission="17"] .airt-channels {
   display: none !important;
 }
+
+@media (max-width: 1024px) {
+  body[data-mission="17"] .airt-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

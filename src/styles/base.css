@@ -50,11 +50,12 @@ button {
 
 .airt-app {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
-  min-height: 100vh;
-  max-height: 100vh;
-  gap: var(--airt-sp-2);
-  padding: var(--airt-sp-2);
+  height: 100dvh;
+  min-height: 500px;
+  gap: 6px;
+  padding: 6px;
   overflow: hidden;
 }
 
@@ -62,13 +63,11 @@ button {
 
 .airt-header {
   display: grid;
-  grid-template-columns: 100px minmax(280px, auto) minmax(0, 1fr);
-  gap: var(--airt-sp-3);
+  grid-template-columns: 94px 250px minmax(0, 1fr);
+  gap: 10px;
   align-items: stretch;
-  background: var(--airt-bg-surface);
-  border: 1px solid var(--airt-border);
-  border-radius: var(--airt-radius-md);
-  padding: var(--airt-sp-2) var(--airt-sp-3);
+  background: var(--airt-bg-page);
+  padding: 0;
   height: var(--airt-header-h);
 }
 .airt-header__logo {
@@ -145,16 +144,17 @@ button {
   color: var(--airt-fg-secondary);
 }
 .airt-get__input {
-  width: 9ch;
+  width: 11ch;
+  flex: 0 0 11ch;
   background: var(--airt-bg-surface-hi);
   border: 1px solid var(--airt-border-hi);
   color: var(--airt-fg-secondary);
   padding: 3px 6px;
   text-align: center;
   border-radius: var(--airt-radius-sm);
-  font-family: var(--airt-font-oswald);
-  font-size: var(--airt-fs-md);
-  font-weight: 300;
+  font-family: var(--airt-font-mono);
+  font-size: 12px;
+  font-weight: 400;
 }
 .airt-get__input:focus {
   outline: 2px solid var(--airt-accent);
@@ -220,7 +220,7 @@ button {
 
 .airt-left {
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(120px, 1fr);
   gap: var(--airt-sp-2);
   min-width: 0;
   min-height: 0;
@@ -238,9 +238,10 @@ button {
 .airt-monitor--top {
   /* video slot — dashboard overlay is layered on top.
      Aspect-ratio 4:3 mirrors the legacy `img.aspect-holder` trick. */
-  min-height: 200px;
+  width: 100%;
+  min-height: 0;
   aspect-ratio: 4 / 3;
-  max-height: 60vh;
+  max-height: calc(100dvh - 350px);
 }
 .airt-monitor--text {
   display: flex;
@@ -320,7 +321,7 @@ button {
   width: 100%;
   height: 100%;
 }
-.airt-player iframe {
+.airt-player-wrapper iframe {
   width: 100%;
   height: 100%;
   border: 0;
@@ -350,30 +351,36 @@ button {
 /* ── tabs row (transcript / TOC / commentary + small action btns) ── */
 .airt-tabs-wrapper {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--airt-sp-2);
-  align-items: end;
+  grid-template-columns: minmax(0, 1fr) 126px;
+  gap: 3px;
+  align-items: stretch;
 }
 .airt-button-row {
   display: flex;
   gap: 2px;
 }
 .airt-button-row--small {
-  gap: var(--airt-sp-1);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
 }
 .airt-tab {
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  min-width: 0;
   height: var(--airt-tab-h);
-  padding: 0 var(--airt-sp-3);
-  background: var(--airt-bg-surface-hi);
+  padding: 0 6px;
+  background: linear-gradient(#aaa, #777);
   color: var(--airt-fg-secondary);
   border-radius: var(--airt-radius-sm) var(--airt-radius-sm) 0 0;
   border: 1px solid var(--airt-border);
   border-bottom: 0;
-  font-size: var(--airt-fs-sm);
+  font-family: var(--airt-font-oswald);
+  font-size: 11px;
+  color: #151515;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 1.1;
 }
 .airt-tab:hover {
   background: var(--airt-border-hi);
@@ -385,13 +392,14 @@ button {
   border-color: transparent;
 }
 .airt-action-btn {
-  width: 28px;
-  height: 28px;
+  width: 100%;
+  height: 19px;
   border-radius: var(--airt-radius-sm);
   background: var(--airt-bg-surface-hi);
   color: var(--airt-fg-secondary);
   border: 1px solid var(--airt-border-hi);
-  font-size: 14px;
+  font-family: var(--airt-font-mono);
+  font-size: 11px;
   line-height: 1;
 }
 .airt-action-btn:hover {
@@ -452,10 +460,10 @@ button {
 .airt-channels__list .thirtybtn-channel {
   display: block;
   width: 100%;
-  padding: 2px 2px;
+  padding: 3px 2px;
   text-align: left;
-  background: #292929;
-  color: #595959;
+  background: linear-gradient(#858585, #606060);
+  color: #111;
   border: none;
   border-right: 1px solid #292929;
   border-bottom: 1px solid #292929;
@@ -506,8 +514,10 @@ button {
   gap: 2px;
 }
 .airt-app-tab {
-  flex: 0 0 auto;
-  height: 32px;
+  flex: 0 1 auto;
+  min-width: 0;
+  height: 38px;
+  font-family: var(--airt-font-oswald);
   padding: 0 var(--airt-sp-4);
   background: var(--airt-bg-surface-hi);
   color: var(--airt-fg-secondary);
@@ -597,7 +607,7 @@ button {
   color: var(--airt-fg-primary);
   z-index: var(--airt-z-overlay);
   overflow: auto;
-  padding: var(--airt-sp-3);
+  padding: 8px;
 }
 .airt-mocrviz-host[hidden] {
   display: none;
@@ -643,76 +653,170 @@ button {
   }
 }
 
-/* Tablet portrait / narrow: stack right column under, drop rail width. */
+/* Narrow viewports use normal page flow: every panel remains reachable. */
 @media (max-width: 1024px) {
+  .airt-app {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+  .airt-header {
+    grid-template-columns: 80px 250px minmax(0, 1fr);
+  }
   .airt-main {
-    grid-template-columns: minmax(0, 1fr) var(--airt-channels-w);
-    grid-template-rows: minmax(0, 1fr) auto;
+    height: auto;
+    overflow: visible;
+    grid-template-columns: minmax(0, 1fr) 76px;
+    grid-template-rows: auto auto;
+  }
+  .airt-left {
+    grid-template-rows: auto auto 340px;
+  }
+  .airt-monitor--top {
+    max-height: none;
   }
   .airt-right {
     grid-column: 1 / -1;
     grid-row: 2;
-    max-height: 40vh;
+    height: 720px;
   }
-  :root {
-    --airt-channels-w: 60px;
-    --airt-photo-rail-w: 80px;
+  .airt-channels {
+    width: 76px;
+    max-height: 820px;
   }
 }
 
-/* Phone: full stack. */
 @media (max-width: 640px) {
-  .airt-app {
-    max-height: none;
-    overflow: auto;
-    padding: var(--airt-sp-1);
-    gap: var(--airt-sp-1);
-  }
   .airt-header {
-    grid-template-columns: 60px 1fr;
-    grid-template-areas:
-      "logo info"
-      "nav  nav";
+    grid-template-columns: 64px minmax(0, 1fr);
     height: auto;
-    gap: var(--airt-sp-2);
+    gap: 8px;
   }
   .airt-header__logo {
-    grid-area: logo;
-    width: 56px;
-    height: 56px;
-  }
-  .airt-header__info {
-    grid-area: info;
+    width: 60px;
+    height: 60px;
   }
   .airt-header__navigator {
-    grid-area: nav;
-    min-height: 100px;
+    grid-column: 1 / -1;
+    height: 132px;
   }
   .airt-header__title {
-    font-size: var(--airt-fs-xl);
+    font-size: 20px;
+  }
+  .airt-header__subtitle {
+    font-size: 10px;
+  }
+  .airt-header__pretitle {
+    font-size: 8px;
+  }
+  .airt-get {
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .airt-get__label {
+    font-size: 11px;
+  }
+  .airt-get__input {
+    padding: 3px;
+  }
+  .airt-clock__row {
+    font-size: 13px;
   }
   .airt-main {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .airt-left {
+    flex: none;
+    grid-template-rows: auto auto 330px;
+    overflow: visible;
+  }
+  .airt-tabs-wrapper {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(300px, auto) auto minmax(200px, auto);
+  }
+  .airt-tab {
+    font-size: 12px;
+  }
+  .airt-button-row--small {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+  .airt-action-btn {
+    height: 32px;
   }
   .airt-channels {
     width: 100%;
+    height: 90px;
     flex-direction: row;
-    height: 80px;
   }
   .airt-channels__title {
-    border-bottom: 0;
-    border-right: 1px solid var(--airt-border);
-    writing-mode: vertical-rl;
-    padding: 4px;
+    width: 65px;
+    font-size: 11px;
+    padding: 10px 4px;
   }
   .airt-channels__list {
-    flex-direction: row;
+    min-width: 0;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(3, 1fr);
+    grid-auto-columns: 84px;
     overflow-x: auto;
     overflow-y: hidden;
   }
   .airt-channels__list .thirtybtn-channel {
-    min-width: 60px;
     height: 100%;
   }
+  .airt-right {
+    flex: none;
+    height: 740px;
+  }
+  .airt-app-tab {
+    padding: 0 12px;
+    font-size: 12px;
+  }
+  :root {
+    --airt-photo-rail-w: 76px;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--airt-accent-hi);
+  outline-offset: 2px;
+}
+.airt-video-playback {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+.airt-text-panel {
+  scrollbar-width: thin;
+  scrollbar-color: #555 #111;
+}
+.airt-dialog {
+  max-width: min(560px, calc(100vw - 32px));
+  color: #ddd;
+  background: #161819;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 24px;
+}
+.airt-dialog::backdrop {
+  background: #000b;
+}
+.airt-dialog h2 {
+  font: 18px var(--airt-font-display);
+  color: var(--airt-accent-hi);
+}
+.airt-dialog form {
+  float: right;
+}
+.airt-dialog input {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  background: #000;
+  color: #ddd;
+  border: 1px solid #555;
 }

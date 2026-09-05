@@ -15,7 +15,7 @@
 import { a11Config } from "../missions/11.config.js";
 import { a13Config } from "../missions/13.config.js";
 import { a17Config } from "../missions/17.config.js";
-import { secondsToTimeStr, timeStrToSeconds } from "../shell/clock.js";
+import { secondsToTimeStr, timeIdToSeconds } from "../shell/clock.js";
 import { ready } from "../dom/index.js";
 import { NavigatorRenderer } from "../engines/navigator/renderer.js";
 import { loadTocData, findClosestTocIndex } from "../data/tocData.js";
@@ -38,88 +38,48 @@ import type { FrameOfReferenceRange } from "../panels/telemetry/index.js";
 import { createDashboardPanel } from "../panels/dashboard/index.js";
 import { createSearchPanel } from "../panels/search/index.js";
 import type { MocrvizPanel } from "../panels/mocrviz/index.js";
-import { channelsFor, type ChannelInfo } from "../panels/mocrviz/channels.js";
+import { channelsFor } from "../panels/mocrviz/channels.js";
 import { renderShell, setActiveTab, type ShellElements } from "./shell.js";
 import { parseDeepLink } from "./deepLink.js";
+import { MissionPlayback, realtimeGet } from "./playback.js";
+import { loadYouTubeIframeApi } from "../engines/ytplayer/index.js";
 
 const CONFIGS: Record<string, MissionConfig> = {
   "11": a11Config,
   "13": a13Config,
   "17": a17Config,
 };
+let seekRevision = 0;
 
 function readMissionId(): "11" | "13" | "17" | null {
   const id = document.body.dataset.mission;
   return id === "11" || id === "13" || id === "17" ? id : null;
 }
 
-/** Modern-year launch epoch ms ("if the mission launched this year"). */
-function modernLaunchEpochMs(config: MissionConfig): number {
-  const year = new Date().getFullYear().toString();
-  return Date.parse(year + config.launchDateModernSuffix);
+/** The historical date always describes the selected mission moment. */
+function startClock(config: MissionConfig, shell: ShellElements, ref: MissionPlayback): void {
+  startTicker(ref, (seconds) => {
+    const date = new Date(Date.parse(config.launchDate) + seconds * 1000);
+    shell.historicDate.textContent = date.toUTCString().slice(0, 16);
+    shell.historicTime.textContent = `${date.toUTCString().slice(17, 25)} UTC`;
+    if (document.activeElement !== shell.getInput) shell.getInput.value = secondsToTimeStr(seconds);
+  });
 }
 
-/**
- * Clock tick — formats both the historic-launch and modern-year GETs
- * plus the wall-clock date strings into the header readouts.
- */
-function startClock(config: MissionConfig, shell: ShellElements): void {
-  const modernEpoch = modernLaunchEpochMs(config);
-  const historicEpoch = Date.parse(config.launchDate);
-
-  const fmtDate = (epoch: number): string => {
-    if (!Number.isFinite(epoch)) return "--";
-    const d = new Date(Date.now() - (Date.now() - epoch < 0 ? 0 : 0));
-    return d.toUTCString().slice(0, 16); // "Mon, 21 Jul 1969"
-  };
-  const fmtTime = (epoch: number): string => {
-    if (!Number.isFinite(epoch)) return "--";
-    const d = new Date();
-    return d.toUTCString().slice(17, 25); // "16:50:00"
-  };
-
-  const tick = (): void => {
-    const now = Date.now();
-    if (Number.isFinite(historicEpoch)) {
-      shell.historicDate.textContent = `T+${secondsToTimeStr(Math.trunc((now - historicEpoch) / 1000))}`;
-      shell.historicTime.textContent = fmtDate(historicEpoch);
-    } else {
-      shell.historicDate.textContent = "(launchDate unparseable)";
-    }
-    if (Number.isFinite(modernEpoch)) {
-      shell.modernDate.textContent = `if launched today: T+${secondsToTimeStr(Math.trunc((now - modernEpoch) / 1000))}`;
-      shell.modernTime.textContent = fmtTime(modernEpoch);
-    } else {
-      shell.modernDate.textContent = "(modern suffix unparseable)";
-    }
-  };
-  tick();
-  window.setInterval(tick, 1000);
+function seekTo(seconds: number): void {
+  document.dispatchEvent(new CustomEvent("airt:seek", { detail: { seconds } }));
 }
 
-/**
- * Wire the GET input + GO button. The input accepts "HHH:MM:SS" (with
- * an optional leading "-" for pre-launch) and "GO" dispatches a `seek`
- * `CustomEvent` on `document` so any registered panel can react. The
- * navigator renderer's `onSeek` callback also fires this event so all
- * sources stay aligned.
- */
-function wireGetInput(shell: ShellElements, currentSecondsRef: { value: number }): void {
-  const dispatchSeek = (seconds: number): void => {
-    currentSecondsRef.value = seconds;
-    shell.getInput.value = secondsToTimeStr(seconds);
-    document.dispatchEvent(new CustomEvent("airt:seek", { detail: { seconds } }));
-  };
+function wireGetInput(shell: ShellElements): void {
   shell.getButton.addEventListener("click", () => {
-    const raw = shell.getInput.value.trim();
-    const negative = raw.startsWith("-");
-    const body = negative ? raw.slice(1) : raw;
-    try {
-      const seconds = timeStrToSeconds(body) * (negative ? -1 : 1);
-      if (Number.isFinite(seconds)) dispatchSeek(seconds);
-    } catch (err) {
-      console.warn("[missionApp] bad GET input:", err);
-    }
+    const parsed = parseDeepLink(`?t=${encodeURIComponent(shell.getInput.value.trim())}`).seek;
+    const valid = parsed?.kind === "seconds";
+    shell.getInput.setCustomValidity(valid ? "" : "Enter a time such as 055:54:53 or -02:00:00.");
+    if (valid) seekTo(parsed.seconds);
+    else shell.getInput.reportValidity();
+  });
+  shell.getInput.addEventListener("input", () => {
+    shell.getInput.setCustomValidity("");
   });
   shell.getInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") shell.getButton.click();
@@ -215,18 +175,18 @@ async function startDashboardAutodisplay(
   ref: { value: number },
   state: OverlayState,
 ): Promise<void> {
-  let videos: VideoUrlData;
+  let videos: VideoSegmentsData;
   try {
-    videos = await loadVideoUrlData(`/${config.id}/`);
+    videos = await loadVideoSegmentData(`/${config.id}/`);
   } catch (err) {
     console.warn("[missionApp] failed to load video URLs for dashboard auto-display", err);
     return;
   }
   startTicker(ref, (seconds) => {
     if (state.dashboardManuallyToggled || !shell.searchOverlay.hidden) return;
-    const idx = findVideoUrlIndex(videos, seconds);
+    const idx = findVideoSegmentIndex(videos, seconds);
     if (idx >= 0) {
-      const segment = videos.entries[idx];
+      const segment = videos.segments[idx];
       if (!segment) return;
       if (state.lastVideoSegmentDashboardHidden !== segment.startSeconds) {
         state.lastVideoSegmentDashboardHidden = segment.startSeconds;
@@ -239,45 +199,81 @@ async function startDashboardAutodisplay(
   });
 }
 
-/**
- * Minimal YouTube embed surface. The player sits in the left-column
- * monitor underneath the dashboard overlay. When current GET enters a
- * `videoURLData.csv` range, load that video's iframe and seek to the
- * offset inside the segment; otherwise leave the last frame/blank player
- * behind the dashboard.
- */
+/** Keep video, shared GET and transport synchronized, including same-segment seeks. */
 async function mountVideoPlayer(
   config: MissionConfig,
   shell: ShellElements,
-  ref: { value: number },
+  ref: MissionPlayback,
 ): Promise<void> {
-  let data: VideoUrlData;
   try {
-    data = await loadVideoUrlData(`/${config.id}/`);
+    const [data, yt] = await Promise.all([
+      loadVideoUrlData(`/${config.id}/`),
+      loadYouTubeIframeApi(),
+    ]);
+    let player: YTPlayer | null = null;
+    let key = "";
+    let appliedPlaying: boolean | null = null;
+    let appliedMute: boolean | null = null;
+    const sync = (forceSeek = false): void => {
+      if (!player) return;
+      const seconds = ref.value;
+      const entry = data.entries[findVideoUrlIndex(data, seconds)];
+      if (!entry) {
+        player.pauseVideo();
+        key = "";
+        appliedPlaying = null;
+        return;
+      }
+      const nextKey = `${entry.videoId}:${String(entry.startSeconds)}`;
+      const offset = Math.max(0, seconds - entry.startSeconds);
+      if (nextKey !== key) {
+        key = nextKey;
+        if (ref.playing) player.loadVideoById(entry.videoId, offset);
+        else player.cueVideoById(entry.videoId, offset);
+        appliedPlaying = ref.playing;
+      } else if ((ref.playing || forceSeek) && Math.abs(player.getCurrentTime() - offset) > 2) {
+        player.seekTo(offset, true);
+      }
+      if (appliedPlaying !== ref.playing) {
+        if (ref.playing) player.playVideo();
+        else player.pauseVideo();
+        appliedPlaying = ref.playing;
+      }
+      const mute = ref.muted || ref.mocrActive;
+      if (mute !== appliedMute) {
+        if (mute) player.mute();
+        else player.unMute();
+        appliedMute = mute;
+      }
+    };
+    new yt.Player("player", {
+      width: "100%",
+      height: "100%",
+      playerVars: { playsinline: 1, controls: 0, rel: 0, origin: window.location.origin },
+      events: {
+        onReady: (event: { target: YTPlayer }): void => {
+          player = event.target;
+          sync();
+          document.addEventListener("airt:seek", () => {
+            sync(true);
+          });
+          document.addEventListener("airt:transport", () => {
+            sync();
+          });
+          window.setInterval(() => {
+            sync();
+          }, 1000);
+        },
+        onError: (): void => {
+          shell.playerWrapper.dataset.mediaError = "true";
+        },
+      },
+    });
   } catch (err) {
-    console.warn("[missionApp] failed to load video URL data", err);
-    return;
+    console.warn("[missionApp] video unavailable", err);
+    shell.player.textContent =
+      "Video is unavailable. The mission timeline and historical material remain accessible.";
   }
-
-  let lastVideoKey = "";
-  startTicker(ref, (seconds) => {
-    const idx = findVideoUrlIndex(data, seconds);
-    if (idx < 0) return;
-    const entry = data.entries[idx];
-    if (!entry || entry.videoId === "") return;
-    const startOffset = Math.max(0, Math.floor(seconds - entry.startSeconds));
-    // Only rebuild when changing segment/video. Avoid resetting playback
-    // once a second while still inside the same segment.
-    const key = `${entry.videoId}:${String(entry.startSeconds)}`;
-    if (key === lastVideoKey) return;
-    lastVideoKey = key;
-    const src = new URL(`https://www.youtube.com/embed/${encodeURIComponent(entry.videoId)}`);
-    src.searchParams.set("start", String(startOffset));
-    src.searchParams.set("autoplay", "1");
-    src.searchParams.set("mute", "1");
-    src.searchParams.set("playsinline", "1");
-    shell.player.innerHTML = `<iframe title="Mission video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen src="${src.toString()}"></iframe>`;
-  });
 }
 
 /**
@@ -323,18 +319,21 @@ async function mountNavigator(
 
   // Load the four overlay datasets concurrently.
   const baseUrl = `/${config.id}/`;
-  const [stagesResult, videoSegmentsResult, photosResult, tocResult] = await Promise.allSettled([
-    loadMissionStagesData(baseUrl, { missionDurationSeconds: config.missionDurationSeconds }),
-    loadVideoSegmentData(baseUrl),
-    loadPhotoData(baseUrl),
-    loadTocData(baseUrl),
-  ]);
+  const [stagesResult, videoSegmentsResult, photosResult, tocResult, utterancesResult] =
+    await Promise.allSettled([
+      loadMissionStagesData(baseUrl, { missionDurationSeconds: config.missionDurationSeconds }),
+      loadVideoSegmentData(baseUrl),
+      loadPhotoData(baseUrl),
+      loadTocData(baseUrl),
+      loadUtteranceData(baseUrl),
+    ]);
 
   const overlays: NavigatorOverlays = {
     ...(stagesResult.status === "fulfilled" && { stages: stagesResult.value }),
     ...(videoSegmentsResult.status === "fulfilled" && { videoSegments: videoSegmentsResult.value }),
     ...(photosResult.status === "fulfilled" && { photos: photosResult.value }),
     ...(tocResult.status === "fulfilled" && { toc: tocResult.value }),
+    ...(utterancesResult.status === "fulfilled" && { utterances: utterancesResult.value }),
   };
 
   const renderer = new NavigatorRenderer(paper, {
@@ -349,10 +348,9 @@ async function mountNavigator(
   });
   renderer.mount(shell.navCanvas);
 
-  renderer.render(currentSecondsRef.value);
-  window.setInterval(() => {
-    renderer.render(currentSecondsRef.value);
-  }, 1000);
+  startTicker(currentSecondsRef, (seconds) => {
+    renderer.render(seconds);
+  });
 }
 
 /**
@@ -365,6 +363,8 @@ function startTicker(currentSecondsRef: { value: number }, cb: (seconds: number)
     cb(currentSecondsRef.value);
   };
   tick();
+  document.addEventListener("airt:seek", tick);
+  document.addEventListener("airt:transport", tick);
   window.setInterval(tick, 1000);
 }
 
@@ -386,7 +386,7 @@ async function mountTranscriptPanel(
     container: shell.transcriptWrapper,
     data,
     onSeek: (timeId) => {
-      console.warn("[missionApp] transcript seek", timeId);
+      seekTo(timeIdToSeconds(timeId));
     },
   });
   let last: string | null = null;
@@ -416,7 +416,7 @@ async function mountTocPanel(
     container: shell.tocWrapper,
     data: toc,
     onSeek: (timeId) => {
-      console.warn("[missionApp] TOC seek", timeId);
+      seekTo(timeIdToSeconds(timeId));
     },
   });
   let last: string | null = null;
@@ -446,7 +446,7 @@ async function mountCommentaryPanel(
     container: shell.commentaryWrapper,
     data,
     onSeek: (timeId) => {
-      console.warn("[missionApp] commentary seek", timeId);
+      seekTo(timeIdToSeconds(timeId));
     },
   });
   let last: string | null = null;
@@ -487,7 +487,12 @@ function photoResolverFor(config: MissionConfig): PhotoUrlResolver {
       const parts = parseAsRollImg(entry.photoId, "11");
       if (parts) {
         const thumb = `${lpi}/resources/apollo/images/thumb/AS11/${parts.rollNum}/${parts.imgNum}.jpg`;
-        return { thumb, full: thumb };
+        const full =
+          entry.filename !== ""
+            ? `${mediaRoot}/images/NASA_photos/${entry.filename}`
+            : entry.supportingFilename ||
+              `${lpi}/resources/apollo/images/print/AS11/${parts.rollNum}/${parts.imgNum}.jpg`;
+        return { thumb, full };
       }
       if (entry.supportingFilename !== "") {
         return {
@@ -516,6 +521,7 @@ async function mountPhotoPanel(
   shell: ShellElements,
   ref: { value: number },
 ): Promise<void> {
+  const initialSeekRevision = seekRevision;
   let data: PhotoData;
   try {
     data = await loadPhotoData(`/${config.id}/`);
@@ -529,9 +535,12 @@ async function mountPhotoPanel(
     data,
     resolveUrls: photoResolverFor(config),
     onSeek: (timeId) => {
-      console.warn("[missionApp] photo seek", timeId);
+      seekTo(timeIdToSeconds(timeId));
     },
   });
+  const requestedPhoto = new URLSearchParams(window.location.search).get("img");
+  const linkedPhoto = data.entries.find((entry) => entry.photoId === requestedPhoto);
+  if (linkedPhoto && seekRevision === initialSeekRevision) seekTo(linkedPhoto.seconds);
   let last: string | null = null;
   startTicker(ref, (seconds) => {
     const idx = findClosestPhotoIndex(data, seconds);
@@ -589,6 +598,15 @@ async function mountDashboardPanel(
   startTicker(ref, (seconds) => {
     panel.update(seconds);
   });
+  if (config.id === "17") {
+    const host = document.createElement("div");
+    shell.dashboardContent.append(host);
+    const mod = await import("../panels/biometrics/index.js");
+    const biometrics = await mod.createBiometricsPanel({ container: host });
+    startTicker(ref, (seconds) => {
+      biometrics.update(seconds);
+    });
+  }
 }
 
 async function mountSearchPanel(config: MissionConfig, shell: ShellElements): Promise<void> {
@@ -605,131 +623,153 @@ async function mountSearchPanel(config: MissionConfig, shell: ShellElements): Pr
       ...(photoR.status === "fulfilled" && { photos: photoR.value }),
     },
     onResult: (item) => {
-      console.warn("[missionApp] search pick", item);
+      seekTo(timeIdToSeconds(item.timeId));
+      shell.searchOverlay.hidden = true;
+      shell.searchBtn.classList.remove("is-active");
     },
   });
 }
 
-function renderChannelStrip(
+function mountMocrvizPanel(
   config: MissionConfig,
   shell: ShellElements,
-  panel: MocrvizPanel | null,
+  ref: MissionPlayback,
+  initialChannel: number | null,
 ): void {
   const catalog = channelsFor(config.id);
-  shell.channelGrid.textContent = "";
-  if (catalog === null) {
+  if (!catalog || (config.id !== "11" && config.id !== "13")) {
     shell.channelGrid.parentElement?.setAttribute("hidden", "");
     return;
   }
-
-  // Build a lookup map for fast access by id.
-  const infoById = new Map<number, ChannelInfo>(catalog.all.map((c) => [c.id, c]));
-  const buttons = new Map<number, HTMLButtonElement>();
-
-  // Render only the available channels, in the production display order
-  // (available array encodes that order). Redacted channels are omitted
-  // entirely — production HTML does not show them at all.
-  for (const chId of catalog.available) {
-    const info = infoById.get(chId);
-    if (!info) continue;
-    const wrap = document.createElement("div");
-    wrap.className = "buttondiv";
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.id = `btn-ch${String(info.id)}`;
-    btn.className = "thirtybtn-channel";
-    btn.textContent = info.label;
-    btn.title = info.description.length > 0 ? `${info.label}: ${info.description}` : info.label;
-    if (info.id === catalog.defaultChannel) btn.classList.add("is-active");
-    btn.addEventListener("click", () => {
-      if (panel === null) return;
-      panel.setChannel(info.id);
-      for (const [id, button] of buttons) button.classList.toggle("is-active", id === info.id);
-    });
-    wrap.append(btn);
-    shell.channelGrid.append(wrap);
-    buttons.set(info.id, btn);
-  }
-}
-
-async function mountMocrvizPanel(
-  config: MissionConfig,
-  shell: ShellElements,
-  ref: { value: number },
-  initialChannel: number | null,
-): Promise<void> {
-  if (config.features?.mocrviz !== true) {
-    renderChannelStrip(config, shell, null);
-    return;
-  }
-  if (config.id !== "11" && config.id !== "13") {
-    renderChannelStrip(config, shell, null);
-    return;
-  }
-
-  // Render the production middle-strip immediately; audio-panel loading is
-  // allowed to lag/fail without leaving the layout empty.
-  renderChannelStrip(config, shell, null);
-
-  let mod: typeof import("../panels/mocrviz/index.js");
-  try {
-    mod = await import("../panels/mocrviz/index.js");
-  } catch (err) {
-    console.warn("[missionApp] failed to import MOCRviz panel", err);
-    return;
-  }
-  const audioRoot = `/${config.id}/MOCRviz/MOCR_audio`;
-  let panel: MocrvizPanel | null;
-  try {
-    panel = await mod.createMocrvizPanel({
-      container: shell.mocrvizHost,
-      mission: config.id,
-      mediaRoot: `/${config.id}/`,
-      audioRoot,
-    });
-  } catch (err) {
-    shell.mocrvizHost.textContent = `failed to load MOCRviz: ${String(err)}`;
-    return;
-  }
-  if (panel === null) return;
-
-  // Production default is Photography; MOCR audio is a right-column tab.
-  shell.mocrvizHost.hidden = true;
-  renderChannelStrip(config, shell, panel);
-
-  // Apply `?ch=N` deep link: select the requested channel on load.
-  if (initialChannel !== null) {
-    panel.setChannel(initialChannel);
-    // Update button highlights to reflect the deep-linked channel.
-    const buttons = shell.channelGrid.querySelectorAll<HTMLButtonElement>(".thirtybtn-channel");
-    const catalog = channelsFor(config.id);
-    if (catalog) {
-      for (const btn of buttons) {
-        const id = parseInt(btn.id.replace("btn-ch", ""), 10);
-        btn.classList.toggle("is-active", id === initialChannel);
-      }
-    }
-  }
-
+  const mission = config.id;
   const photoTab = document.getElementById("photoTab");
   const mocrTab = document.getElementById("mocrTab");
+  const spacecraftTab = document.getElementById(mission === "11" ? "samplesTab" : "spacecraftTab");
+  const spacecraftHost = document.getElementById(
+    mission === "11" ? "samples-host" : "spacecraft-host",
+  );
+  let spacecraft: { setVisible: (visible: boolean) => void } | null = null;
+  let spacecraftVisible = false;
+  let auxiliaryLoading: Promise<void> | null = null;
+  spacecraftTab?.addEventListener("click", () => {
+    show(false);
+    spacecraftVisible = true;
+    shell.photoDiv.hidden = true;
+    shell.photoGallery.hidden = true;
+    photoTab?.classList.remove("is-active");
+    spacecraftTab.classList.add("is-active");
+    if (spacecraft) spacecraft.setVisible(true);
+    else if (spacecraftHost && !auxiliaryLoading) {
+      spacecraftHost.hidden = false;
+      spacecraftHost.textContent = "Loading...";
+      auxiliaryLoading = (async (): Promise<void> => {
+        try {
+          spacecraft =
+            mission === "11"
+              ? await (
+                  await import("../panels/samples/index.js")
+                ).createSamplesPanel(spacecraftHost, { onSeek: seekTo })
+              : (await import("../panels/spacecraft/index.js")).mountSpacecraftPanel(
+                  spacecraftHost,
+                );
+          spacecraft.setVisible(spacecraftVisible);
+        } catch (error) {
+          console.warn("Mission information could not be loaded", error);
+          spacecraftHost.textContent =
+            "This information could not be loaded. Reopen the tab to retry.";
+          auxiliaryLoading = null;
+        }
+      })();
+    }
+  });
+  let panel: MocrvizPanel | null = null;
+  let mounting: Promise<void> | null = null;
+  let selected =
+    initialChannel !== null && catalog.available.includes(initialChannel)
+      ? initialChannel
+      : catalog.defaultChannel;
+  const buttons = new Map<number, HTMLButtonElement>();
+  const highlight = (channel: number): void => {
+    selected = channel;
+    for (const [id, button] of buttons) {
+      button.classList.toggle("is-active", id === channel && ref.mocrActive);
+      button.setAttribute("aria-pressed", String(id === channel && ref.mocrActive));
+    }
+  };
+  const tick = (): void => {
+    panel?.setMuted(ref.muted);
+    panel?.setClock(ref.value, ref.playing && ref.mocrActive);
+  };
+  const mount = async (): Promise<void> => {
+    shell.mocrvizHost.textContent = "Loading Mission Control recordings...";
+    try {
+      const mod = await import("../panels/mocrviz/index.js");
+      panel = await mod.createMocrvizPanel({
+        container: shell.mocrvizHost,
+        mission,
+        mediaRoot: `/${mission}/`,
+        audioRoot: `${config.mediaRoot}/MOCR_audio`,
+        countdownSeconds: config.countdownSeconds,
+        onSeek: seekTo,
+        onChannelChange: highlight,
+        onPlayingChange: (playing) => {
+          document.dispatchEvent(new CustomEvent("airt:playing", { detail: playing }));
+        },
+      });
+      panel?.setChannel(selected);
+      tick();
+    } catch (error) {
+      console.warn("Mission Control unavailable", error);
+      shell.mocrvizHost.textContent =
+        "Mission Control recordings could not be loaded. Reopen this tab to try again.";
+      mounting = null;
+    }
+  };
+  const show = (visible: boolean): void => {
+    spacecraftVisible = false;
+    spacecraft?.setVisible(false);
+    if (spacecraftHost) spacecraftHost.hidden = true;
+    spacecraftTab?.classList.remove("is-active");
+    ref.mocrActive = visible;
+    shell.mocrvizHost.hidden = !visible;
+    shell.photoDiv.hidden = visible;
+    shell.photoGallery.hidden = visible;
+    photoTab?.classList.toggle("is-active", !visible);
+    mocrTab?.classList.toggle("is-active", visible);
+    photoTab?.setAttribute("aria-selected", String(!visible));
+    mocrTab?.setAttribute("aria-selected", String(visible));
+    highlight(selected);
+    if (visible && !mounting) mounting = mount();
+    tick();
+    document.dispatchEvent(new Event("airt:transport"));
+  };
+  for (const id of catalog.available) {
+    const info = catalog.all.find((channel) => channel.id === id);
+    if (!info) continue;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.id = `btn-ch${String(id)}`;
+    button.className = "thirtybtn-channel";
+    button.textContent = info.label;
+    button.title = `${info.label}: ${info.description}`;
+    button.addEventListener("click", () => {
+      selected = id;
+      show(true);
+      panel?.setChannel(id);
+      tick();
+    });
+    shell.channelGrid.append(button);
+    buttons.set(id, button);
+  }
   photoTab?.addEventListener("click", () => {
-    shell.mocrvizHost.hidden = true;
-    photoTab.classList.add("is-active");
-    mocrTab?.classList.remove("is-active");
+    show(false);
   });
   mocrTab?.addEventListener("click", () => {
-    shell.mocrvizHost.hidden = false;
-    mocrTab.classList.add("is-active");
-    photoTab?.classList.remove("is-active");
+    show(true);
   });
-
-  startTicker(ref, (seconds) => {
-    panel.setClock(seconds, !shell.mocrvizHost.querySelector<HTMLAudioElement>("audio")?.paused);
-  });
+  startTicker(ref, tick);
+  if (initialChannel !== null) show(true);
 }
-
-// ── debug readout (?debug=1) ──────────────────────────────────────────────────
 
 async function mountDebugReadout(
   config: MissionConfig,
@@ -818,61 +858,91 @@ ready(() => {
   if (!config) return;
   window.MISSION = config;
 
-  // Shared seconds reference — the navigator, GET input, and every panel
-  // ticker read from / write to this single mutable cell.
-  const historicEpoch = Date.parse(config.launchDate);
-  const currentSecondsRef = {
-    value: Number.isFinite(historicEpoch) ? Math.trunc((Date.now() - historicEpoch) / 1000) : 0,
-  };
-
-  const liveModeRef = { value: true };
-
-  // Deep-link params (`?t=HHH:MM:SS`, `?t=rt`, `?ch=N`). Mirrors legacy
-  // `initializePlayback`. A `t=` seek pins the ref and disables live
-  // mode so manual visual QA and Playwright diffs land on a stable GET.
   const deepLink = parseDeepLink(window.location.search);
-  if (deepLink.seek?.kind === "seconds") {
-    currentSecondsRef.value = deepLink.seek.seconds;
-    liveModeRef.value = false;
+  const initialGet =
+    deepLink.seek?.kind === "seconds"
+      ? deepLink.seek.seconds
+      : timeIdToSeconds(config.defaultStartTimeId);
+  const currentSecondsRef = new MissionPlayback(
+    initialGet,
+    -config.countdownSeconds,
+    config.missionDurationSeconds,
+  );
+  if (deepLink.seek?.kind === "rt") {
+    currentSecondsRef.value = realtimeGet(Date.parse(config.launchDate), initialGet);
   }
-
-  // Listen for `airt:seek` from any source (GET input, navigator, future
-  // deep-link parser) and rebroadcast it back into the seconds ref so
-  // tickers pick it up on next interval. Manual seeks intentionally exit
-  // live wall-clock mode; otherwise the next 1-Hz tick immediately snaps
-  // back to today's historic clock and makes visual QA impossible.
-  document.addEventListener("airt:seek", (e) => {
-    const seconds = (e as CustomEvent<{ seconds: number }>).detail.seconds;
-    if (Number.isFinite(seconds)) {
-      currentSecondsRef.value = seconds;
-      liveModeRef.value = false;
-    }
-  });
-
-  // Auto-advance the ref from the historic-launch wall clock only while
-  // in live mode. A future #realtimeBtn will restore `liveModeRef.value`.
-  if (Number.isFinite(historicEpoch)) {
-    window.setInterval(() => {
-      if (liveModeRef.value) {
-        currentSecondsRef.value = Math.trunc((Date.now() - historicEpoch) / 1000);
-      }
-    }, 1000);
-  }
-
   const shell = renderShell(config);
-  // If a deep-link `?t=` pinned a specific GET, reflect it in the input
-  // immediately so the user/test can see the intent. Without this the
-  // input keeps its `defaultStartTimeId`-derived placeholder until the
-  // first tick lands.
-  if (deepLink.seek?.kind === "seconds") {
-    shell.getInput.value = secondsToTimeStr(deepLink.seek.seconds);
-  }
-  startClock(config, shell);
-  wireGetInput(shell, currentSecondsRef);
+  document.addEventListener("airt:seek", (event) => {
+    seekRevision++;
+    currentSecondsRef.value = (event as CustomEvent<{ seconds: number }>).detail.seconds;
+    shell.getInput.value = secondsToTimeStr(currentSecondsRef.value);
+  });
+  startClock(config, shell, currentSecondsRef);
+  wireGetInput(shell);
   wireTabs(shell);
   const overlayState = wireOverlays(shell);
   setActiveTab(shell, "transcript");
-
+  const transport = (): void => {
+    const play = document.getElementById("playPauseBtn");
+    if (play) {
+      play.textContent = currentSecondsRef.playing ? "Ⅱ" : "▶";
+      play.setAttribute("aria-label", currentSecondsRef.playing ? "Pause" : "Play");
+      play.setAttribute("aria-pressed", String(currentSecondsRef.playing));
+    }
+    const sound = document.getElementById("soundBtn");
+    sound?.setAttribute("aria-pressed", String(currentSecondsRef.muted));
+    if (sound) sound.textContent = currentSecondsRef.muted ? "MUTE" : "SND";
+    document.dispatchEvent(new Event("airt:transport"));
+  };
+  document.getElementById("playPauseBtn")?.addEventListener("click", () => {
+    currentSecondsRef.setPlaying(!currentSecondsRef.playing);
+    transport();
+  });
+  document.getElementById("videoPlaybackBtn")?.addEventListener("click", () => {
+    currentSecondsRef.setPlaying(!currentSecondsRef.playing);
+    transport();
+  });
+  document.getElementById("soundBtn")?.addEventListener("click", () => {
+    currentSecondsRef.muted = !currentSecondsRef.muted;
+    transport();
+  });
+  document.getElementById("realtimeBtn")?.addEventListener("click", () => {
+    seekTo(realtimeGet(Date.parse(config.launchDate), currentSecondsRef.value));
+    currentSecondsRef.setPlaying(true);
+    transport();
+  });
+  document.getElementById("fullscreenBtn")?.addEventListener("click", () => {
+    const action = document.fullscreenElement
+      ? document.exitFullscreen()
+      : shell.root.requestFullscreen();
+    void action.catch((error: unknown) => {
+      console.warn("Fullscreen unavailable", error);
+    });
+  });
+  document.getElementById("shareBtn")?.addEventListener("click", () => {
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.searchParams.set("t", secondsToTimeStr(currentSecondsRef.value));
+    const selected = shell.channelGrid.querySelector(".is-active");
+    if (currentSecondsRef.mocrActive && selected)
+      url.searchParams.set("ch", selected.id.replace("btn-ch", ""));
+    const input = document.getElementById("shareUrl");
+    const dialog = document.getElementById("shareDialog");
+    if (input instanceof HTMLInputElement && dialog instanceof HTMLDialogElement) {
+      input.value = url.toString();
+      dialog.showModal();
+      input.select();
+    }
+  });
+  document.getElementById("aboutBtn")?.addEventListener("click", () => {
+    const dialog = document.getElementById("aboutDialog");
+    if (dialog instanceof HTMLDialogElement) dialog.showModal();
+  });
+  document.addEventListener("airt:playing", (event) => {
+    currentSecondsRef.setPlaying((event as CustomEvent<boolean>).detail);
+    transport();
+  });
+  transport();
   void mountNavigator(config, shell, currentSecondsRef);
   void mountVideoPlayer(config, shell, currentSecondsRef);
   void mountTranscriptPanel(config, shell, currentSecondsRef);
@@ -882,8 +952,6 @@ ready(() => {
   void mountDashboardPanel(config, shell, currentSecondsRef);
   void startDashboardAutodisplay(config, shell, currentSecondsRef, overlayState);
   void mountSearchPanel(config, shell);
-  void mountMocrvizPanel(config, shell, currentSecondsRef, deepLink.channel);
+  mountMocrvizPanel(config, shell, currentSecondsRef, deepLink.channel);
   void mountDebugReadout(config, shell, currentSecondsRef);
-
-  console.warn(`[missionApp] ${config.name} (${id}) ready (debug=${String(shell.debugVisible)})`);
 });
