@@ -1,13 +1,20 @@
-﻿import { secondsToTimeStr } from "../../shell/clock.js";
+import { secondsToTimeStr } from "../../shell/clock.js";
 import { waveformPeak, type WaveformData } from "./data.js";
 
+/** Geometry from the original Paper.js MOCRviz canvas. */
 export const TIMELINE = {
-  labelWidth: 74,
-  top: 22,
-  rowHeight: 4,
-  halfWindow: 180,
-  waveformHeight: 78,
+  height: 350,
+  rowHeight: 5,
+  channelStroke: 4,
+  waveformCenter: 235,
+  waveformHeight: 100,
 };
+
+export interface TimelineHover {
+  x: number;
+  channel: number;
+  seconds: number;
+}
 
 export interface TimelineState {
   seconds: number;
@@ -19,13 +26,30 @@ export interface TimelineState {
   tapeStart: number;
   activityMessage: string;
   waveformMessage: string;
+  hoveredChannel: number | null;
+  hover: TimelineHover | null;
+}
+
+/** The legacy activity plot uses one horizontal CSS pixel per mission second. */
+export function activityTimeAtX(x: number, width: number, seconds: number): number {
+  return seconds + x - width / 2;
+}
+
+/** The waveform retains its native audiowaveform scale, as the original did. */
+export function waveformTimeAtX(
+  x: number,
+  width: number,
+  seconds: number,
+  waveform: WaveformData | null,
+): number {
+  if (!waveform) return activityTimeAtX(x, width, seconds);
+  return seconds + (x - width / 2) * (waveform.samplesPerPixel / waveform.sampleRate);
 }
 
 export function drawTimeline(canvas: HTMLCanvasElement, state: TimelineState): void {
   const width = Math.round(canvas.getBoundingClientRect().width);
-  if (width === 0) return; // Hidden tab: ResizeObserver draws when it opens.
-  const height =
-    TIMELINE.top + state.channels.length * TIMELINE.rowHeight + TIMELINE.waveformHeight + 26;
+  if (width === 0) return;
+  const height = TIMELINE.height;
   const ratio = window.devicePixelRatio || 1;
   canvas.width = Math.round(width * ratio);
   canvas.height = Math.round(height * ratio);
@@ -33,84 +57,107 @@ export function drawTimeline(canvas: HTMLCanvasElement, state: TimelineState): v
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
   ctx.scale(ratio, ratio);
-  ctx.fillStyle = "#080808";
+  ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, width, height);
-  const startX = TIMELINE.labelWidth;
-  const plotWidth = Math.max(1, width - startX - 8);
-  const span = TIMELINE.halfWindow * 2;
-  const start = state.seconds - TIMELINE.halfWindow;
-  const scale = plotWidth / span;
-  ctx.font = '10px "Roboto Mono", monospace';
-  ctx.textBaseline = "middle";
-  const waveY = TIMELINE.top + state.channels.length * TIMELINE.rowHeight + 16;
+
+  const start = state.seconds - width / 2;
   for (let row = 0; row < state.channels.length; row++) {
     const channel = state.channels[row];
-    const y = TIMELINE.top + row * TIMELINE.rowHeight;
-    ctx.fillStyle = channel === state.channel ? "#214557" : "#242424";
-    ctx.fillRect(startX, y, plotWidth, 3);
+    const y = row * TIMELINE.rowHeight;
+    ctx.fillStyle = channel === state.channel ? "#214557" : "#292929";
+    ctx.fillRect(0, y, width, TIMELINE.channelStroke);
   }
+
   // An empty array is known silence; undefined means no recording data loaded.
-  for (let second = Math.floor(start); second <= start + span; second++) {
+  for (let second = Math.floor(start); second <= start + width; second++) {
     const active = state.activityAt(second);
     if (!active) continue;
-    const x = startX + (second - start) * scale;
+    const x = second - start;
     for (let row = 0; row < state.channels.length; row++) {
-      const ch = state.channels[row];
-      if (ch !== undefined && active.includes(ch)) {
-        ctx.fillStyle = ch === state.channel ? "#7cb7e0" : "#737373";
-        ctx.fillRect(x, TIMELINE.top + row * TIMELINE.rowHeight, Math.max(1, scale), 3);
+      const channel = state.channels[row];
+      if (channel !== undefined && active.includes(channel)) {
+        ctx.fillStyle = channel === state.channel ? "#7cb7e0" : "#636363";
+        ctx.fillRect(x, row * TIMELINE.rowHeight, 1.25, TIMELINE.channelStroke);
       }
     }
   }
-  const selectedRow = state.channels.indexOf(state.channel);
-  const selectedY = TIMELINE.top + selectedRow * TIMELINE.rowHeight;
-  ctx.fillStyle = "#7cb7e0";
-  ctx.fillText(
-    state.labels.get(state.channel) ?? String(state.channel),
-    3,
-    selectedY + 2,
-    startX - 6,
-  );
-  ctx.fillStyle = "#909090";
-  ctx.fillText("CHANNELS", 3, 10);
-  ctx.fillText("WAVEFORM", 3, waveY + TIMELINE.waveformHeight / 2);
-  const middleY = waveY + TIMELINE.waveformHeight / 2;
-  ctx.fillStyle = "#252525";
-  ctx.fillRect(startX, middleY, plotWidth, 1);
-  if (state.waveform) {
+
+  const waveRate = state.waveform ? state.waveform.sampleRate / state.waveform.samplesPerPixel : 0;
+  const middleY = TIMELINE.waveformCenter;
+  if (state.waveform && waveRate > 0) {
     ctx.strokeStyle = "#7cb7e0";
+    ctx.lineWidth = 0.8;
     ctx.beginPath();
-    for (let x = 0; x < plotWidth; x++) {
-      const t = start + x / scale - state.tapeStart;
-      const peak = waveformPeak(state.waveform, t, t + 1 / scale);
+    for (let x = 0; x < width; x++) {
+      const tapeSecond = state.seconds - state.tapeStart + (x - width / 2) / waveRate;
+      const peak = waveformPeak(state.waveform, tapeSecond, tapeSecond + 1 / waveRate);
       if (!peak) continue;
-      ctx.moveTo(startX + x, middleY - peak[1] * 34);
-      ctx.lineTo(startX + x, middleY - peak[0] * 34);
+      ctx.moveTo(x, middleY - peak[1] * (TIMELINE.waveformHeight / 2));
+      ctx.lineTo(x, middleY - peak[0] * (TIMELINE.waveformHeight / 2));
     }
     ctx.stroke();
-  } else {
-    ctx.fillStyle = "#969696";
-    ctx.fillText(state.waveformMessage, startX + 8, middleY - 12, plotWidth - 16);
+  } else if (state.waveformMessage) {
+    ctx.fillStyle = "#777";
+    ctx.font = '10px "Roboto Mono", monospace';
+    ctx.fillText(state.waveformMessage, 10, middleY + 4, width - 20);
   }
-  for (const fraction of [0, 0.5, 1]) {
-    const x = startX + plotWidth * fraction;
-    ctx.textAlign = fraction === 0 ? "left" : fraction === 1 ? "right" : "center";
-    ctx.fillStyle = fraction === 0.5 ? "#f29b92" : "#aaa";
-    ctx.fillText(secondsToTimeStr(start + span * fraction), x, 10);
+
+  ctx.font = 'bold 12px "Roboto Mono", monospace';
+  ctx.fillStyle = "#ddd";
+  ctx.fillText(state.labels.get(state.channel) ?? String(state.channel), 10, height - 75);
+
+  if (state.activityMessage) {
+    ctx.font = '10px "Roboto Mono", monospace';
+    ctx.fillStyle = "#777";
+    ctx.fillText(state.activityMessage, 10, height - 48, width - 20);
   }
-  ctx.textAlign = "left";
-  ctx.fillStyle = "#aaa";
-  if (state.activityMessage)
-    ctx.fillText(state.activityMessage, startX + 8, waveY - 7, plotWidth - 16);
+
+  // The real playhead remains centered while the recording moves beneath it.
+  const center = Math.round(width / 2) + 0.5;
   ctx.strokeStyle = "#e45a51";
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(startX + plotWidth / 2, 19);
-  ctx.lineTo(startX + plotWidth / 2, height - 4);
+  ctx.moveTo(center, 0);
+  ctx.lineTo(center, height - 10);
   ctx.stroke();
+
+  const currentLabel = secondsToTimeStr(state.seconds);
+  ctx.font = 'bold 12px "Roboto Mono", monospace';
+  const currentWidth = ctx.measureText(currentLabel).width;
+  const currentX = center - currentWidth / 2;
+  ctx.fillStyle = "#000";
+  ctx.strokeStyle = "#e45a51";
+  ctx.fillRect(currentX - 4, height - 25, currentWidth + 8, 19);
+  ctx.strokeRect(currentX - 4, height - 25, currentWidth + 8, 19);
+  ctx.fillStyle = "#e45a51";
+  ctx.fillText(currentLabel, currentX, height - 10);
+
+  if (state.hoveredChannel !== null) drawHover(ctx, width, state);
 }
 
-export function timelineSeek(x: number, width: number, seconds: number): number {
-  const plotWidth = Math.max(1, width - TIMELINE.labelWidth - 8);
-  const fraction = Math.max(0, Math.min(1, (x - TIMELINE.labelWidth) / plotWidth));
-  return seconds + (fraction - 0.5) * TIMELINE.halfWindow * 2;
+function drawHover(ctx: CanvasRenderingContext2D, width: number, state: TimelineState): void {
+  const channel = state.hoveredChannel;
+  if (channel === null) return;
+  const row = state.channels.indexOf(channel);
+  if (row < 0) return;
+  const y = row * TIMELINE.rowHeight;
+  ctx.fillStyle = "rgba(146, 211, 255, 0.6)";
+  ctx.fillRect(0, y, width, TIMELINE.channelStroke);
+
+  const hover = state.hover;
+  if (!hover) return;
+  const title = `ch${String(channel)} ${state.labels.get(channel) ?? ""}`.trim();
+  const time = secondsToTimeStr(hover.seconds);
+  ctx.font = 'bold 11px "Roboto Mono", monospace';
+  const boxWidth = Math.max(ctx.measureText(title).width, ctx.measureText(time).width) + 10;
+  const boxHeight = 34;
+  const boxX = Math.max(2, Math.min(width - boxWidth - 2, hover.x + 20));
+  const boxY = Math.max(2, Math.min(TIMELINE.height - boxHeight - 2, y + 8));
+  ctx.fillStyle = "#000";
+  ctx.strokeStyle = "#ddd";
+  ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+  ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+  ctx.fillStyle = "#ddd";
+  ctx.fillText(title, boxX + 5, boxY + 13);
+  ctx.fillText(time, boxX + 5, boxY + 27);
 }

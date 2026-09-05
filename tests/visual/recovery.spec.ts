@@ -96,7 +96,7 @@ for (const mission of ["11", "13"]) {
     await expect(page.locator(".mocrviz-room-image")).toBeVisible();
     await expect(page.locator(".mocrviz-timeline")).toBeVisible();
     await page.locator("#btn-ch50").click();
-    await expect(page.locator(".mocrviz-channel-name")).toContainText("CH 50");
+    await expect(page.locator(".mocrviz-channel-name")).toHaveText("FLIGHT");
     await expect(page.locator("#btn-ch50")).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator(".mocrviz-audio")).toHaveAttribute(
       "src",
@@ -190,6 +190,45 @@ for (const mission of ["11", "13"]) {
     });
   }
 }
+
+test("recovery MOCR timeline previews channel and GET before seeking smoothly", async ({
+  page,
+}) => {
+  await page.goto("/13/?t=055:54:53&ch=14");
+  const canvas = page.locator(".mocrviz-timeline");
+  await expect(canvas).toBeVisible();
+  await page.getByRole("button", { name: "ABOUT", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "About This Mission Control Audio", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "SEARCH", exact: true }).click();
+  const channelSearch = page.getByRole("searchbox", { name: "Search this channel transcript" });
+  await expect(channelSearch).toBeVisible();
+  await channelSearch.fill("Doesn't matter");
+  await expect(page.locator(".mocrviz-utterance").first()).toContainText("Doesn't matter");
+  await page.getByRole("button", { name: "TRANSCRIPT", exact: true }).click();
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error("MOCR timeline has no layout box");
+
+  // Channel 21 is row 17 in the original sorted activity-channel order.
+  await page.mouse.move(box.x + box.width / 2 + 60, box.y + 17 * 5 + 2);
+  await expect(canvas).toHaveAttribute("data-hover-channel", "21");
+  await expect(canvas).toHaveAttribute("data-hover-get", "055:55:53");
+  await expect(page.locator("#btn-ch21")).toHaveClass(/is-hovered/);
+  await expect(page.locator('.mocrviz-console[data-channel-id="21"]')).toHaveClass(/is-hovered/);
+  await expect(page.locator("#missionElapsedTime")).toHaveValue("055:54:53");
+
+  const initialFrame = Number(await canvas.getAttribute("data-current-seconds"));
+  await page.locator("#playPauseBtn").click();
+  await expect
+    .poll(async () => Number(await canvas.getAttribute("data-current-seconds")), { timeout: 700 })
+    .toBeGreaterThan(initialFrame + 0.1);
+  await page.locator("#playPauseBtn").click();
+
+  await page.mouse.click(box.x + box.width / 2 + 60, box.y + 17 * 5 + 2);
+  await expect(page.locator("#missionElapsedTime")).toHaveValue("055:55:53");
+  await expect(page.locator("#btn-ch21")).toHaveAttribute("aria-pressed", "true");
+});
 
 for (const width of [1440, 768, 390]) {
   test(`recovery production landing at ${String(width)}`, async ({ page }) => {

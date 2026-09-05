@@ -2,11 +2,15 @@
 
 ## Resume here
 
-**2026-09-05: planning docs consolidated. No production cutover.** The local
-recovery scope is complete. The planning set now contains only the current
-product/architecture contracts, current evidence, remaining release sequence,
-preservation rules, and deferred ingestion scope. Next, run the long-session
-media resilience work in [05-migration-plan.md](05-migration-plan.md).
+**2026-09-05: MOCRviz interaction parity restored. No production cutover.**
+Apollo 11/13 now use the original visualization hierarchy and cadence: a direct
+350 px activity/waveform canvas, centered playhead, 10 Hz motion, hover channel
+emphasis, prospective GET tooltip, synchronized shell/room highlights, native
+waveform seek scale, and Transcript/Search/About views. The redundant internal
+title, clock, Play button, instruction, and channel expander are removed. The
+phone panel expands so its room and transcript remain reachable. Next, run the
+long-session media resilience work in
+[05-migration-plan.md](05-migration-plan.md).
 
 Useful review routes:
 
@@ -19,16 +23,16 @@ Playback starts paused and the mission controls own playback intent.
 
 ## Current state
 
-| Area               | State                                                                                                                                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Shared application | One vanilla TypeScript/ESM/Vite app serves Apollo 11, 13, and 17 with mission-specific configuration and data.                                                                        |
-| Homepage           | Original wording, mission photography, insignia, Saturn V background, launch dates, and forum link are restored.                                                                      |
-| Shell and timeline | Responsive shared shell, three-tier navigator, synchronized GET/date/seeks, transport controls, video/dashboard behavior, and mission-specific layouts are implemented.               |
-| Mission content    | Transcript, milestones, commentary, photography, search, Apollo 11 samples, Apollo 13 spacecraft information, and Apollo 17 biometrics are mounted in the typed app.                  |
-| MOCRviz            | Apollo 11/13 use native typed room selection, real channel catalogs/activity/waveforms/audio/transcripts, tape boundaries, and synchronized transport. Apollo 17 has no MOCR dataset. |
-| Photo sources      | The selected large photograph links to the highest-resolution source available for each mission without changing thumbnail seeking or timed progression.                              |
-| Protected trees    | `legacy/`, `legacy-src/`, `legacy-oracle/`, and `public/{11,13,17}/` remain preserved and read-only.                                                                                  |
-| Release            | Not ready for cutover; the release audit and environment validation below remain open.                                                                                                |
+| Area               | State                                                                                                                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Shared application | One vanilla TypeScript/ESM/Vite app serves Apollo 11, 13, and 17 with mission-specific configuration and data.                                                                                                                  |
+| Homepage           | Original wording, mission photography, insignia, Saturn V background, launch dates, and forum link are restored.                                                                                                                |
+| Shell and timeline | Responsive shared shell, three-tier navigator, synchronized GET/date/seeks, transport controls, video/dashboard behavior, and mission-specific layouts are implemented.                                                         |
+| Mission content    | Transcript, milestones, commentary, photography, search, Apollo 11 samples, Apollo 13 spacecraft information, and Apollo 17 biometrics are mounted in the typed app.                                                            |
+| MOCRviz            | Apollo 11/13 use the production interaction hierarchy with typed room selection, synchronized hover/seek previews, smooth activity/waveform motion, real audio/transcripts, and tape boundaries. Apollo 17 has no MOCR dataset. |
+| Photo sources      | The selected large photograph links to the highest-resolution source available for each mission without changing thumbnail seeking or timed progression.                                                                        |
+| Protected trees    | `legacy/`, `legacy-src/`, `legacy-oracle/`, and `public/{11,13,17}/` remain preserved and read-only.                                                                                                                            |
+| Release            | Not ready for cutover; the release audit and environment validation below remain open.                                                                                                                                          |
 
 ## Current verification evidence
 
@@ -43,6 +47,12 @@ views. Screenshots establish reviewed local layout, not external audio delivery
 or complete production parity. A visible Apollo 13 high-resolution-photo click
 opened the expected 3900 × 3900 LPI source in a separate tab. Representative
 Apollo 11, 13, and 17 source URLs returned HTTP 200 at verification time.
+
+The MOCRviz parity repair was compared visibly against live Apollo 11 and 13.
+Focused browser coverage passes the shared channel/GET hover preview, subsecond
+redraw, seek/channel selection, transcript/search/about controls, and all six
+Apollo 11/13 MOCR snapshots at 1440, 768, and 390 px. The production control
+reference and local control matrix also remain green.
 
 ## Remaining release work
 
@@ -68,6 +78,7 @@ ingestion pipeline remain deferred beyond this release.
 
 ## Session log
 
-| Date       | Work                                                                                                                                                 | Verification                                                                                                   |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| 2026-09-05 | Consolidated planning docs around current state and unfinished work; removed the two historical inventories and corrected adjacent stale references. | Local Markdown links and Prettier pass; `npm run check` passes 276 tests; protected reference trees unchanged. |
+| Date       | Work                                                                                                                                                         | Verification                                                                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-09-05 | Restored Apollo 11/13 MOCRviz production-style layout, hover/seek feedback, 10 Hz motion, native waveform scaling, transcript views, and phone reachability. | Live A11/A13 comparison; 9 focused MOCR browser cases, 6 control cases, and 3 live control-reference cases pass; `npm run check` (276) and build pass. |
+| 2026-09-05 | Consolidated planning docs around current state and unfinished work; removed the two historical inventories and corrected adjacent stale references.         | Local Markdown links and Prettier pass; `npm run check` passes 276 tests; protected reference trees unchanged.                                         |

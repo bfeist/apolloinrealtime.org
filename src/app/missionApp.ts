@@ -720,6 +720,9 @@ function mountMocrvizPanel(
       button.setAttribute("aria-pressed", String(id === channel && ref.mocrActive));
     }
   };
+  const highlightHover = (channel: number | null): void => {
+    for (const [id, button] of buttons) button.classList.toggle("is-hovered", id === channel);
+  };
   const tick = (): void => {
     channelActivity.update(ref.value);
     panel?.setMuted(ref.muted);
@@ -737,9 +740,7 @@ function mountMocrvizPanel(
         countdownSeconds: config.countdownSeconds,
         onSeek: seekTo,
         onChannelChange: highlight,
-        onPlayingChange: (playing) => {
-          document.dispatchEvent(new CustomEvent("airt:playing", { detail: playing }));
-        },
+        onChannelHover: highlightHover,
       });
       panel?.setChannel(selected);
       tick();
@@ -756,6 +757,7 @@ function mountMocrvizPanel(
     if (spacecraftHost) spacecraftHost.hidden = true;
     spacecraftTab?.classList.remove("is-active");
     ref.mocrActive = visible;
+    shell.mocrvizHost.closest(".airt-right")?.classList.toggle("is-mocrviz-active", visible);
     shell.mocrvizHost.hidden = !visible;
     shell.photoDiv.hidden = visible;
     shell.photoGallery.hidden = visible;
@@ -783,6 +785,18 @@ function mountMocrvizPanel(
       panel?.setChannel(id);
       tick();
     });
+    button.addEventListener("pointerenter", () => {
+      panel?.setHoveredChannel(id);
+    });
+    button.addEventListener("pointerleave", () => {
+      panel?.setHoveredChannel(null);
+    });
+    button.addEventListener("focus", () => {
+      panel?.setHoveredChannel(id);
+    });
+    button.addEventListener("blur", () => {
+      panel?.setHoveredChannel(null);
+    });
     shell.channelGrid.append(button);
     buttons.set(id, button);
   }
@@ -793,6 +807,11 @@ function mountMocrvizPanel(
     show(true);
   });
   startTicker(ref, tick);
+  // Legacy MOCRviz advances its visualization at 10 Hz. Keep that smooth cadence
+  // local to this relatively expensive panel instead of accelerating every panel.
+  window.setInterval(() => {
+    if (ref.mocrActive && ref.playing) tick();
+  }, 100);
   if (initialChannel !== null) show(true);
 }
 

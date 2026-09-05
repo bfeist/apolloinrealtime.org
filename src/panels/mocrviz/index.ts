@@ -16,7 +16,13 @@ import {
   type WaveformData,
 } from "./data.js";
 import { CONSOLES } from "./consoles.js";
-import { drawTimeline, timelineSeek, TIMELINE } from "./timeline.js";
+import {
+  activityTimeAtX,
+  drawTimeline,
+  waveformTimeAtX,
+  TIMELINE,
+  type TimelineHover,
+} from "./timeline.js";
 
 export interface MocrvizPanelOptions {
   container: HTMLElement;
@@ -28,12 +34,13 @@ export interface MocrvizPanelOptions {
   countdownSeconds?: number;
   onSeek?: (seconds: number) => void;
   onChannelChange?: (channel: number) => void;
-  onPlayingChange?: (playing: boolean) => void;
+  onChannelHover?: (channel: number | null) => void;
 }
 
 export interface MocrvizPanel {
   setClock(currentGetSeconds: number, isPlaying: boolean): void;
   setChannel(channel: number): void;
+  setHoveredChannel(channel: number | null): void;
   getChannel(): number;
   setMuted(muted: boolean): void;
   destroy(): void;
@@ -59,6 +66,13 @@ function element<K extends keyof HTMLElementTagNameMap>(
   return node;
 }
 
+function displayLabel(channel: number, label: string): string {
+  const sided = /^(.*)-(L|R|C)$/.exec(label);
+  if (sided) return `${sided[1] ?? label} [${sided[2] ?? ""}]`;
+  if ([12, 14, 21, 28, 47].includes(channel)) return `${label} [L]`;
+  return label;
+}
+
 function mountMocrvizPanel(
   options: MocrvizPanelOptions,
   catalog: MissionChannels,
@@ -70,7 +84,7 @@ function mountMocrvizPanel(
   const abort = new AbortController();
   const root = options.audioRoot.replace(/\/+$/, "");
   const countdown = options.countdownSeconds ?? (options.mission === "13" ? 127048 : 74768);
-  const labels = new Map(catalog.all.map((ch) => [ch.id, ch.label]));
+  const displayLabels = new Map(catalog.all.map((ch) => [ch.id, displayLabel(ch.id, ch.label)]));
   const orderedChannels = [...catalog.available].sort((a, b) => a - b);
   let currentChannel = catalog.defaultChannel;
   let seconds = 0;
@@ -87,35 +101,22 @@ function mountMocrvizPanel(
   let transcriptIndex = -2;
   let transcriptStart = -1;
   let transcriptEnd = -1;
+  let transcriptMode: "transcript" | "search" | "about" = "transcript";
   let activityMessage = "Loading recorded channel activity…";
+  let hoveredChannel: number | null = null;
+  let timelineHover: TimelineHover | null = null;
   const activity = new Map<number, readonly (readonly number[])[]>();
   const requestedActivity = new Set<number>();
   const failedActivity = new Map<number, number>();
   let audioError = "";
 
-  const toolbar = element("div", "mocrviz-toolbar");
-  const heading = element("strong", "mocrviz-heading", "MISSION CONTROL AUDIO");
-  const playButton = element("button", "mocrviz-play", "▶ Play");
-  playButton.type = "button";
-  playButton.addEventListener("click", () => {
-    playing = !playing;
-    options.onPlayingChange?.(playing);
-    controller.tick(seconds, playing);
-    render();
-  });
-  const clock = element("span", "mocrviz-clock");
-  toolbar.append(heading, clock, playButton);
   const canvas = element("canvas", "mocrviz-timeline");
   canvas.setAttribute(
     "aria-label",
     "Recorded channel activity and audio waveform. Click to select a channel and seek in mission time.",
   );
-  canvas.setAttribute("role", "img");
-  const instruction = element(
-    "p",
-    "mocrviz-instruction",
-    "Click the activity timeline to seek. Select a controller in the room or a channel below.",
-  );
+  canvas.setAttribute("role", "application");
+  canvas.tabIndex = 0;
   const bottom = element("div", "mocrviz-bottom");
   const controls = element("section", "mocrviz-controls");
   const room = element("div", "mocrviz-room");
@@ -135,6 +136,18 @@ function mountMocrvizPanel(
     button.setAttribute("aria-label", `Channel ${String(channel)}, ${info?.label ?? label}`);
     button.addEventListener("click", () => {
       setChannel(channel);
+    });
+    button.addEventListener("pointerenter", () => {
+      setHover(channel);
+    });
+    button.addEventListener("pointerleave", () => {
+      setHover(null);
+    });
+    button.addEventListener("focus", () => {
+      setHover(channel);
+    });
+    button.addEventListener("blur", () => {
+      setHover(null);
     });
     buttons.push(button);
     return button;
@@ -156,32 +169,53 @@ function mountMocrvizPanel(
   }
   const channelName = element("h3", "mocrviz-channel-name");
   const channelDescription = element("p", "mocrviz-channel-description");
-  const grid = element("div", "mocrviz-channel-grid");
-  for (const id of catalog.available)
-    grid.append(channelButton(id, labels.get(id) ?? String(id), "mocrviz-channel"));
-  const details = element("details", "mocrviz-channel-details");
-  details.append(element("summary", "", "All recorded channels"), grid);
-  details.open = false;
-  controls.append(room, channelName, channelDescription, details);
+  controls.append(room, channelName, channelDescription);
 
   const transcriptPanel = element("section", "mocrviz-transcript-panel");
-  const transcriptTitle = element("h3", "mocrviz-transcript-title", "CHANNEL TRANSCRIPT");
+  const transcriptTitle = element("div", "mocrviz-transcript-title");
+  const transcriptChannel = element("span", "mocrviz-transcript-channel");
+  transcriptTitle.append("Mission Control Audio Channel: ", transcriptChannel);
+  const transcriptTabs = element("div", "mocrviz-transcript-tabs");
+  const transcriptButton = element("button", "mocrviz-transcript-tab is-active", "TRANSCRIPT");
+  const searchButton = element("button", "mocrviz-transcript-tab", "SEARCH");
+  const aboutButton = element("button", "mocrviz-transcript-tab", "ABOUT");
+  for (const button of [transcriptButton, searchButton, aboutButton]) button.type = "button";
+  transcriptTabs.append(transcriptButton, searchButton, aboutButton);
+  const transcriptMonitor = element("div", "mocrviz-transcript-monitor");
   const search = element("input", "mocrviz-transcript-search");
   search.type = "search";
   search.placeholder = "Search this channel";
   search.setAttribute("aria-label", "Search this channel transcript");
+  search.hidden = true;
   const transcriptList = element("div", "mocrviz-transcript", "Loading channel transcript…");
+  const about = element("div", "mocrviz-transcript-about");
+  about.hidden = true;
+  about.append(
+    element("h4", "", "About This Mission Control Audio"),
+    element(
+      "p",
+      "",
+      "These recordings contain the individual flight-controller and backroom communication loops captured throughout the mission.",
+    ),
+    element("h4", "", "About These Transcripts"),
+    element(
+      "p",
+      "",
+      "The channel transcripts were generated automatically and may contain errors. The original audio remains the historical source.",
+    ),
+  );
+  transcriptMonitor.append(search, transcriptList, about);
   const transcriptNote = element(
     "p",
     "mocrviz-transcript-note",
     "Machine transcription · may contain errors",
   );
-  transcriptPanel.append(transcriptTitle, search, transcriptList, transcriptNote);
+  transcriptPanel.append(transcriptTitle, transcriptTabs, transcriptMonitor, transcriptNote);
   bottom.append(controls, transcriptPanel);
   const audio = element("audio", "mocrviz-audio");
   audio.preload = "metadata";
   const status = element("p", "mocrviz-status");
-  container.append(toolbar, canvas, instruction, bottom, status, audio);
+  container.append(canvas, bottom, status, audio);
 
   const controller = new MocrvizAudioController(
     { mission: options.mission, audioRoot: root, tapes, createAudio: () => audio },
@@ -195,13 +229,40 @@ function mountMocrvizPanel(
     audioError = "";
     if (!destroyed) controller.tick(seconds, playing);
   });
-  canvas.addEventListener("click", (event) => {
+  canvas.addEventListener("pointermove", (event) => {
     const rect = canvas.getBoundingClientRect();
-    const row = Math.floor((event.clientY - rect.top - TIMELINE.top) / TIMELINE.rowHeight);
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const row = Math.floor(y / TIMELINE.rowHeight);
     const channel = orderedChannels[row];
-    if (channel !== undefined && row >= 0) setChannel(channel);
-    if (event.clientX - rect.left >= TIMELINE.labelWidth)
-      seek(timelineSeek(event.clientX - rect.left, rect.width, seconds));
+    if (channel !== undefined && row >= 0 && y < orderedChannels.length * TIMELINE.rowHeight) {
+      timelineHover = { x, channel, seconds: activityTimeAtX(x, rect.width, seconds) };
+      canvas.dataset.hoverGet = secondsToTimeStr(timelineHover.seconds);
+      setHover(channel, false);
+    } else {
+      timelineHover = null;
+      delete canvas.dataset.hoverGet;
+      setHover(null, false);
+    }
+    draw();
+  });
+  canvas.addEventListener("pointerleave", () => {
+    timelineHover = null;
+    delete canvas.dataset.hoverGet;
+    setHover(null);
+  });
+  canvas.addEventListener("pointerdown", (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const row = Math.floor(y / TIMELINE.rowHeight);
+    const channel = orderedChannels[row];
+    if (channel !== undefined && row >= 0 && y < orderedChannels.length * TIMELINE.rowHeight) {
+      setChannel(channel);
+      seek(activityTimeAtX(x, rect.width, seconds));
+    } else {
+      seek(waveformTimeAtX(x, rect.width, seconds, wave));
+    }
   });
   function seek(next: number): void {
     options.onSeek?.(Math.round(next));
@@ -215,7 +276,8 @@ function mountMocrvizPanel(
   }
   function draw(): void {
     if (destroyed) return;
-    const currentChunks = activityChunks(options.mission, seconds, TIMELINE.halfWindow);
+    const activityHalfWindow = Math.ceil(canvas.getBoundingClientRect().width / 2) + 2;
+    const currentChunks = activityChunks(options.mission, seconds, activityHalfWindow);
     activityMessage =
       currentChunks.length === 0
         ? "No activity recording at this mission time"
@@ -228,16 +290,19 @@ function mountMocrvizPanel(
       seconds,
       channel: currentChannel,
       channels: orderedChannels,
-      labels,
+      labels: displayLabels,
       activityAt,
       waveform: wave,
       tapeStart,
       activityMessage,
       waveformMessage: waveMessage,
+      hoveredChannel,
+      hover: timelineHover,
     });
   }
   async function fetchActivity(): Promise<void> {
-    const chunks = activityChunks(options.mission, seconds, TIMELINE.halfWindow);
+    const activityHalfWindow = Math.ceil(canvas.getBoundingClientRect().width / 2) + 2;
+    const chunks = activityChunks(options.mission, seconds, activityHalfWindow);
     await Promise.all(
       chunks.map(async (chunk) => {
         if (requestedActivity.has(chunk.start)) return;
@@ -314,7 +379,7 @@ function mountMocrvizPanel(
     transcriptStart = -1;
     transcriptEnd = -1;
     search.value = "";
-    transcriptTitle.textContent = `${labels.get(currentChannel) ?? "CHANNEL"} TRANSCRIPT`;
+    transcriptChannel.textContent = displayLabels.get(currentChannel) ?? "CHANNEL";
     transcriptList.textContent = "Loading channel transcript…";
     try {
       const response = await fetch(
@@ -387,6 +452,31 @@ function mountMocrvizPanel(
   search.addEventListener("input", () => {
     renderTranscript(true);
   });
+  function setTranscriptMode(mode: "transcript" | "search" | "about"): void {
+    transcriptMode = mode;
+    transcriptButton.classList.toggle("is-active", mode === "transcript");
+    searchButton.classList.toggle("is-active", mode === "search");
+    aboutButton.classList.toggle("is-active", mode === "about");
+    search.hidden = mode !== "search";
+    transcriptList.hidden = mode === "about";
+    about.hidden = mode !== "about";
+    if (mode === "transcript") {
+      search.value = "";
+      renderTranscript(true);
+    } else if (mode === "search") {
+      renderTranscript(true);
+      search.focus();
+    }
+  }
+  transcriptButton.addEventListener("click", () => {
+    setTranscriptMode("transcript");
+  });
+  searchButton.addEventListener("click", () => {
+    setTranscriptMode("search");
+  });
+  aboutButton.addEventListener("click", () => {
+    setTranscriptMode("about");
+  });
   transcriptList.addEventListener("scroll", () => {
     if (
       search.value.trim() ||
@@ -408,22 +498,35 @@ function mountMocrvizPanel(
     void fetchTranscript();
     update();
   }
+  function setHover(channel: number | null, redraw = true): void {
+    if (channel !== null && !catalog.available.includes(channel)) channel = null;
+    const changed = hoveredChannel !== channel;
+    hoveredChannel = channel;
+    if (channel === null) delete canvas.dataset.hoverChannel;
+    else canvas.dataset.hoverChannel = String(channel);
+    for (const button of buttons)
+      button.classList.toggle("is-hovered", Number(button.dataset.channelId) === channel);
+    if (changed) options.onChannelHover?.(channel);
+    if (redraw) render();
+  }
   function render(): void {
     if (destroyed) return;
-    const info = catalog.all.find((entry) => entry.id === currentChannel);
-    channelName.textContent = `CH ${String(currentChannel)} · ${info?.label ?? ""}`;
+    const displayChannel = hoveredChannel ?? currentChannel;
+    const info = catalog.all.find((entry) => entry.id === displayChannel);
+    channelName.textContent = displayLabels.get(displayChannel) ?? "";
     channelDescription.textContent = info?.description ?? "";
-    clock.textContent = secondsToTimeStr(seconds);
-    playButton.textContent = playing ? "Ⅱ Pause" : "▶ Play";
+    transcriptChannel.textContent = displayLabels.get(currentChannel) ?? "CHANNEL";
+    canvas.dataset.currentSeconds = seconds.toFixed(3);
     const active = activityAt(seconds);
     for (const button of buttons) {
       const id = Number(button.dataset.channelId);
       button.classList.toggle("is-active", id === currentChannel);
       button.classList.toggle("is-speaking", active?.includes(id) ?? false);
+      button.classList.toggle("is-hovered", id === hoveredChannel);
       button.setAttribute("aria-pressed", String(id === currentChannel));
     }
     draw();
-    renderTranscript();
+    if (transcriptMode !== "about") renderTranscript();
   }
   function update(): void {
     controller.tick(seconds, playing);
@@ -438,7 +541,10 @@ function mountMocrvizPanel(
     void fetchActivity();
     render();
   }
-  const observer = new ResizeObserver(draw);
+  const observer = new ResizeObserver(() => {
+    draw();
+    void fetchActivity();
+  });
   observer.observe(canvas);
   void fetchTranscript();
   render();
@@ -449,6 +555,10 @@ function mountMocrvizPanel(
       update();
     },
     setChannel,
+    setHoveredChannel(channel) {
+      timelineHover = null;
+      setHover(channel);
+    },
     getChannel() {
       return currentChannel;
     },

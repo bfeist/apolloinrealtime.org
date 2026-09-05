@@ -7,7 +7,7 @@ import {
   parseWaveform,
   waveformPeak,
 } from "../../src/panels/mocrviz/data.js";
-import { timelineSeek } from "../../src/panels/mocrviz/timeline.js";
+import { activityTimeAtX, waveformTimeAtX } from "../../src/panels/mocrviz/timeline.js";
 import { channelsFor } from "../../src/panels/mocrviz/channels.js";
 
 describe("historical MOCR data", () => {
@@ -39,10 +39,20 @@ describe("historical MOCR data", () => {
     expect(closestChannelUtterance(entries, 10)).toBe(2);
     expect(closestChannelUtterance(entries, -2)).toBe(-1);
   });
-  it("maps the timeline center to current GET and clamps edge seeks", () => {
-    expect(timelineSeek(383, 700, 1000)).toBe(1000);
-    expect(timelineSeek(-1, 700, 1000)).toBe(820);
-    expect(timelineSeek(900, 700, 1000)).toBe(1180);
+  it("maps activity at one second per pixel and waveform at its native scale", () => {
+    expect(activityTimeAtX(350, 700, 1000)).toBe(1000);
+    expect(activityTimeAtX(0, 700, 1000)).toBe(650);
+    expect(activityTimeAtX(700, 700, 1000)).toBe(1350);
+    expect(
+      waveformTimeAtX(382, 700, 1000, {
+        sampleRate: 16000,
+        samplesPerPixel: 512,
+        length: 0,
+        channels: 1,
+        maxAmplitude: 128,
+        samples: new Int8Array(),
+      }),
+    ).toBeCloseTo(1001.024);
   });
   it("keeps mission-specific channel roles and excludes unavailable missions", () => {
     expect(channelsFor("11")?.all.find((ch) => ch.id === 16)?.label).not.toBe(

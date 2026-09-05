@@ -418,7 +418,7 @@ button {
   color: #000;
   border-color: #636363;
 }
-.airt-channels__list .thirtybtn-channel:is(:hover, .is-active) {
+.airt-channels__list .thirtybtn-channel:is(:hover, .is-hovered, .is-active) {
   background: #7cb7e0;
   color: #000;
   border-color: rgb(93, 153, 177);
