@@ -43,7 +43,11 @@ import { createChannelActivity } from "../panels/mocrviz/channelActivity.js";
 import { renderShell, setActiveTab, type ShellElements } from "./shell.js";
 import { parseDeepLink } from "./deepLink.js";
 import { MissionPlayback, realtimeGet } from "./playback.js";
-import { loadYouTubeIframeApi } from "../engines/ytplayer/index.js";
+import {
+  loadYouTubeIframeApi,
+  syncYouTubePlayback,
+  youtubePlayerVars,
+} from "../engines/ytplayer/index.js";
 
 const CONFIGS: Record<string, MissionConfig> = {
   "11": a11Config,
@@ -213,8 +217,10 @@ async function mountVideoPlayer(
     ]);
     let player: YTPlayer | null = null;
     let key = "";
-    let appliedPlaying: boolean | null = null;
     let appliedMute: boolean | null = null;
+    const hideYouTubeCaptions = (): void => {
+      if (player?.getOptions?.().includes("captions")) player.unloadModule?.("captions");
+    };
     const sync = (forceSeek = false): void => {
       if (!player) return;
       const seconds = ref.value;
@@ -222,7 +228,6 @@ async function mountVideoPlayer(
       if (!entry) {
         player.pauseVideo();
         key = "";
-        appliedPlaying = null;
         return;
       }
       const nextKey = `${entry.videoId}:${String(entry.startSeconds)}`;
@@ -231,15 +236,13 @@ async function mountVideoPlayer(
         key = nextKey;
         if (ref.playing) player.loadVideoById(entry.videoId, offset);
         else player.cueVideoById(entry.videoId, offset);
-        appliedPlaying = ref.playing;
       } else if ((ref.playing || forceSeek) && Math.abs(player.getCurrentTime() - offset) > 2) {
         player.seekTo(offset, true);
       }
-      if (appliedPlaying !== ref.playing) {
-        if (ref.playing) player.playVideo();
-        else player.pauseVideo();
-        appliedPlaying = ref.playing;
-      }
+      // Commands such as loadVideoById() complete asynchronously. Inspect the
+      // real player state on every synchronization pass so a late YouTube
+      // transition can never override the mission transport button.
+      syncYouTubePlayback(player, player.getPlayerState(), ref.playing, yt.PlayerState);
       const mute = ref.muted || ref.mocrActive;
       if (mute !== appliedMute) {
         if (mute) player.mute();
@@ -250,10 +253,11 @@ async function mountVideoPlayer(
     new yt.Player("player", {
       width: "100%",
       height: "100%",
-      playerVars: { playsinline: 1, controls: 0, rel: 0, origin: window.location.origin },
+      playerVars: youtubePlayerVars(window.location.origin),
       events: {
         onReady: (event: { target: YTPlayer }): void => {
           player = event.target;
+          hideYouTubeCaptions();
           sync();
           document.addEventListener("airt:seek", () => {
             sync(true);
@@ -264,6 +268,13 @@ async function mountVideoPlayer(
           window.setInterval(() => {
             sync();
           }, 1000);
+        },
+        onStateChange: (): void => {
+          hideYouTubeCaptions();
+          sync();
+        },
+        onApiChange: (): void => {
+          hideYouTubeCaptions();
         },
         onError: (): void => {
           shell.playerWrapper.dataset.mediaError = "true";
@@ -900,6 +911,16 @@ ready(() => {
       play.setAttribute("aria-label", currentSecondsRef.playing ? "Pause" : "Play");
       play.setAttribute("aria-pressed", String(currentSecondsRef.playing));
     }
+    const videoPlay = document.getElementById("videoPlaybackBtn");
+    videoPlay?.setAttribute(
+      "aria-label",
+      currentSecondsRef.playing ? "Pause mission video" : "Play mission video",
+    );
+    videoPlay?.setAttribute("aria-pressed", String(currentSecondsRef.playing));
+    videoPlay?.setAttribute(
+      "title",
+      currentSecondsRef.playing ? "Pause the mission" : "Play the mission",
+    );
     const sound = document.getElementById("soundBtn");
     sound?.setAttribute("aria-pressed", String(currentSecondsRef.muted));
     sound?.setAttribute("title", currentSecondsRef.muted ? "Unmute sound" : "Mute sound");

@@ -215,7 +215,7 @@ function buildHtml(config: MissionConfig, debug: boolean): string {
         <!-- video player (always present, plays underneath the overlay) -->
         <div id="player-iframe-wrapper" class="airt-player-wrapper">
           <div id="player" class="airt-player"></div>
-          <button id="videoPlaybackBtn" class="airt-video-playback" type="button" aria-label="Toggle mission playback" title="Play or pause the mission"></button>
+          <button id="videoPlaybackBtn" class="airt-video-playback" type="button" aria-label="Play mission video" aria-pressed="false" title="Play the mission"></button>
         </div>
         <!-- dashboard overlay sits on top of the player; auto-hides when
              current GET is inside a video segment (legacy

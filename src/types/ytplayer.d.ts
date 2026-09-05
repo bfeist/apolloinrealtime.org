@@ -7,6 +7,9 @@ interface YTPlayer {
   seekTo(seconds: number, allowSeekAhead: boolean): void;
   getCurrentTime(): number;
   getPlayerState(): number;
+  /** YouTube exposes caption modules dynamically; unloading one disables it. */
+  getOptions?(): string[];
+  unloadModule?(module: string): void;
   setPlaybackQuality(quality: string): void;
   loadVideoById(videoId: string, startSeconds?: number): void;
   cueVideoById(videoId: string, startSeconds?: number): void;

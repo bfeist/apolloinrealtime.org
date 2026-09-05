@@ -14,6 +14,40 @@
 
 let loadPromise: Promise<YTNamespace> | null = null;
 
+/** Player configuration keeps YouTube UI out of the mission-owned transport surface. */
+export function youtubePlayerVars(origin: string): Readonly<Record<string, string | number>> {
+  return {
+    playsinline: 1,
+    controls: 0,
+    disablekb: 1,
+    fs: 0,
+    iv_load_policy: 3,
+    cc_load_policy: 0,
+    autohide: 1,
+    modestbranding: 1,
+    rel: 0,
+    origin,
+  };
+}
+
+/** Reconcile the real iframe state with the app's canonical playback intent. */
+export function syncYouTubePlayback(
+  player: Pick<YTPlayer, "playVideo" | "pauseVideo">,
+  playerState: number,
+  playing: boolean,
+  states: YTPlayerStateConstants,
+): void {
+  if (playing && playerState !== states.PLAYING && playerState !== states.BUFFERING)
+    player.playVideo();
+  else if (
+    !playing &&
+    playerState !== states.PAUSED &&
+    playerState !== states.CUED &&
+    playerState !== states.UNSTARTED
+  )
+    player.pauseVideo();
+}
+
 /**
  * Inject the YouTube IFrame API script (once across the page) and resolve
  * with the `YT` namespace when it's ready. Subsequent calls return the

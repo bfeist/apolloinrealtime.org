@@ -66,6 +66,30 @@ test("recovery A13 seek sources update the same GET", async ({ page }) => {
   await expect(get).toHaveValue("068:00:02");
 });
 
+test("recovery A13 shared transport advances photography and both play controls agree", async ({
+  page,
+}) => {
+  await page.goto("/13/?t=000:00:00");
+  const get = page.locator("#missionElapsedTime");
+  const mainPlay = page.locator("#playPauseBtn");
+  const videoPlay = page.locator("#videoPlaybackBtn");
+  const selectedPhoto = page.locator("#photoGallery .selected");
+
+  await expect(selectedPhoto).toHaveAttribute("id", "gallerytimeid0000000");
+  await videoPlay.click();
+  await expect(mainPlay).toHaveAttribute("aria-pressed", "true");
+  await expect(videoPlay).toHaveAttribute("aria-pressed", "true");
+  await expect(get).not.toHaveValue("000:00:00", { timeout: 3000 });
+  await expect(selectedPhoto).toHaveAttribute("id", "gallerytimeid0000004", { timeout: 6000 });
+
+  await mainPlay.click();
+  await expect(mainPlay).toHaveAttribute("aria-pressed", "false");
+  await expect(videoPlay).toHaveAttribute("aria-pressed", "false");
+  const paused = await get.inputValue();
+  await page.waitForTimeout(1100);
+  await expect(get).toHaveValue(paused);
+});
+
 for (const mission of ["11", "13"]) {
   test(`recovery A${mission} native Mission Control`, async ({ page }) => {
     await page.goto(`/${mission}/?t=000:00:00&ch=14`);
