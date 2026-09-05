@@ -5,6 +5,7 @@
    them per mission if needed). */
 
 @import "./base.css";
+@import "./mission-splash.css";
 @import "./panels/transcript.css";
 @import "./panels/toc.css";
 @import "./panels/photo.css";

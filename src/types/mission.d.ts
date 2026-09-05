@@ -59,6 +59,8 @@ interface MissionConfig {
   redactedChannels?: number[];
   /** Legacy transcript role codes mapped to mission-specific display names. */
   speakerLabels: Readonly<Record<string, string>>;
+  /** Mission-specific copy shown by the legacy entry overlay. */
+  splash: MissionSplashConfig;
 
   // --- Feature flags ---
   /** Per-mission feature flags. Currently only `mocrviz` (typed MOCR audio panel). */
@@ -69,6 +71,13 @@ interface MissionConfig {
   meta: MissionMeta;
   /** Per-mission head/script-chain switches that differ across legacy missions. */
   head: MissionHeadOptions;
+}
+
+interface MissionSplashConfig {
+  tagline: string;
+  description: string;
+  year: string;
+  included: readonly string[];
 }
 
 interface MissionFeatures {

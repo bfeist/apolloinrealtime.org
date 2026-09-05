@@ -30,6 +30,21 @@ export const a17Config: MissionConfig = {
     PAO: "Public Affairs",
     CC: "Mission Control",
   },
+  splash: {
+    tagline: "A real-time journey through last landing on the Moon.",
+    description:
+      "This multimedia project consists entirely of original historical mission material",
+    year: "1972",
+    included: [
+      "All mission control film footage",
+      "All on-board television and film footage",
+      "302 hours of space-to-ground audio",
+      "All on-board recorder audio",
+      "3,600+ photographs",
+      "35,800 searchable utterances",
+      "Landing area reconstruction using Lunar Reconnaissance Orbiter data",
+    ],
+  },
 
   meta: {
     // Legacy A17 head <title> reads "Apollo 17 in Real-time" (hyphen+lower).

@@ -30,6 +30,24 @@ export const a13Config: MissionConfig = {
     PAO: "Public Affairs",
     CC: "Mission Control",
   },
+  splash: {
+    tagline: "A real-time journey through the third lunar landing attempt.",
+    description:
+      "This multimedia project consists entirely of original historical mission material",
+    year: "1970",
+    included: [
+      "All mission control film footage",
+      "All on-board television and film footage",
+      "All Mission Control audio (7,200 hours)",
+      "144 hours of space-to-ground audio",
+      "All on-board recorder audio",
+      "Press conferences as they happened",
+      "600+ photographs",
+      "12,900 searchable utterances",
+      "Post-mission commentary",
+      "Onboard view reconstructed using Lunar Reconnaissance Orbiter data",
+    ],
+  },
 
   meta: {
     title: "Apollo 13 in Real Time",

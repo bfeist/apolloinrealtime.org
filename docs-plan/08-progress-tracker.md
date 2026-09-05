@@ -2,18 +2,19 @@
 
 ## Resume here
 
-**2026-09-05: Mission-specific speaker-name parity repair complete.** Transcript,
-commentary, and search displays now expand legacy role codes with each mission's
-crew roster: Armstrong/Collins/Aldrin for Apollo 11, Lovell/Swigert/Haise for
-Apollo 13, and Cernan/Evans/Schmitt for Apollo 17. `PAO` and `CC` display as
-Public Affairs and Mission Control, named controllers remain unchanged, and
-token-aware replacement avoids corrupting labels such as `MCC-H`. Apollo 13
-launch views at 1440 and 390 px visibly match production naming while retaining
-the compact border-free columns. All six Apollo 11/13/17 desktop/phone control
-cases pass, `npm run check` passes all 279 tests, and `npm run build` passes.
-Push the current branch to exercise the first dev deployment, then validate the
-landing page and all three mission routes on the staging host. No deployment has
-been triggered yet.
+**2026-09-05: Mission entry/splash parity repair complete.** Bare Apollo 11, 13,
+and 17 routes now open on responsive mission-specific entry overlays using the
+preserved production imagery, insignia, wording, inventories, one-minute and
+in-progress choices, fullscreen control, instructions/credits entry, and forum
+link. Both entry choices start the shared transport; query-string deep links
+still enter the mission directly and paused. Visible Chrome comparisons covered
+live/local Apollo 11, 13, and 17 desktop pages plus local 390 x 844 views. Six
+focused desktop/phone browser cases pass, as do `npm run check` (279 tests) and
+`npm run build`. The broader recovery run passed 26/36 cases; its ten MOCR
+snapshot expectations retain unrelated pre-existing typography drift and were
+not regenerated. Push the current branch to exercise the first dev deployment,
+then validate the homepage and all three bare/deep-linked mission routes on the
+staging host. No deployment has been triggered yet.
 
 Useful review routes:
 
@@ -22,7 +23,8 @@ Useful review routes:
 - Apollo 11 samples: `/11/?t=109:34:00`
 - Apollo 17 dashboard/biometrics: `/17/?t=118:00:00`
 
-Playback starts paused and the mission controls own playback intent.
+Deep links start paused; mission-entry choices start playback. The shared
+mission controls own playback intent after entry.
 
 ## Current state
 
@@ -38,6 +40,14 @@ Playback starts paused and the mission controls own playback intent.
 | Release             | Not ready for cutover; the release audit and environment validation below remain open.                                                                                                                                             |
 
 ## Current verification evidence
+
+The restored mission entries were inspected directly against the three live
+production mission routes in Chrome at desktop size and locally at 390 x 844.
+All original hero images, mission-specific text/inventories, entry controls,
+instructions link, and forum link are present; phone layouts have no horizontal
+overflow and can scroll to the forum. Six focused browser cases cover both entry
+choices, deep-link bypass, instructions, transport state, and phone reachability.
+`npm run check` passes all 279 tests and `npm run build` emits all three routes.
 
 The last completed application baseline passed `npm run check` with 276 tests,
 `npm run build`, all 82 browser cases in one unchanged-reference run, and three
@@ -108,6 +118,7 @@ preserved ingestion pipeline remain deferred beyond this release.
 
 | Date       | Work                                                                                                                                                                                    | Verification                                                                                                                                                                      |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-05 | Restored responsive, mission-specific Apollo 11/13/17 entry overlays with production imagery/copy, entry controls, instructions, and forum access while preserving deep links.          | Direct live/local desktop and local phone review; six focused browser cases, `npm run check` (279), and build pass. Broader recovery: 26/36, with ten unrelated stale MOCR snapshots. |
 | 2026-09-05 | Restored mission-specific transcript role-name substitution across transcript, commentary, and search displays, including PAO and Mission Control labels.                               | Live A13 naming reference and 1440/390 local review; six all-mission desktop/phone cases; `npm run check` (279) and build pass.                                                   |
 | 2026-09-05 | Matched shared transcript/commentary typography and three-column flow to production, removing table spacing and fixed column widths while restoring wrapped, right-aligned speakers.    | Live A13 measurement and 1440/768/390 local review; six desktop/phone mission cases; `npm run check` (276) and build pass. Control-reference gate retains its known tab-size gap. |
 | 2026-09-05 | Removed mistaken local commit `373f57af` from `main` and restored the three mission entry files it had deleted.                                                                         | `npm run test:all` passes lint, TypeScript, production build, and all 276 unit tests; the build emits entry pages for Apollo 11, 13, and 17.                                      |

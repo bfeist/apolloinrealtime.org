@@ -43,6 +43,7 @@ import { createChannelActivity } from "../panels/mocrviz/channelActivity.js";
 import { renderShell, setActiveTab, type ShellElements } from "./shell.js";
 import { parseDeepLink } from "./deepLink.js";
 import { MissionPlayback, realtimeGet } from "./playback.js";
+import { mountMissionSplash } from "./missionSplash.js";
 import {
   loadYouTubeIframeApi,
   syncYouTubePlayback,
@@ -994,6 +995,19 @@ ready(() => {
   document.getElementById("aboutBtn")?.addEventListener("click", () => {
     const dialog = document.getElementById("aboutDialog");
     if (dialog instanceof HTMLDialogElement) dialog.showModal();
+  });
+  mountMissionSplash({
+    config,
+    container: shell.root,
+    onEnter: (seconds) => {
+      seekTo(seconds);
+      currentSecondsRef.setPlaying(true);
+      transport();
+    },
+    onAbout: () => {
+      const dialog = document.getElementById("aboutDialog");
+      if (dialog instanceof HTMLDialogElement) dialog.showModal();
+    },
   });
   document.addEventListener("airt:playing", (event) => {
     currentSecondsRef.setPlaying((event as CustomEvent<boolean>).detail);

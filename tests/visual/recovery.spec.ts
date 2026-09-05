@@ -313,3 +313,50 @@ for (const width of [1440, 768, 390]) {
     });
   });
 }
+
+const splashCopy = {
+  "11": ["the first landing on the Moon", "11,000 hours of Mission Control audio"],
+  "13": ["the third lunar landing attempt", "All Mission Control audio (7,200 hours)"],
+  "17": ["last landing on the Moon", "302 hours of space-to-ground audio"],
+} as const;
+
+for (const mission of ["11", "13", "17"] as const) {
+  test(`recovery A${mission} mission entry and deep-link bypass`, async ({ page }) => {
+    await page.goto(`/${mission}/`);
+    const splash = page.locator(".mission-splash");
+    await expect(splash).toBeVisible();
+    await expect(splash).toContainText(splashCopy[mission][0]);
+    await expect(splash).toContainText(splashCopy[mission][1]);
+    await expect(page.getByRole("button", { name: "T-Minus 1m", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Now", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "forum.apolloinrealtime.org" })).toHaveAttribute(
+      "href",
+      "https://forum.apolloinrealtime.org",
+    );
+    await page.getByRole("button", { name: "Instructions / Credits", exact: true }).click();
+    await expect(page.getByRole("heading", { name: `Explore Apollo ${mission}` })).toBeVisible();
+    await page.getByRole("button", { name: "Close instructions", exact: true }).click();
+    await page.getByRole("button", { name: "T-Minus 1m", exact: true }).click();
+    await expect(splash).toBeHidden();
+    await expect(page.locator("#playPauseBtn")).toHaveAttribute("aria-pressed", "true");
+
+    await page.goto(`/${mission}/?t=000:00:00`);
+    await expect(page.locator(".mission-splash")).toHaveCount(0);
+    await expect(page.locator("#missionElapsedTime")).toHaveValue("000:00:00");
+  });
+
+  test(`recovery A${mission} mission entry remains usable on a phone`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/${mission}/`);
+    const splash = page.locator(".mission-splash");
+    await expect(splash).toBeVisible();
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth),
+    ).toBe(false);
+    await page.getByRole("link", { name: "forum.apolloinrealtime.org" }).scrollIntoViewIfNeeded();
+    await expect(page.getByRole("link", { name: "forum.apolloinrealtime.org" })).toBeVisible();
+    await page.getByRole("button", { name: "Now", exact: true }).click();
+    await expect(splash).toBeHidden();
+    await expect(page.locator("#playPauseBtn")).toHaveAttribute("aria-pressed", "true");
+  });
+}

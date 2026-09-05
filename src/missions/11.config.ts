@@ -29,6 +29,22 @@ export const a11Config: MissionConfig = {
     PAO: "Public Affairs",
     CC: "Mission Control",
   },
+  splash: {
+    tagline: "A real-time journey through the first landing on the Moon",
+    description: "This website consists entirely of original historical mission material",
+    year: "1969",
+    included: [
+      "All mission control film footage",
+      "All TV transmissions and onboard film footage",
+      "2,000 photographs",
+      "11,000 hours of Mission Control audio",
+      "240 hours of space-to-ground audio",
+      "All onboard recorder audio",
+      "15,000 searchable utterances",
+      "Post-mission commentary",
+      "Astromaterials sample data",
+    ],
+  },
 
   meta: {
     title: "Apollo 11 in Real Time",
