@@ -3,9 +3,10 @@
 Use live [Apollo 11](https://apolloinrealtime.org/11/),
 [Apollo 13](https://apolloinrealtime.org/13/), and
 [Apollo 17](https://apolloinrealtime.org/17/) as the visual and interaction
-references. Local `/legacy/{N}/` provides the preserved source application.
-This document describes the target structure, not the current typed app's
-completion status. See the tracker for observed gaps and evidence.
+references. Original source remains in the adjacent `../Apollo_11`,
+`../Apollo_13`, and `../Apollo17.org` repositories. This document describes
+the target structure, not the current typed app's completion status. See the
+tracker for observed gaps and evidence.
 
 The September 2026 goal is recognizable, usable parity. Exact pixel equality
 is unnecessary. Preserve the information hierarchy, proportions, real

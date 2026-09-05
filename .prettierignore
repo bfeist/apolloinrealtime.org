@@ -1,7 +1,5 @@
-dist
+.local
 node_modules
-legacy
-legacy-src
 public
 pipeline
 tests/visual/**/*-snapshots/**

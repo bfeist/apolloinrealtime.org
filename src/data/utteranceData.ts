@@ -3,7 +3,7 @@
  *
  * Typed reference module for `indexes/utteranceData.csv` (Phase 5).
  *
- * Legacy origin: `legacy-src/{11,13,17}/ajax.js` `processUtteranceData()`.
+ * Legacy origin: the adjacent mission webroots' `ajax.js` `processUtteranceData()`.
  * Each mission loads pipe-split transcript rows.
  *
  * CSV schema (pipe-delimited):

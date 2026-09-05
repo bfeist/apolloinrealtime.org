@@ -3,8 +3,8 @@
  *
  * Typed reference module for `indexes/TOCData.csv` (Phase 5 starter).
  *
- * Legacy origin: `legacy-src/{11,13,17}/ajax.js` `processTOCData()` and
- * `legacy-src/{11,13,17}/index.js` `scrollToClosestTOC()`. Each mission
+ * Legacy origin: the adjacent mission webroots' `ajax.js` `processTOCData()` and
+ * `index.js` `scrollToClosestTOC()`. Each mission
  * stored three parallel globals:
  *
  *   - `gTOCData[]`     — `[timeStr, level, label]` rows (timeId at col 0

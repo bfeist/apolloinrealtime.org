@@ -34,16 +34,27 @@ and `/{N}/MOCRviz/` are case-sensitive. Preserve photo identifiers, filenames,
 attribution, and source links. Do not add KeyCDN URLs or CDN-switching logic to
 the typed app.
 
+## Preserved processing material
+
+The mission-specific processing scripts, raw inputs, working files, and
+historical intermediates are preserved under `pipeline/{11,13,17}/` in their
+original per-mission layouts. This includes source material that the original
+repositories ignored, such as transcript backups, local scraping corpora, OCR
+inputs, and caches used during processing. See `pipeline/README.md` for the
+source inventory and exclusions. These files are snapshots, not the runtime
+inputs under `public/` and not a supported unified toolchain.
+
 ## Future ingestion work
 
 The replacement ingestion pipeline is deferred and does not block release.
 Existing CSVs remain the runtime input until a separately verified pipeline can
 regenerate equivalent output.
 
-When this track starts:
+When modernization of this preserved material starts:
 
-- Build `pipeline/` with uv, Python 3.12+, pinned dependencies, and a typed,
-  validated writer contract matching the runtime adapters.
+- Add a unified harness with uv, Python 3.12+, pinned dependencies, and a typed,
+  validated writer contract matching the runtime adapters without rewriting the
+  preserved mission snapshots in place.
 - Keep the initial workflow interactive. Transcript generation and photo-timing
   correction are the ongoing tools; old scrapers and experiments are reference
   material.

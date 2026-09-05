@@ -3,7 +3,7 @@
  *
  * Typed reference module for `indexes/telemetryData.csv` (Phase 5).
  *
- * Legacy origin: `legacy-src/{11,13,17}/ajax.js` `processTelemetryData()`.
+ * Legacy origin: the adjacent mission webroots' `ajax.js` `processTelemetryData()`.
  * Normalizes telemetry positions, velocities, and distances relative to
  * Earth and Moon.
  *

@@ -67,25 +67,26 @@ another. Future missions opt in only when real datasets are available.
 - MOCRviz, spacecraft, and samples are lazy right-column panels. Apollo 17
   biometrics use the shared GET inside the dashboard.
 - Vite route normalization applies only to application routes. Development
-  endpoints such as `/@vite/client` and legacy-oracle query strings must survive.
+  endpoints such as `/@vite/client` must survive.
 - Browser interaction and visual inspection remain required; DOM presence and
   unit tests do not prove product completeness.
 
 ## Where to work
 
-| Location                                   | Responsibility                                                        |
-| ------------------------------------------ | --------------------------------------------------------------------- |
-| `src/app/missionApp.ts`                    | App composition, clock coordination, event wiring, and panel mounting |
-| `src/app/shell.ts`                         | Shared shell and controls                                             |
-| `src/app/deepLink.ts`                      | GET and channel URL handling                                          |
-| `src/missions/`, `src/types/`              | Mission configuration and typed data contracts                        |
-| `src/data/`                                | Mission CSV adapters and time-indexed lookup                          |
-| `src/engines/`                             | Navigator and YouTube integration                                     |
-| `src/panels/`                              | Typed feature panels, including MOCRviz                               |
-| `src/styles/`                              | Shared layout, tokens, panel styles, and small mission overrides      |
-| `public/{11,13,17}/`                       | Read-only assets and data used by the typed app                       |
-| `legacy/`, `legacy-src/`, `legacy-oracle/` | Read-only source and browser references                               |
-| `tests/`                                   | Unit, browser, and visual verification                                |
+| Location                      | Responsibility                                                        |
+| ----------------------------- | --------------------------------------------------------------------- |
+| `src/app/missionApp.ts`       | App composition, clock coordination, event wiring, and panel mounting |
+| `src/app/shell.ts`            | Shared shell and controls                                             |
+| `src/app/deepLink.ts`         | GET and channel URL handling                                          |
+| `src/missions/`, `src/types/` | Mission configuration and typed data contracts                        |
+| `src/data/`                   | Mission CSV adapters and time-indexed lookup                          |
+| `src/engines/`                | Navigator and YouTube integration                                     |
+| `src/panels/`                 | Typed feature panels, including MOCRviz                               |
+| `src/styles/`                 | Shared layout, tokens, panel styles, and small mission overrides      |
+| `public/{11,13,17}/`          | Read-only assets and data used by the typed app                       |
+| `pipeline/{11,13,17}/`        | Preserved mission processing code, inputs, and intermediates          |
+| Adjacent Apollo repositories  | Original source and browser-reference implementations                 |
+| `tests/`                      | Unit, browser, and visual verification                                |
 
 ## Documentation authority
 

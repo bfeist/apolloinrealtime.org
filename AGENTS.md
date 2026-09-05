@@ -21,9 +21,10 @@ recognizable layout, content, and interactions. The September 2026 salvage
 request accepts modest visual differences; exact production pixel equality
 is not required. Broken layout and missing visualizations are unacceptable.
 
-Use live `https://apolloinrealtime.org/{11,13,17}/` and local
-`/legacy/{11,13,17}/` as references. Open real browser windows and inspect
-the same mission, GET, viewport, and selected panel before and after changes.
+Use live `https://apolloinrealtime.org/{11,13,17}/` and the adjacent
+`../Apollo_11`, `../Apollo_13`, and `../Apollo17.org` repositories as
+references. Open real browser windows and inspect the same mission, GET,
+viewport, and selected panel before and after changes.
 Do not declare parity from screenshots of the splash screen, DOM existence,
 or unit tests alone. MOCRviz completion is authorized by the salvage request;
 the former audio-MVP sign-off gate is superseded.
@@ -31,8 +32,8 @@ the former audio-MVP sign-off gate is superseded.
 The homepage reference is `https://apolloinrealtime.org/` itself. Preserve
 its original wording, mission photographs, insignia, Saturn V background,
 and forum link. Do not invent marketing copy or a new landing-page design.
-Its source is `legacy/landing/_website/_webroot/`; reusable copies live in
-`public/landing/`.
+Its source is `../apolloinrealtime.org/_website/_webroot/`; reusable copies
+live in `public/landing/`.
 
 ## Implementation constraints
 
@@ -54,11 +55,12 @@ Its source is `legacy/landing/_website/_webroot/`; reusable copies live in
 
 ## Reference trees and git hygiene
 
-`legacy/`, `legacy-src/`, `legacy-oracle/`, and `public/{11,13,17}/`
-are read-only during application and release work. The last group includes assets used by the
-typed app, not just obsolete scripts. Never remove or edit these trees as
-part of cleanup. Read [07-repo-and-git-strategy.md](docs-plan/07-repo-and-git-strategy.md)
-for provenance and targeted restoration sources if drift is found.
+`public/{11,13,17}/` is read-only during application and release work because
+it contains assets used by the typed app, not just obsolete scripts. The
+mission snapshots under `pipeline/` preserve original processing scripts,
+inputs, and intermediates; do not modernize them in place. Read
+[07-repo-and-git-strategy.md](docs-plan/07-repo-and-git-strategy.md) for
+provenance and targeted restoration sources if drift is found.
 
 Inspect the working tree before edits and preserve unrelated user changes.
 Commit each meaningful completed unit with `phase(N): short description`;

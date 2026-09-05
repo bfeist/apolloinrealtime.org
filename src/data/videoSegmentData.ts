@@ -3,7 +3,7 @@
  *
  * Typed reference module for `indexes/videoSegmentData.csv` (Phase 5).
  *
- * Legacy origin: `legacy-src/{11,13,17}/ajax.js` `processVideoSegmentData()`.
+ * Legacy origin: the adjacent mission webroots' `ajax.js` `processVideoSegmentData()`.
  * The legacy code stored `gVideoSegments[]` as `[startTimeStr, endTimeStr,
  * <unused>]` — a flat list of (start, end) windows used to draw availability
  * rectangles on the navigator's tier-1 strip.

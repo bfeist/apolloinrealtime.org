@@ -3,7 +3,7 @@
  *
  * Phase 5 Track C — typed, jQuery-free replacement for the legacy
  * `#photoGallery` + `#photodiv` + `populatePhotoGallery` / `showPhotoByTimeId`
- * / `loadPhotoHtml` / `galleryClick` chain in `legacy-src/{N}/index.js`.
+ * / `loadPhotoHtml` / `galleryClick` chain in the adjacent mission `index.js`.
  *
  * Renders:
  *   - a gallery strip of thumbnails (`<div class="galleryItemContainer"

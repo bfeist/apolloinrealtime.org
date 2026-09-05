@@ -1,141 +1,29 @@
-import { defineConfig, type Plugin } from "vite";
 import { resolve } from "node:path";
-import { existsSync, readFileSync } from "node:fs";
-import { rm } from "node:fs/promises";
+import { defineConfig, type Plugin } from "vite";
 
 /**
  * URL strategy
  * ------------
- *  /                      \u2192 landing/index.html (placeholder)
- *  /11/  /13/  /17/       \u2192 the new typed app (this is the work-in-progress).
- *                            HTML lives at {N}/index.html, ESM at
- *                            src/app/missionApp.ts, assets under public/{N}/.
- *  /legacy/{N}/           \u2192 byte-for-byte lifted legacy mission, served from
- *                            legacy-oracle/{N}/index.html for side-by-side
- *                            comparison. Dev-only \u2014 not in the production build.
- *  /dev/                  \u2192 raw per-module smoke harness (src/dev/harness.ts).
- *                            Dev-only \u2014 not in the production build.
+ *  /                 -> landing page
+ *  /11/ /13/ /17/    -> shared typed mission application
+ *  /dev/              -> raw per-module smoke harness (development only)
  *
- * All shared assets (CSVs, photos, MOCRviz audio data, vendored paper.js)
- * live under public/{N}/ and are reachable from both the new app and the
- * legacy oracle.
+ * Shared CSVs, photos, MOCRviz data/images, and vendored paper.js live under
+ * public/{N}/. Original website source remains in the adjacent repositories.
  */
 
-/**
- * If a path looks like a directory (no extension, no trailing slash), append
- * one so Vite resolves the index.html inside. Handles /11, /13, /17, /dev,
- * /legacy, /legacy/13, etc. without per-route config.
- */
+/** Append a slash to supported directory routes so Vite resolves index.html. */
 const trailingSlashRedirect = (): Plugin => ({
   name: "trailing-slash-redirect",
   configureServer(server) {
     server.middlewares.use((req, _res, next) => {
       const url = req.url ?? "";
-      // Only application routes are directories. Rewriting /@vite/client
-      // bypasses Vite's client transform and breaks every dynamic CSS import.
-      const match = /^(\/(?:11|13|17|dev|legacy\/(?:11|13|17)))(\?.*)?$/.exec(url);
+      // Rewriting development endpoints such as /@vite/client would bypass
+      // Vite's client transform and break dynamic CSS imports.
+      const match = /^(\/(?:11|13|17|dev))(\?.*)?$/.exec(url);
       if (match) req.url = `${match[1]}/${match[2] ?? ""}`;
       next();
     });
-  },
-});
-
-/**
- * Dev-only: serve /legacy/{11,13,17}/ from legacy-oracle/{N}/index.html as
- * a read-only byte-for-byte oracle. The oracle's <script src="..."> tags
- * reference relative paths (e.g. "lib/jquery-2.1.4.js", "index.js") that
- * resolve against the URL prefix \u2014 we rewrite those requests to look under
- * public/{N}/ so the same asset tree serves both the new app and the
- * oracle. The oracle is never copied into the production build.
- */
-const legacyOraclePlugin = (): Plugin => ({
-  name: "legacy-oracle",
-  configureServer(server) {
-    const oracleHtml = (mission: string): string | null => {
-      const path = resolve("legacy-oracle", mission, "index.html");
-      return existsSync(path) ? readFileSync(path, "utf8") : null;
-    };
-    server.middlewares.use((req, res, next) => {
-      const url = req.url ?? "";
-      const m = /^\/legacy\/(11|13|17)\/([^?]*)(\?.*)?$/.exec(url);
-      if (!m) return next();
-      const [, mission, rest] = m;
-      // bare /legacy/{N}/ \u2192 serve the oracle HTML
-      if (rest === "" || rest === "index.html") {
-        const html = oracleHtml(mission!);
-        if (!html) return next();
-        res.setHeader("content-type", "text/html; charset=utf-8");
-        res.end(html);
-        return;
-      }
-      // /legacy/{N}/<asset> \u2192 rewrite to /{N}/<asset> so Vite serves it
-      // from public/{N}/
-      req.url = `/${mission}/${rest}${m[3] ?? ""}`;
-      next();
-    });
-  },
-});
-
-/**
- * Production build only: delete legacy script files copied from public/{N}/
- * by Vite's publicDir mechanism. These files are NOT referenced by the typed
- * app bundle — they are dead weight from the legacy site that ships in the
- * same public/ tree as the data assets (indexes/, img/, MOCRviz/data/).
- *
- * Kept in dist/{N}/:
- *   lib/paper-full.js        — navigator engine (loaded dynamically)
- *   indexes/**               — all CSV data (typed loaders)
- *   img/**                   — mission patch + photo assets
- *   MOCRviz/data/**          — tape_ranges.csv
- *   MOCRviz/img/**           — tape images used by the MOCRviz panel
- *   favicons/**              — site icons
- *   favicon.ico, robots.txt, privacy.html
- *
- * Deleted from dist/{N}/:
- *   index.js, navigator.js, ajax.js, styles.css, TOC.html,
- *   navigator_dev.html, navigator_dev.js,
- *   lib/* (except paper-full.js),
- *   MOCRviz/MOCRviz.{html,js,css}, MOCRviz/js/
- */
-const purgeLegacyAssets = (): Plugin => ({
-  name: "purge-legacy-assets",
-  apply: "build",
-  closeBundle: {
-    order: "post" as const,
-    async handler() {
-      const del = async (p: string) => rm(p, { recursive: true, force: true });
-      for (const mission of ["11", "13", "17"]) {
-        const b = resolve(__dirname, "dist", mission);
-        // Top-level legacy files
-        for (const f of [
-          "index.js",
-          "navigator.js",
-          "ajax.js",
-          "styles.css",
-          "TOC.html",
-          "navigator_dev.html",
-          "navigator_dev.js",
-        ]) {
-          await del(`${b}/${f}`);
-        }
-        // lib/ — keep only paper-full.js; delete everything else
-        const libDir = `${b}/lib`;
-        const libKeep = new Set(["paper-full.js"]);
-        if (existsSync(libDir)) {
-          const { readdirSync } = await import("node:fs");
-          for (const f of readdirSync(libDir)) {
-            if (!libKeep.has(f)) await del(`${libDir}/${f}`);
-          }
-        }
-        // MOCRviz — delete HTML/JS/CSS + js/ subdir; keep data/ and img/
-        const mocrDir = `${b}/MOCRviz`;
-        if (existsSync(mocrDir)) {
-          for (const f of ["MOCRviz.html", "MOCRviz.js", "MOCRviz.css", "js"]) {
-            await del(`${mocrDir}/${f}`);
-          }
-        }
-      }
-    },
   },
 });
 
@@ -151,9 +39,9 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
-  plugins: [trailingSlashRedirect(), legacyOraclePlugin(), purgeLegacyAssets()],
+  plugins: [trailingSlashRedirect()],
   build: {
-    outDir: "dist",
+    outDir: ".local/dist",
     emptyOutDir: true,
     rollupOptions: {
       input: {

@@ -1,5 +1,5 @@
 /** A13's production Spacecraft tab, independent of the retired spacecraft_dev app.
- * Source copy: legacy-oracle/13/index.html#spacecraftDescription.
+ * Source copy: ../Apollo_13/_website/_webroot/13/index.html#spacecraftDescription.
  * The original rotation video stays on the mission media CDN. */
 import "../../styles/panels/spacecraft.css";
 

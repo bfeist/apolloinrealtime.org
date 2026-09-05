@@ -16,7 +16,7 @@ only in [08-progress-tracker.md](08-progress-tracker.md).
 | C8   | Production cutover covers all three missions together. Local availability at the mission routes is not a deployment, and release requires verified hosting and rollback mechanics.                                                                             |
 | D10  | Apollo 8, 9, 10, 12, 14, 15, and 16 are future work. Do not add missions before the current release work is complete; MOCRviz requires real available recordings.                                                                                              |
 | E11  | Continue static hosting; do not introduce an application server.                                                                                                                                                                                               |
-| E11b | Typed media URLs use `media.apolloinrealtime.org`, not KeyCDN. Historical reference copies remain pristine.                                                                                                                                                    |
+| E11b | Typed media URLs use `media.apolloinrealtime.org`, not KeyCDN. Historical reference repositories remain pristine.                                                                                                                                              |
 | F13  | Unit tests cover logic, browser checks cover interactions, live production guides recognizable parity, and reviewed typed snapshots catch regressions. None of these alone establishes release readiness.                                                      |
 
 TypeScript and Vite are authoring tools; their output must run as static files.

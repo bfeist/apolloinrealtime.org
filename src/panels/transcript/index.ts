@@ -4,7 +4,7 @@
  * Phase 5 Track C + Phase 6.5 — typed, jQuery-free replacement for the
  * legacy `#utteranceTable` + `scrollTranscriptToTimeId` +
  * `repopulateTranscript` / `prependTranscript` / `appendUtterances` /
- * `trimUtterances` chain in `legacy-src/{N}/index.js`.
+ * `trimUtterances` chain in the corresponding adjacent mission `index.js`.
  *
  * Why windowed: A11 has ~30k utterances and A17 has ~17k. Rendering them
  * all at once produces a >500,000 px scroll-host and locks the main
@@ -19,7 +19,7 @@
  * `.utt_crew`, `.spokenwords` CSS continues to apply.
  *
  * Tuning constants mirror the legacy thresholds in
- * `legacy-src/13/index.js` around `scrollTranscriptToTimeId`:
+ * `../Apollo_13/_website/_webroot/13/index.js` around `scrollTranscriptToTimeId`:
  *   - INITIAL_HALF_WINDOW  = 50   // legacy: utteranceIndex - 50 .. + 50
  *   - PREPEND_CHUNK        = 50
  *   - APPEND_CHUNK         = 50

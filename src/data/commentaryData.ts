@@ -3,7 +3,7 @@
  *
  * Typed reference module for `indexes/commentaryData.csv` (Phase 5).
  *
- * Legacy origin: `legacy-src/{11,13,17}/ajax.js` `processCommentaryData()`.
+ * Legacy origin: the adjacent mission webroots' `ajax.js` `processCommentaryData()`.
  * In A13, `commentaryData.csv` has a two-column schema (`timeId|text`).
  * In A11 and A17, it has a four-column schema (`timeId|source|speaker|text`).
  * This loader normalizes both structures into a consistent typed entry.

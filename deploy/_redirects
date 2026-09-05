@@ -1,5 +1,5 @@
 # Cloudflare Pages / Netlify _redirects for AiRT2
-# (Copy this file into dist/ before deploying to Cloudflare Pages or Netlify)
+# (Copy this file into .local/dist/ before deploying to Cloudflare Pages or Netlify)
 #
 # Mobile subfolder redirects — the /mobile/ subfolders are retired (decision B5).
 # Every existing deep link under /11/mobile/, /13/mobile/, /17/mobile/ should

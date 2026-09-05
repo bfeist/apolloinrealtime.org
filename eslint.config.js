@@ -10,10 +10,8 @@ import prettier from "eslint-config-prettier";
 export default tseslint.config(
   {
     ignores: [
-      "dist/**",
+      ".local/**",
       "node_modules/**",
-      "legacy/**",
-      "legacy-src/**",
       "public/**",
       "pipeline/**",
       "tests/visual/**/*-snapshots/**",

@@ -3,7 +3,7 @@
  *
  * Typed reference module for `indexes/orbitData.csv` (Phase 5).
  *
- * Legacy origin: `legacy-src/{11,13,17}/ajax.js` `processOrbitData()`.
+ * Legacy origin: the adjacent mission webroots' `ajax.js` `processOrbitData()`.
  * Manages lunar orbit sequence indexes and their duration windows.
  *
  * CSV schema (pipe-delimited):

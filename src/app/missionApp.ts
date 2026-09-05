@@ -4,8 +4,8 @@
  * Builds the typed production shell (`src/app/shell.ts`), then mounts
  * every typed engine and panel into the shell's named slots. Append
  * `?debug=1` to the URL to also render the diagnostic-readout dump in
- * a side host (useful while Phase 6 hardens). The byte-for-byte legacy
- * oracle lives at `/legacy/{N}/`.
+ * a side host (useful while Phase 6 hardens). Original implementations live
+ * in the adjacent mission repositories.
  *
  * Mission id is read from `<body data-mission="11|13|17">`. The matching
  * typed `MissionConfig` is imported statically and exposed at

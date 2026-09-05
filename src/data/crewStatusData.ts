@@ -3,7 +3,7 @@
  *
  * Typed reference module for `indexes/crewStatusData.csv` (Phase 5).
  *
- * Legacy origin: `legacy-src/{11,13,17}/ajax.js` `processCrewStatusData()`.
+ * Legacy origin: the adjacent mission webroots' `ajax.js` `processCrewStatusData()`.
  * Each row has a start time and status text. End times are backfilled
  * from the next row's start (or the end of the mission).
  *

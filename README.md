@@ -18,12 +18,11 @@ npm ci
 npm run dev
 ```
 
-| URL                                        | Purpose                                                |
-| ------------------------------------------ | ------------------------------------------------------ |
-| `http://localhost:5173/`                   | Mission picker                                         |
-| `http://localhost:5173/{11,13,17}/`        | Shared typed application                               |
-| `http://localhost:5173/legacy/{11,13,17}/` | Original applications for comparison, development only |
-| `http://localhost:5173/dev/`               | Module smoke harness                                   |
+| URL                                 | Purpose                  |
+| ----------------------------------- | ------------------------ |
+| `http://localhost:5173/`            | Mission picker           |
+| `http://localhost:5173/{11,13,17}/` | Shared typed application |
+| `http://localhost:5173/dev/`        | Module smoke harness     |
 
 Run `npm run check` for TypeScript, lint, formatting, and unit tests.
 Run `npm run build` and `npm run preview` to verify the static build.
@@ -38,6 +37,7 @@ Read [AGENTS.md](AGENTS.md), then the
 The tracker records actual verification and remaining work; the existence
 of modules and passing unit tests does not establish product parity.
 
-New application code belongs in `src/`. The original source trees and
-copied legacy assets remain read-only reference material. Their provenance
-is documented in [legacy/LEGACY.md](legacy/LEGACY.md).
+New application code belongs in `src/`. Runtime assets belong in `public/`, and
+the preserved mission processing snapshots live in `pipeline/`. Consult the
+adjacent `../Apollo_11`, `../Apollo_13`, `../Apollo17.org`, and
+`../apolloinrealtime.org` repositories for original website source.

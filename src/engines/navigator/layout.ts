@@ -1,7 +1,7 @@
 /**
  * Navigator layout + coordinate math.
  *
- * Extracted from `legacy-src/{11,13,17}/navigator.js` (Phase 4). This module
+ * Extracted from the adjacent mission webroots' `navigator.js` files (Phase 4). This module
  * is the pure-math subset of the navigator: tier sizing, pixels-per-second,
  * seconds<->x mapping per tier, and the zoom-pane (nav box) position +
  * derived "start seconds" anchors that feed tier 2 and tier 3.

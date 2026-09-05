@@ -21,7 +21,8 @@ is required for release.
 ## 2. Complete the feature audit
 
 Compare the same mission, GET, viewport, and active panel against live production
-and the local legacy oracle. Resolve or explicitly accept gaps in:
+and the adjacent original mission repositories. Resolve or explicitly accept
+gaps in:
 
 - mission entry and splash behavior;
 - complete credits, help, navigator legend, and ancillary overlays;
@@ -67,7 +68,8 @@ green. Preserve the previous production deployment for rollback.
 
 - Run `npm run check` before every commit and `npm run build` for application or
   build-output changes.
-- Use visible production, typed, and local-legacy browser windows as described in
+- Use visible production and typed browser windows plus the adjacent original
+  source repositories as described in
   [PHASE6-visual-reference.md](PHASE6-visual-reference.md).
 - Exercise GET input, navigator, transcript/TOC/commentary/photo/search seeks,
   play/pause/mute, tab switching, dashboard, share/fullscreen/help controls, and

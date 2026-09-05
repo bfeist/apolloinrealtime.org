@@ -3,7 +3,7 @@
  *
  * Typed reference module for `indexes/photoData.csv` (Phase 5).
  *
- * Legacy origin: `legacy-src/{11,13,17}/ajax.js` `processPhotoData()`.
+ * Legacy origin: the adjacent mission webroots' `ajax.js` `processPhotoData()`.
  * Each mission loads pipe-split photo metadata rows.
  *
  * CSV schema (pipe-delimited):

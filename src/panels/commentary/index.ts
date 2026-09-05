@@ -4,7 +4,7 @@
  * Phase 5 Track C — typed, jQuery-free replacement for the legacy
  * `#commentaryTable` + `scrollCommentaryToTimeId` / `repopulateCommentary`
  * / `prependCommentary` / `appendCommentary` / `trimCommentary` chain in
- * `legacy-src/{N}/index.js`.
+ * the corresponding adjacent mission webroot's `index.js`.
  *
  * The legacy code maintained a sliding 100-item window with manual
  * prepend/append/trim because rendering all ~5k commentary rows through

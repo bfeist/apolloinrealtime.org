@@ -3,7 +3,7 @@
  *
  * Typed reference module for `indexes/missionStagesData.csv` (Phase 5).
  *
- * Legacy origin: `legacy-src/{11,13,17}/ajax.js` `processMissionStagesData()`.
+ * Legacy origin: the adjacent mission webroots' `ajax.js` `processMissionStagesData()`.
  * The legacy code stored `gMissionStages[]` as `[startTimeStr, name,
  * description, endTimeStr]`, where `endTimeStr` was back-filled with the
  * next row's start time and the final row's end was

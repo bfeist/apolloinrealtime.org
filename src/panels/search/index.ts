@@ -3,7 +3,7 @@
  *
  * Phase 5 Track C — typed, jQuery-free replacement for the legacy
  * `performSearch` / `getSearchResultHTML` / `searchResultClick` chain in
- * `legacy-src/{N}/index.js`. The legacy code searched a flat
+ * the corresponding adjacent mission webroot's `index.js`. The legacy code searched a flat
  * `gSearchData` array that was concatenated from commentary +
  * utterances + photos at startup. Here we build the search index from
  * the typed data modules instead.

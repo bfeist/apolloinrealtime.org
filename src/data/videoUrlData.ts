@@ -3,7 +3,7 @@
  *
  * Typed reference module for `indexes/videoURLData.csv` (Phase 5).
  *
- * Legacy origin: `legacy-src/{11,13,17}/ajax.js` `processVideoURLData()`.
+ * Legacy origin: the adjacent mission webroots' `ajax.js` `processVideoURLData()`.
  * Normalizes different column formats across missions into a consistent typed model.
  *
  * CSV schema variants:

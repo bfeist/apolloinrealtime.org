@@ -42,7 +42,7 @@ function buildAll(entries: readonly (readonly [number, string, string])[]): read
 }
 
 // A13 channel catalog. Labels match the production HTML button text exactly
-// (short abbreviations from legacy-src/13/index.html). Descriptions are from
+// (short abbreviations from ../Apollo_13/_website/_webroot/13/index.html). Descriptions are from
 // public/13/MOCRviz/MOCRviz.js `cTrackInfo` (tooltip text).
 const A13_ENTRIES: readonly (readonly [number, string, string])[] = [
   [1, "HR1", ""],
@@ -217,7 +217,7 @@ const A13_ENTRIES: readonly (readonly [number, string, string])[] = [
 
 const A13_CHANNELS: MissionChannels = {
   all: buildAll(A13_ENTRIES),
-  // Display order matches the production legacy-src/13/index.html button list exactly.
+  // Display order matches the adjacent Apollo 13 webroot button list exactly.
   available: [
     2, 3, 50, 7, 8, 14, 15, 47, 48, 49, 19, 20, 21, 22, 12, 13, 16, 17, 58, 18, 57, 5, 9, 6, 11, 42,
     43, 28, 29, 32, 33, 34, 35, 51, 52, 53, 54, 55, 56, 23, 24, 25, 26, 27, 59, 44, 45, 46,

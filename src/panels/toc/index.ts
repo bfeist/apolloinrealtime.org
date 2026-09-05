@@ -15,14 +15,14 @@
  *
  * The panel renders from a {@link TocData} object (already loaded by
  * `src/data/tocData.ts`). The new typed app mounts it at `/{N}/` via
- * `src/app/missionApp.ts`; the legacy iframe-based TOC lives only in the
- * read-only oracle at `/legacy/{N}/`.
+ * `src/app/missionApp.ts`; the legacy iframe-based TOC remains in the adjacent
+ * original mission repositories.
  *
  * Legacy origin:
- *   - `legacy-src/{11,13,17}/index.html` `<iframe id="iFrameTOC">`
- *   - `legacy-src/{11,13,17}/index.js` `scrollTOCToTimeId`
+ *   - adjacent mission webroot `index.html` `<iframe id="iFrameTOC">`
+ *   - adjacent mission webroot `index.js` `scrollTOCToTimeId`
  *   - `public/{11,13,17}/TOC.html` static-built TOC markup
- *   - `legacy-src/{11,13,17}/styles.css` `.TOC_container` etc.
+ *   - adjacent mission webroot `styles.css` `.TOC_container` etc.
  */
 
 import { delegate } from "../../dom/index.js";
