@@ -7,6 +7,28 @@ for (const mission of ["11", "13", "17"]) {
       await page.goto(`/${mission}/?t=000:00:00`);
       await expect(page.locator("#transcriptWrapper tr").first()).toBeAttached();
       await page.evaluate(() => document.fonts.ready);
+      const transcriptTable = page.locator("#utteranceTable");
+      const transcriptCells = transcriptTable.locator("tr").first().locator("td");
+      await expect(transcriptTable).toHaveCSS("border-collapse", "collapse");
+      await expect(transcriptCells.first()).toHaveCSS("font-size", "13px");
+      const transcriptGeometry = await transcriptCells.evaluateAll((cells) =>
+        cells.map((cell) => {
+          const style = getComputedStyle(cell);
+          return {
+            width: cell.getBoundingClientRect().width,
+            borderLeft: style.borderLeftWidth,
+            borderRight: style.borderRightWidth,
+          };
+        }),
+      );
+      expect(transcriptGeometry).toHaveLength(3);
+      expect(transcriptGeometry[0]?.width).toBeLessThan(82);
+      expect(transcriptGeometry[1]?.width).toBeLessThan(82);
+      expect(
+        transcriptGeometry.every(
+          ({ borderLeft, borderRight }) => borderLeft === "0px" && borderRight === "0px",
+        ),
+      ).toBe(true);
       const controls = page.locator(".airt-tabs-wrapper");
       await expect(controls).toBeVisible();
       await page.locator("#tocTab").hover();
