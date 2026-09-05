@@ -13,12 +13,12 @@ flow**. Both must agree.
 
 ## Live production URLs (visual layout oracle)
 
-| Mission   | Live URL                                | Splash button to reach the app                     |
-| --------- | --------------------------------------- | -------------------------------------------------- |
-| Apollo 11 | https://apolloinrealtime.org/11/        | T-MINUS 1M (pre-launch) or NOW (in-progress)       |
-| Apollo 13 | https://apolloinrealtime.org/13/        | T-MINUS 1M or NOW                                  |
-| Apollo 17 | https://apolloinrealtime.org/17/        | T-MINUS 1M or NOW                                  |
-| Landing   | https://apolloinrealtime.org/           | (used for cross-mission landing page in Phase 7)   |
+| Mission   | Live URL                         | Splash button to reach the app                   |
+| --------- | -------------------------------- | ------------------------------------------------ |
+| Apollo 11 | https://apolloinrealtime.org/11/ | T-MINUS 1M (pre-launch) or NOW (in-progress)     |
+| Apollo 13 | https://apolloinrealtime.org/13/ | T-MINUS 1M or NOW                                |
+| Apollo 17 | https://apolloinrealtime.org/17/ | T-MINUS 1M or NOW                                |
+| Landing   | https://apolloinrealtime.org/    | (used for cross-mission landing page in Phase 7) |
 
 The splash screen is its own DOM (`.splash-content`). Clicking either
 launch button hides splash (`body.removeClass("splash-loaded")`) and
@@ -99,11 +99,11 @@ layout above** before Playwright visual diff can pass.
 
 ## Per-mission layout deltas (from production)
 
-| Mission | Photo container class      | Notes                                                                      |
-| ------- | -------------------------- | -------------------------------------------------------------------------- |
-| A11     | `.app-with-tabs-block`     | Photography / MOCR Audio / Astromaterial Samples tabs                      |
-| A13     | `.app-with-tabs-block`     | Photography / MOCR Audio / Spacecraft tabs                                 |
-| A17     | `.photo-block`             | No tabs; just the photo viewer + gallery                                   |
+| Mission | Photo container class  | Notes                                                 |
+| ------- | ---------------------- | ----------------------------------------------------- |
+| A11     | `.app-with-tabs-block` | Photography / MOCR Audio / Astromaterial Samples tabs |
+| A13     | `.app-with-tabs-block` | Photography / MOCR Audio / Spacecraft tabs            |
+| A17     | `.photo-block`         | No tabs; just the photo viewer + gallery              |
 
 A17 also drops the MOCR audio panel; the channel grid is not present.
 
@@ -120,6 +120,7 @@ The header is a horizontal flexbox:
 - Right: navigator monitor (Paper.js canvas spans ~70% of header width)
 
 The navigator shows **three vertically stacked tier bars**:
+
 - Tier 1 (full mission, ~5–10 px tall) — colored bands for stages
 - Tier 2 (zoomed-in window with handles) — ~50 px tall, shows
   half-hour ticks + labeled chapter labels
@@ -141,6 +142,7 @@ specific times when the current GET is inside a video URL segment
 auto show/hide until the next seek.
 
 Left column holds:
+
 1. **Video monitor + Mission Status overlay** — dashboard: mission day,
    phase, crew status, wake-up timer, distance/velocity. Toggled via the
    `🎚` dashboard button. The `#dashboardContent` element fills this
@@ -177,6 +179,7 @@ When the YouTube video is active, `#player` overlays this whole area.
 ## Where the Phase 6 typed shell stands (2026-05-29 end of session)
 
 What works:
+
 - 3-row grid (header / main / debug)
 - Header layout (patch / info / navigator) at desktop ✓
 - GET input + GO button wired with `airt:seek` dispatch ✓
@@ -189,6 +192,7 @@ What works:
 - `?debug=1` reveals a diagnostic readout host ✓
 
 What's wrong / not yet matching production:
+
 1. **Main layout is 2-column** (video-left, side-rail-right) but should
    be **3-column** (video/transcript-left, channels-mid, photo-right).
 2. **Dashboard overlay behavior is incomplete**; production shows it by
@@ -198,14 +202,15 @@ What's wrong / not yet matching production:
    vertical strip.
 4. **Photo gallery is a horizontal scroll** below the photo viewer;
    should be a vertical rail on the far-right edge.
-6. **No splash screen** at all yet; production starts with one.
-7. **No play/pause, sound, share, fullscreen, dashboard, search,
+5. **No splash screen** at all yet; production starts with one.
+6. **No play/pause, sound, share, fullscreen, dashboard, search,
    help buttons.** Phase 6 plan calls these out in the "tabs" section.
-8. **CSS visual styling is generic** (modern flat dark theme with
+7. **CSS visual styling is generic** (modern flat dark theme with
    our own tokens); production uses specific NASA-ish typography
    (Roboto Slab title) and warmer per-mission accents.
 
 **Phase 6.5 priorities (next session):**
+
 1. Restructure `src/app/shell.ts` from 2-col to 3-col grid.
 2. Keep `#player` in the left top monitor under the default-visible
    `#dashboardContent` overlay; auto-hide dashboard during video URL
@@ -224,15 +229,16 @@ After 6.5, Playwright visual diff is unblocked and Phase 6 can exit.
 
 Once the layout is restructured, capture baselines for each combo:
 
-| Mission | GET                                | Viewport (px)    |
-| ------- | ---------------------------------- | ---------------- |
-| 11      | pre-launch, launch, key-event-1,   | 1440×900 (desk), |
-|         | key-event-2, final-phase, end      | 768×1024 (tab),  |
-| 13      | (same six snapshots)               | 390×844 (phone)  |
-| 17      | (same six snapshots)               |                  |
+| Mission | GET                              | Viewport (px)    |
+| ------- | -------------------------------- | ---------------- |
+| 11      | pre-launch, launch, key-event-1, | 1440×900 (desk), |
+|         | key-event-2, final-phase, end    | 768×1024 (tab),  |
+| 13      | (same six snapshots)             | 390×844 (phone)  |
+| 17      | (same six snapshots)             |                  |
 
 Total: 3 missions × 6 GETs × 3 viewports = 54 baselines (matches the
 Phase 0 inventory). Compare each against:
+
 1. The legacy oracle at `/legacy/{N}/` (DOM equivalence)
 2. The production deploy at `apolloinrealtime.org/{N}/` (visual layout)
 

@@ -15,12 +15,12 @@ real mission URLs, and grows in place toward feature parity.
 
 ### URL layout (in dev server)
 
-| URL              | Source                                  | What it is                                                    |
-| ---------------- | --------------------------------------- | ------------------------------------------------------------- |
-| `/`              | `index.html`                            | Landing placeholder + links to the other URLs                 |
-| `/11/` `/13/` `/17/` | `{N}/index.html` + `src/app/missionApp.ts` | **The new typed app under construction.** This is where work happens. |
+| URL                  | Source                                           | What it is                                                                                                                            |
+| -------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                  | `index.html`                                     | Landing placeholder + links to the other URLs                                                                                         |
+| `/11/` `/13/` `/17/` | `{N}/index.html` + `src/app/missionApp.ts`       | **The new typed app under construction.** This is where work happens.                                                                 |
 | `/legacy/11/` etc.   | `legacy-oracle/{N}/index.html` (via Vite plugin) | **Byte-for-byte legacy oracle**, for side-by-side comparison. Pristine; never edited. Assets are pulled from `public/{N}/`. Dev-only. |
-| `/dev/`          | `dev/index.html` + `src/dev/harness.ts` | Per-module browser smoke tests (clock, CSV loader, ytplayer). Dev-only. |
+| `/dev/`              | `dev/index.html` + `src/dev/harness.ts`          | Per-module browser smoke tests (clock, CSV loader, ytplayer). Dev-only.                                                               |
 
 Bindings:
 
@@ -300,7 +300,7 @@ are never imported, called, or modified.
    `renderer.ts` + `paperApi.ts`). Paper.js is vendored at
    `public/{N}/lib/paper-full.js` and loaded via the shared head; the
    typed renderer accepts an injected `PaperScopeLike` (no `npm install
-   paper`).
+paper`).
 
 **Exit criterion:** All five typed reference modules exist in `src/` with
 Vitest tests and are exercisable at `/{N}/` for every mission they
@@ -463,7 +463,7 @@ Sequence:
 5. Monitor analytics, share-link traffic, console errors.
 6. After the rollback window closes, **delete the legacy script payloads
    from the repo** in one commit: `public/{11,13,17}/{index.js,
-   navigator.js, ajax.js, TOC.html, navigator_dev.{html,js}}`,
+navigator.js, ajax.js, TOC.html, navigator_dev.{html,js}}`,
    `public/{N}/lib/` (jQuery + jQuery plugins; Paper.js stays only if
    still vendored as a runtime), `public/{N}/MOCRviz/*.{html,js,css}`
    (waveform PNGs + audio + calibration JSON in `MOCRviz/data/` and
@@ -512,18 +512,18 @@ May be delegated to a sub-agent — see the open follow-ups in 06. Network
 
 ## Estimated complexity (not time)
 
-| Phase                          | Complexity  | Risk                                  |
-| ------------------------------ | ----------- | ------------------------------------- |
-| 0 — scaffold + baselines       | low         | low                                   |
-| 1 — lift legacy oracles        | low         | low                                   |
-| 2 — mission config             | medium      | low                                   |
-| 3 — head + ESM entry stub      | medium      | low                                   |
-| 4 — engines                    | high        | medium                                |
-| 4.5 — MOCRviz typed            | medium-high | medium (audio + waveform sync)        |
-| 5 — data, overlays, panels     | medium      | low                                   |
-| 6 — production shell + CSS     | high        | medium-high (full layout + phone)     |
-| 7 — atomic cutover             | low (code)  | medium-high (URL/SEO/share-link/DNS)  |
-| 8 — cleanup + new missions     | varies      | low                                   |
-| Data-ingestion track           | medium      | low (parallel, non-blocking)          |
+| Phase                      | Complexity  | Risk                                 |
+| -------------------------- | ----------- | ------------------------------------ |
+| 0 — scaffold + baselines   | low         | low                                  |
+| 1 — lift legacy oracles    | low         | low                                  |
+| 2 — mission config         | medium      | low                                  |
+| 3 — head + ESM entry stub  | medium      | low                                  |
+| 4 — engines                | high        | medium                               |
+| 4.5 — MOCRviz typed        | medium-high | medium (audio + waveform sync)       |
+| 5 — data, overlays, panels | medium      | low                                  |
+| 6 — production shell + CSS | high        | medium-high (full layout + phone)    |
+| 7 — atomic cutover         | low (code)  | medium-high (URL/SEO/share-link/DNS) |
+| 8 — cleanup + new missions | varies      | low                                  |
+| Data-ingestion track       | medium      | low (parallel, non-blocking)         |
 
 The risk concentration is in Phases 4, 4.5, 6, and 7.
