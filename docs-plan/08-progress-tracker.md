@@ -2,12 +2,12 @@
 
 ## Resume here
 
-**2026-09-05: Legacy ancestry repair in progress. No production cutover.**
-The complete filtered legacy graphs are present, but their branch tips were
-attached to one recent merge and produce a misleading main-branch timeline.
-Repair the four original import merges so they point to the granular filtered
-source histories, then revalidate every source graph before resuming release
-work in [05-migration-plan.md](05-migration-plan.md).
+**2026-09-05: Granular legacy ancestry restored. No production cutover.**
+The four original import merges on `main` now point to the full filtered default
+branch histories at their correct import points. Auxiliary legacy branches and
+tags remain under namespaced `legacy/*` refs. Removed files and pre-pipeline
+snapshots remain expunged. Resume long-session media resilience work in
+[05-migration-plan.md](05-migration-plan.md).
 
 Useful review routes:
 
@@ -28,7 +28,7 @@ Playback starts paused and the mission controls own playback intent.
 | Mission content     | Transcript, milestones, commentary, photography, search, Apollo 11 samples, Apollo 13 spacecraft information, and Apollo 17 biometrics are mounted in the typed app.                                                            |
 | MOCRviz             | Apollo 11/13 use the production interaction hierarchy with typed room selection, synchronized hover/seek previews, smooth activity/waveform motion, real audio/transcripts, and tape boundaries. Apollo 17 has no MOCR dataset. |
 | Photo sources       | The selected large photograph links to the highest-resolution source available for each mission without changing thumbnail seeking or timed progression.                                                                        |
-| Source preservation | Adjacent repositories remain source references; their complete filtered commit graphs are retained under `legacy/*` refs. `public/{11,13,17}/` remains read-only runtime content; pre-pipeline material is excluded.            |
+| Source preservation | Complete filtered source graphs are retained under `legacy/*` refs; imported default histories are connected through their original `main` merges. Runtime `public/{11,13,17}/` remains read-only.                              |
 | Release             | Not ready for cutover; the release audit and environment validation below remain open.                                                                                                                                          |
 
 ## Current verification evidence
@@ -58,6 +58,11 @@ commits, 939/939 Apollo 17 commits, and 14/14 landing-site commits. A path audit
 found no reachable file outside the current 975-file AiRT2 path set. This was a
 repository-only change, so no new browser comparison was required.
 
+The original four import merges were subsequently reconnected to the granular
+filtered source tips instead of attaching all histories to one recent merge.
+`main` now reaches 1,516 commits through the semantically correct import graph;
+the complete source graphs, including auxiliary branches, remain namespaced.
+
 ## Remaining release work
 
 1. Run long-session YouTube/MOCR listening tests across tape boundaries, slow
@@ -84,6 +89,7 @@ ingestion pipeline remain deferred beyond this release.
 
 | Date       | Work                                                                                                                                                                                    | Verification                                                                                                                                                                 |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-05 | Repaired the four original import merge parents so granular filtered legacy histories appear at their actual import points instead of beneath one recent multi-parent merge.            | `main` reaches 1,516 commits; all source commit counts, merge-parent mapping, path audit, Git fsck, and `npm run check` (276) pass.                                          |
 | 2026-09-05 | Removed copied pre-pipeline material and rewrote all refs to expunge removed legacy files while retaining the four source repositories' complete commit topology under namespaced refs. | Per-repository commit counts match all four sources; reachable-path audit, Git fsck, `npm run check` (276), and repository repack pass.                                      |
 | 2026-09-05 | Externalized original-site references, removed dead public legacy code, and moved build output to `.local/dist/`.                                                                       | Exact mirror checks for 13 source trees; `npm run check` (276), build, built-payload audit, and six desktop/phone control cases pass.                                        |
 | 2026-09-05 | Moved the desktop Share and Play labels down with a 5 px top inset, retaining control height and icon placement.                                                                        | Visible A13 review; `npm run check` (276), build, and all six `controls.spec.ts` desktop/phone cases pass.                                                                   |

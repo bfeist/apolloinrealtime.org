@@ -21,8 +21,9 @@ The complete commit topology from each adjacent repository is retained in
 namespaced `legacy/{apollo11,apollo13,apollo17,landing}/` branch and tag refs.
 Those histories are filtered to the current AiRT2 path set: commit metadata,
 parents, branches, and tags remain, while files absent from the current tree do
-not retain historical blobs. The legacy branch tips are also parents of the
-current main history so single-branch clones retain their provenance.
+not retain historical blobs. Each source repository's imported default-branch
+tip is the second parent of its original import merge on `main`. Auxiliary
+branches and tags remain available through the namespaced refs.
 
 If runtime drift is found, inspect a targeted diff against the appropriate
 adjacent webroot and restore only the affected files. The retired `/mobile/`
