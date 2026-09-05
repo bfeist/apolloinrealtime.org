@@ -56,9 +56,9 @@ live in `public/landing/`.
 ## Reference trees and git hygiene
 
 `public/{11,13,17}/` is read-only during application and release work because
-it contains assets used by the typed app, not just obsolete scripts. The
-mission snapshots under `pipeline/` preserve original processing scripts,
-inputs, and intermediates; do not modernize them in place. Read
+it contains assets used by the typed app, not just obsolete scripts. Processing
+sources and pre-pipeline data are not stored in this repository; consult the
+adjacent mission repositories until a separate storage approach is added. Read
 [07-repo-and-git-strategy.md](docs-plan/07-repo-and-git-strategy.md) for
 provenance and targeted restoration sources if drift is found.
 

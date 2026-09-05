@@ -37,7 +37,8 @@ Read [AGENTS.md](AGENTS.md), then the
 The tracker records actual verification and remaining work; the existence
 of modules and passing unit tests does not establish product parity.
 
-New application code belongs in `src/`. Runtime assets belong in `public/`, and
-the preserved mission processing snapshots live in `pipeline/`. Consult the
-adjacent `../Apollo_11`, `../Apollo_13`, `../Apollo17.org`, and
-`../apolloinrealtime.org` repositories for original website source.
+New application code belongs in `src/`, and runtime assets belong in `public/`.
+Processing sources and pre-pipeline data are intentionally not copied into this
+repository. Consult the adjacent `../Apollo_11`, `../Apollo_13`,
+`../Apollo17.org`, and `../apolloinrealtime.org` repositories for original
+website and processing source.

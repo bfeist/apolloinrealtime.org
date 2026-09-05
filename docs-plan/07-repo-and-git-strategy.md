@@ -1,9 +1,8 @@
 # 07 — Repository provenance and preservation
 
-AiRT2 contains only the unified application, its runtime content, planning and
-verification material, and preserved mission data-processing snapshots. The
-original website repositories remain adjacent to this checkout and are the
-source references:
+AiRT2 contains only the unified application, its runtime content, planning, and
+verification material. Original website and processing repositories remain
+adjacent to this checkout and are the source references:
 
 | Mission | Source repository         | Webroot                 |
 | ------- | ------------------------- | ----------------------- |
@@ -13,10 +12,10 @@ source references:
 | Landing | `../apolloinrealtime.org` | `_website/_webroot/`    |
 
 `public/{11,13,17}/` remains the read-only runtime asset/data tree for the typed
-app. `pipeline/{11,13,17}/` preserves the old processing scripts with their
-source and intermediate data in the state copied on 2026-09-05. These snapshots
-are provenance, not a functioning replacement pipeline; modern pipeline work
-must define and verify a new contract before changing them.
+app. Pre-pipeline sources, raw inputs, working files, and intermediates are not
+stored in AiRT2. Consult the adjacent repositories until they are added through
+a separately approved storage mechanism. A future replacement pipeline must
+define and verify a new contract before changing runtime data.
 
 If runtime drift is found, inspect a targeted diff against the appropriate
 adjacent webroot and restore only the affected files. The retired `/mobile/`

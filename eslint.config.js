@@ -13,7 +13,6 @@ export default tseslint.config(
       ".local/**",
       "node_modules/**",
       "public/**",
-      "pipeline/**",
       "tests/visual/**/*-snapshots/**",
       "playwright-report/**",
       "test-results/**",

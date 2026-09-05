@@ -34,15 +34,13 @@ and `/{N}/MOCRviz/` are case-sensitive. Preserve photo identifiers, filenames,
 attribution, and source links. Do not add KeyCDN URLs or CDN-switching logic to
 the typed app.
 
-## Preserved processing material
+## Processing material
 
-The mission-specific processing scripts, raw inputs, working files, and
-historical intermediates are preserved under `pipeline/{11,13,17}/` in their
-original per-mission layouts. This includes source material that the original
-repositories ignored, such as transcript backups, local scraping corpora, OCR
-inputs, and caches used during processing. See `pipeline/README.md` for the
-source inventory and exclusions. These files are snapshots, not the runtime
-inputs under `public/` and not a supported unified toolchain.
+Mission-specific processing scripts, raw inputs, working files, and historical
+intermediates are intentionally not copied into AiRT2. Consult the adjacent
+mission repositories for the available processing source until a separate
+storage mechanism is approved. The runtime inputs under `public/` remain part of
+this repository.
 
 ## Future ingestion work
 
@@ -50,7 +48,7 @@ The replacement ingestion pipeline is deferred and does not block release.
 Existing CSVs remain the runtime input until a separately verified pipeline can
 regenerate equivalent output.
 
-When modernization of this preserved material starts:
+When modernization starts:
 
 - Add a unified harness with uv, Python 3.12+, pinned dependencies, and a typed,
   validated writer contract matching the runtime adapters without rewriting the
@@ -61,8 +59,9 @@ When modernization of this preserved material starts:
 - Unify the harness around WhisperX. Do not change models or regenerate
   historical content without a separate content decision.
 - Consult `../ArtemisInRealTime/src/server-batch/` for current WhisperX patterns.
-- Define a standard per-mission input layout and output schema, then reproduce
-  Apollo 13, 11, and 17 in that order. Validate and diff output before switching
-  the application to it.
+- Define how external source material is acquired, then define a standard
+  per-mission input layout and output schema and reproduce Apollo 13, 11, and 17
+  in that order. Validate and diff output before switching the application to
+  it.
 
 Schema documents and CLI names remain proposals until implemented.

@@ -2,14 +2,12 @@
 
 ## Resume here
 
-**2026-09-05: Repository references externalized and pipelines preserved. No production cutover.**
-The in-repository legacy source/oracle copies and dead legacy application files
-under `public/` are removed; use the four adjacent Apollo repositories for
-original source. Mission processing snapshots now live under `pipeline/` with
-their raw, ignored, and intermediate data intact. Vite builds to
-`.local/dist/`. `npm run check`, build, the built-payload audit, source-mirror
-checks, and all six local desktop/phone control cases pass. Resume long-session
-media resilience work in [05-migration-plan.md](05-migration-plan.md).
+**2026-09-05: Repository history cleanup in progress. No production cutover.**
+The oversized legacy source/oracle trees, removed public legacy application
+files, and copied pre-pipeline snapshots are being removed from the current tree
+and expunged from Git history. The four adjacent Apollo repositories remain the
+source references. Resume this cleanup before release work in
+[05-migration-plan.md](05-migration-plan.md).
 
 Useful review routes:
 
@@ -30,7 +28,7 @@ Playback starts paused and the mission controls own playback intent.
 | Mission content     | Transcript, milestones, commentary, photography, search, Apollo 11 samples, Apollo 13 spacecraft information, and Apollo 17 biometrics are mounted in the typed app.                                                            |
 | MOCRviz             | Apollo 11/13 use the production interaction hierarchy with typed room selection, synchronized hover/seek previews, smooth activity/waveform motion, real audio/transcripts, and tape boundaries. Apollo 17 has no MOCR dataset. |
 | Photo sources       | The selected large photograph links to the highest-resolution source available for each mission without changing thumbnail seeking or timed progression.                                                                        |
-| Source preservation | Original websites are referenced from adjacent repositories; `public/{11,13,17}/` remains read-only runtime content and `pipeline/{11,13,17}/` preserves mission processing snapshots.                                          |
+| Source preservation | Original website and processing sources are referenced from adjacent repositories; `public/{11,13,17}/` remains read-only runtime content. Pre-pipeline material is not stored in AiRT2.                               |
 | Release             | Not ready for cutover; the release audit and environment validation below remain open.                                                                                                                                          |
 
 ## Current verification evidence
@@ -81,7 +79,7 @@ ingestion pipeline remain deferred beyond this release.
 
 | Date       | Work                                                                                                                                                                                         | Verification                                                                                                                                                                 |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-09-05 | Externalized original-site references, preserved all three mission processing/source snapshots under `pipeline/`, removed dead public legacy code, and moved build output to `.local/dist/`. | Exact mirror checks for 13 source trees; `npm run check` (276), build, built-payload audit, and six desktop/phone control cases pass.                                        |
+| 2026-09-05 | Externalized original-site references, removed dead public legacy code, and moved build output to `.local/dist/`.                                                       | Exact mirror checks for 13 source trees; `npm run check` (276), build, built-payload audit, and six desktop/phone control cases pass.                                        |
 | 2026-09-05 | Moved the desktop Share and Play labels down with a 5 px top inset, retaining control height and icon placement.                                                                             | Visible A13 review; `npm run check` (276), build, and all six `controls.spec.ts` desktop/phone cases pass.                                                                   |
 | 2026-09-05 | Increased shared right-column top-tab horizontal padding to 11 px on desktop, retaining 8 px on phones and the original 38 px control height.                                                | Visible A13 desktop review; `npm run check` (276), build, and all six `controls.spec.ts` desktop/phone cases pass. Production gate has pre-existing 13 px text-tab mismatch. |
 | 2026-09-05 | Restored Apollo 11 Astromaterial Samples to its production-shaped introductory panel, including the five timed collection rows, source copy, and curation image.                             | Visible live/local desktop comparison at GET 109:34:00; mission-specific panel browser test; `npm run check` (276) and build pass.                                           |
