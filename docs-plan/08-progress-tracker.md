@@ -2,13 +2,16 @@
 
 ## Resume here
 
-**2026-09-05: Legacy mission-data and Python-pipeline preservation complete.**
-Resume long-session media resilience work in
-[05-migration-plan.md](05-migration-plan.md). The recovered source archive now
-lives under `mission-data/`, while legacy Python processes and branch variants
-live under `pipeline/`; rebuilding those processes remains deferred. The
-existing runtime trees remain read-only, the unrelated root mission-index
-deletions remain user work, and no production cutover is authorized.
+**2026-09-05: Dev-host deployment workflow added; build repair complete.** The
+ISSIRT-style GitHub Actions workflow checks and builds every pushed branch, then
+rsyncs `.local/dist/` only to `dev.apolloinrealtime.org` using the configured
+DreamHost repository secret and variables. `npm run check` passes all 276 tests,
+and the workflow and tracker pass Prettier plus `git diff --check`. Mistaken
+local commit `373f57af` was removed from `main`, restoring `11/index.html`,
+`13/index.html`, and `17/index.html`; `npm run check` and `npm run build` now
+pass, including a clean production build. Push the current branch to exercise
+the first dev deployment, then validate the landing page and all three mission
+routes on the staging host. No deployment has been triggered yet.
 
 Useful review routes:
 
@@ -103,6 +106,8 @@ preserved ingestion pipeline remain deferred beyond this release.
 
 | Date       | Work                                                                                                                                                                                    | Verification                                                                                                                                                                  |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-05 | Removed mistaken local commit `373f57af` from `main` and restored the three mission entry files it had deleted.                                                                         | `npm run test:all` passes lint, TypeScript, production build, and all 276 unit tests; the build emits entry pages for Apollo 11, 13, and 17.                                  |
+| 2026-09-05 | Added a dev-only GitHub Actions check, build, and DreamHost rsync workflow based on ISSIRT, using AiRT2's Node version, output path, and configured repository values.                  | `npm run check` passes 276 tests; workflow/docs formatting and `git diff --check` pass. Its initially blocked build was repaired by restoring the three mission entry files.  |
 | 2026-09-05 | Recovered retained branch-tip mission sources into `mission-data/` and separated every legacy Python process plus branch variant into `pipeline/`, without rebuilding the toolchain.    | 4,452 retained branch entries mapped; 2,101 files match source blobs exactly; 13 credential-bearing copies are intentionally redacted; `npm run check` (276) passes.          |
 | 2026-09-05 | Published stable `legacy/<source>/<branch>` aliases for all 17 locally or remotely known branches from Apollo 11, Apollo 13, Apollo 17, and the original landing repository.            | Remote audit finds all 17 aliases; Apollo 17 `develop` retains all 919 commits; every live non-default branch count matches its source; Git fsck passes.                      |
 | 2026-09-05 | Published the rewritten repository to `bfeist/apolloinrealtime.org`, made `main` the GitHub default, and added linked abandonment notices to the Apollo 11, 13, and 17 repositories.    | Remote HEAD resolves to `main`; all legacy refs were pushed; the three notice commits are published; GitHub's 23-commit activity figure matches the selected one-week window. |

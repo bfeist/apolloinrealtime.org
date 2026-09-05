@@ -1,0 +1,66 @@
+name: Deploy AiRT2 to dev
+
+on:
+  push:
+    branches:
+      - "**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code for checks
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js for checks
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.11.1
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run checks
+        run: npm run check
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.11.1
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the app
+        run: npm run build
+
+      - name: Deploy to DreamHost dev host
+        env:
+          DREAMHOST_PRIVATE_KEY: ${{ secrets.DREAMHOST_PRIVATE_KEY }}
+          DREAMHOST_HOST: ${{ vars.DREAMHOST_HOST }}
+          DREAMHOST_PATH_DEV: ${{ vars.DREAMHOST_PATH_DEV }}
+          DREAMHOST_USER: ${{ vars.DREAMHOST_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DREAMHOST_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$DREAMHOST_HOST" >> ~/.ssh/known_hosts
+
+          ssh "$DREAMHOST_USER@$DREAMHOST_HOST" "mkdir -p '$DREAMHOST_PATH_DEV'"
+          rsync -avz --delete .local/dist/ "$DREAMHOST_USER@$DREAMHOST_HOST:$DREAMHOST_PATH_DEV/"
