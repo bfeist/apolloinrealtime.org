@@ -62,37 +62,56 @@ export async function createSamplesPanel(
 
   function renderIndex(): void {
     host.replaceChildren();
-    const heading = element("h2", "", "Apollo 11 Lunar Samples");
+    const panelTitle = element("h2", "samples-panel__title", "Astromaterial Sample Information");
+    const heading = element("h3", "samples-panel__section-heading", "Apollo 11 Lunar Samples");
     const intro = element(
       "p",
       "",
-      "Apollo 11 carried the first geologic samples from the Moon to Earth. The crew collected 22 kilograms of geologic material, including 50 rocks, samples of the fine-grained lunar regolith, and two core tubes that included material from up to 13 centimeters below the lunar surface. In addition, a solar wind collection experiment was deployed on the surface and returned by the crew. Two primary types of rocks, basalts and breccias, were found at the Apollo 11 landing site.",
+      "Apollo 11 carried the first geologic samples from the Moon to Earth. The crew collected 22 kilograms of geologic material, including 50 rocks, samples of the fine-grained lunar regolith, and two core tubes that included material from up to 13 centimeters below the lunar surface. In addition to these samples, a solar wind collection experiment was deployed on the surface and returned by the crew. The rock samples contain no water and provide no evidence for living organisms at any time in the Moon's history. Two primary types of rocks, basalts and breccias, were found at the Apollo 11 landing site. The lunar samples collected by the Apollo 11 crew were deposited in bulk into sample containers for return to Earth.",
     );
-    const title = element("h3", "", "Jump to Sample Collection Moments");
+    const title = element(
+      "h3",
+      "samples-panel__section-heading",
+      "Jump to Sample Collection Moments:",
+    );
     const explanation = element(
       "p",
       "",
-      "Choose a container to return to its collection time and explore the samples inside. Sample numbers were assigned after the material returned to Earth.",
+      "The table below contains links to the moment each sample container was being filled, referencing the sample numbers that were assigned when the samples were returned to Earth.",
     );
-    const list = element("div", "samples-panel__collections");
-    for (const collection of collections) {
-      const button = element("button", "samples-panel__collection");
-      button.type = "button";
-      button.append(
-        element(
-          "time",
-          "",
-          collection.seconds === null ? "Time unrecorded" : secondsToTimeStr(collection.seconds),
-        ),
-        element("strong", "", collection.name),
-        element("span", "", collection.samples.join(", ")),
+    const frame = element("div", "samples-panel__collections");
+    const table = element("table", "samples-panel__collections-table");
+    const header = document.createElement("tr");
+    for (const label of ["Time", "Container", "Sample Numbers"])
+      header.append(element("th", "", label));
+    table.append(header);
+    for (const collection of collections.filter((item) => item.seconds !== null)) {
+      const row = document.createElement("tr");
+      row.tabIndex = 0;
+      row.setAttribute("role", "button");
+      row.setAttribute(
+        "aria-label",
+        `View ${collection.name} samples at ${secondsToTimeStr(collection.seconds ?? 0)}`,
       );
-      button.addEventListener("click", () => {
+      row.append(
+        element("td", "", secondsToTimeStr(collection.seconds ?? 0)),
+        element("td", "samples-panel__collection-link", collection.name),
+        element("td", "", collection.samples.join(", ")),
+      );
+      const openCollection = () => {
         if (collection.seconds !== null) options.onSeek(collection.seconds);
         renderCollection(collection);
+      };
+      row.addEventListener("click", openCollection);
+      row.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openCollection();
+        }
       });
-      list.append(button);
+      table.append(row);
     }
+    frame.append(table);
     const curation = element("section", "samples-panel__curation");
     const image = element("img", "");
     image.src = `${root}img/ares2.jpg`;
@@ -101,15 +120,28 @@ export async function createSamplesPanel(
     const text = element(
       "p",
       "",
-      "The Apollo lunar samples and their associated records are protected, preserved and processed by NASA's Astromaterials Research and Exploration Science Division at Johnson Space Center in Houston, Texas. The lunar sample facility preserves the collection while making samples available to approved scientists and educators.",
+      "Geologic samples returned from the Moon by the six Apollo lunar surface exploration missions (1969-1972), along with associated data records, are physically protected, environmentally preserved, and scientifically processed by NASA's ",
+    );
+    text.append(
+      link("Astromaterials Research and Exploration Science", "https://ares.jsc.nasa.gov/"),
+      " Division in building 31N, a special building dedicated for that purpose, at Johnson Space Center in Houston, Texas. A total of 382 kilograms of lunar material, comprising 2200 individual specimens returned from the Moon, has been processed to meet scientific requirements into more than 110,000 individually cataloged samples.",
     );
     curation.append(
-      element("h3", "", "Lunar Sample Curation"),
+      element("h3", "samples-panel__section-heading", "Lunar Sample Curation"),
       image,
       text,
-      link("NASA Astromaterials Research and Exploration Science", "https://ares.jsc.nasa.gov/"),
+      element(
+        "p",
+        "",
+        "Building 31N was constructed from 1977 to 1979 and opened in 1979 to provide for permanent storage of the lunar sample collection in a physically secure and non-contaminating environment. The purpose of the facility is to maintain in pristine condition the lunar samples that comprise a priceless national and scientific resource while making the samples available to approved scientists and educators.",
+      ),
+      element(
+        "p",
+        "",
+        "The study of samples from the Moon continues to yield useful information about the early history of the Moon, the Earth, and the Solar System. Computer models indicate that the Moon could have been formed from the debris resulting from the Earth being struck a glancing blow by a planetary body about the size of Mars. The chemical composition of the Moon, derived from studies of lunar rocks, is compatible with this theory of the origin of the Moon. We have learned that a crust formed on the Moon ~4.4 billion years ago. This crust formation, the intense meteorite bombardment occurring afterward, and subsequent lava outpourings are recorded in the rocks. Radiation spewed out by the Sun since the formation of the Moon's crust, was trapped in the lunar soil as a permanent record of solar activity throughout this time.",
+      ),
     );
-    host.append(heading, intro, title, explanation, list, curation);
+    host.append(panelTitle, heading, intro, title, explanation, frame, curation);
     host.scrollTop = 0;
   }
 

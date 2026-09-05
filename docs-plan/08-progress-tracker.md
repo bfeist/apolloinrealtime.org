@@ -2,12 +2,14 @@
 
 ## Resume here
 
-**2026-09-05: Top app-tab wrapping repair completed. No production cutover.**
-Top app tabs now use their content width and retain one-line labels, preventing
-the enlarged Astromaterial Samples label from wrapping. `npm run check`, build,
-and all six desktop/phone cross-mission control cases pass; local browser
-inspection confirmed the repaired tab strip. Next, resume long-session media
-resilience work in [05-migration-plan.md](05-migration-plan.md).
+**2026-09-05: Apollo 11 Astromaterial Samples live-parity repair completed. No production cutover.**
+The typed panel now restores the live production landing state: its original
+heading, introductory and curation copy, curation image, and five timed
+collection rows in the compact framed table. Selecting a row still uses the
+typed shared seek flow and opens the preserved indexed sample detail view.
+`npm run check`, build, the mission-specific browser test, and a visible live
+versus local desktop comparison pass. Resume long-session media resilience work
+in [05-migration-plan.md](05-migration-plan.md).
 
 Useful review routes:
 
@@ -79,6 +81,7 @@ ingestion pipeline remain deferred beyond this release.
 
 | Date       | Work                                                                                                                                                         | Verification                                                                                                                                           |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-09-05 | Restored Apollo 11 Astromaterial Samples to its production-shaped introductory panel, including the five timed collection rows, source copy, and curation image. | Visible live/local desktop comparison at GET 109:34:00; mission-specific panel browser test; `npm run check` (276) and build pass.                  |
 | 2026-09-05 | Sized top app tabs to their label content and prevented wrapping after the text-size increase.                                                               | `npm run check` (276), build, all six `controls.spec.ts` desktop/phone cases, and local browser tab-strip review pass.                               |
 | 2026-09-05 | Explicitly aligned shared and MOCR transcript-tab labels to the top-left of their inset control faces.                                                       | `npm run check` (276), build, six `controls.spec.ts` desktop/phone cases (A13 fixture passed on retry), and local browser review pass.                |
 | 2026-09-05 | Increased shared text-tab labels to 13 px and MOCR transcript-tab labels to 11 px following visual review, retaining all button dimensions and states.      | `npm run check` (276), build, and all six `controls.spec.ts` desktop/phone cases pass; desktop browser review confirmed contained labels.             |

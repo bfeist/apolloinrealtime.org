@@ -134,8 +134,11 @@ test("recovery mission-specific panels and photo deep links", async ({ page }) =
   await expect(page.locator("#spacecraft-host")).toBeHidden();
   await page.goto("/11/?t=109:34:00");
   await page.getByRole("button", { name: "Astromaterial Samples", exact: true }).click();
-  await expect(page.locator(".samples-panel__collection")).toHaveCount(7);
-  await page.locator(".samples-panel__collection").first().click();
+  await expect(
+    page.getByRole("heading", { name: "Astromaterial Sample Information", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".samples-panel__collections-table tr[role=button]")).toHaveCount(5);
+  await page.getByRole("button", { name: "View Contingency Bag samples at 109:34:00" }).click();
   await expect(page.locator("#missionElapsedTime")).toHaveValue("109:34:00");
   await expect(page.locator("#samples-host")).toBeVisible();
   await page.getByRole("button", { name: "Photography", exact: true }).click();
