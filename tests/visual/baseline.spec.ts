@@ -1,10 +1,10 @@
 import { test, expect, type Page } from "@playwright/test";
 
 /**
- * Phase 0 baseline capture: pull screenshots from production
+ * Production baseline capture: pull screenshots from production
  * (apolloinrealtime.org) at six narrative GETs per mission across three
  * viewports = 54 snapshots. These become the regression oracle for every
- * subsequent phase. Run with `npm run test:baseline` (rewrites snapshots).
+ * typed-app comparisons. Run with `npm run test:baseline` (rewrites snapshots).
  *
  * Snapshot table is from docs-plan/05-migration-plan.md.
  */

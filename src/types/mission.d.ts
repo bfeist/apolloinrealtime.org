@@ -1,10 +1,6 @@
-// Mission config — typed source of truth for per-mission constants
-// extracted from the legacy `var c*` block at the top of each mission's
-// `index.js`. See docs-plan/05-migration-plan.md Phase 2.
-//
-// Shape is intentionally close to the legacy variable names so the
-// lifted code can read from `window.MISSION` with minimal behavioral
-// change. Phase 3+ will replace those reads with typed imports.
+// Mission config — typed source of truth for per-mission constants adapted
+// from the legacy `var c*` blocks. Shared code consumes these definitions and
+// mission modules provide the real mission-specific values.
 
 type MissionId = "11" | "13" | "17";
 
@@ -62,11 +58,11 @@ interface MissionConfig {
   /** Audio channel numbers that are redacted (`cRedactedChannelsArray`). A11/A13 only. */
   redactedChannels?: number[];
 
-  // --- Feature flags (Phase 4.5+) ---
+  // --- Feature flags ---
   /** Per-mission feature flags. Currently only `mocrviz` (typed MOCR audio panel). */
   features?: MissionFeatures;
 
-  // --- HTML head (Phase 3) ---
+  // --- HTML head ---
   /** Per-mission meta tags, injected into <head> by the shared head builder. */
   meta: MissionMeta;
   /** Per-mission head/script-chain switches that differ across legacy missions. */

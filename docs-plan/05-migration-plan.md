@@ -1,58 +1,84 @@
-﻿# 05 — Recovery and migration plan
+# 05 — Remaining release plan
 
-Read `08-progress-tracker.md` first; `README.md` defines the product. This plan replaces the abandoned phase checklist. The task is to recover a coherent Apollo in Real Time experience, not to maximize the count of typed modules.
+Read [08-progress-tracker.md](08-progress-tracker.md) first. The local recovery
+scope is implemented and verified; the work below is what remains before a
+production cutover can be considered. This plan does not authorize deployment
+or changes to the preserved reference trees.
 
-## Strategy
+## 1. Media resilience sessions
 
-Keep the useful vanilla TypeScript/ESM/Vite foundation and the shared data loaders. One app serves `/11/`, `/13/`, `/17/`; mission configuration/data represent genuine differences. A13 is the first comparison target, then generalize against A11 and A17. No framework, jQuery, peaks.js or runtime package dependencies. Vendored Paper.js and original images/data are allowed.
+Run extended listening sessions on Apollo 11 and 13 across YouTube and MOCR tape
+boundaries. Exercise slow buffering, autoplay rejection, connection loss,
+recording gaps, mission end, channel changes, seeks, mute, pause, and resume.
+Confirm that canonical transport intent, displayed GET, video, MOCR audio,
+waveform, transcript, activity, and photos remain coherent.
 
-Production at `https://apolloinrealtime.org/{11,13,17}/` is the reference for visual hierarchy and behavior. `/legacy/{N}/` is the independent local oracle. Never modify `legacy/`, `legacy-src/`, `legacy-oracle/`, or `public/{N}/` to make comparisons pass. Preserve deep links and historical content.
+Record browser, mission, GET/channel, duration, and any external-service failure.
+The known limitation is that the shared clock can continue while external media
+buffers; decide from observed sessions whether a fuller buffering state machine
+is required for release.
 
-The owner's 2026-09-05 direction supersedes pixel-identical styling and the old MOCRviz MVP sign-off gate. Modest design differences are acceptable; overlapping controls, unreachable panes, fake data and missing core interactions are not.
+## 2. Complete the feature audit
 
-## R1 — Replace contradictory documentation
+Compare the same mission, GET, viewport, and active panel against live production
+and the local legacy oracle. Resolve or explicitly accept gaps in:
 
-- Keep a short product contract, durable architecture decisions, source map, current plan and one truthful tracker.
-- Remove obsolete framework proposals, answered questions and stale instructions. Git retains historical drafts.
-- Retain detailed source analysis as reference, clearly distinguished from observed current behavior.
-- Remove deployment-ready claims until the product has actually been verified.
+- mission entry and splash behavior;
+- complete credits, help, navigator legend, and ancillary overlays;
+- photo source/download interactions and mission-specific photo aliases;
+- Apollo 11 samples and metadata links;
+- Apollo 13 spacecraft information;
+- Apollo 17 geology/sample content and crew biometrics.
 
-## R2 — Restore the mission shell and shared timeline
+The local samples panel intentionally uses preserved indexes and source links; it
+does not recreate the obsolete live MoonDB chemistry interface unless that scope
+is separately approved.
 
-- Homepage: compare with `https://apolloinrealtime.org/` and preserve its content and composition. Use the original landing imagery; no invented promotional copy.
-- Desktop: compact patch/title/date/GET beside a three-tier navigator; left video/dashboard above text tabs and transport; narrow channel strip for A11/A13; large right photo viewer with vertical thumbnails and mission-specific tabs. A17 uses two columns without an empty channel gutter.
-- Assign every region explicit sizing responsibilities. A media aspect ratio must not overflow its grid track. Give scrollable descendants `min-height: 0`; keep control rows visible.
-- On tablet/phone stack panels with useful explicit heights and normal page scrolling. Keep channels, all tabs, photography and MOCRviz reachable. No content-width horizontal overflow.
-- One playback state owns GET, play/pause, seek and mute. Date = historical launch epoch + selected GET. Every seek source updates the same state immediately. No logging-only callbacks.
-- Use the existing YouTube API loader to synchronize segment loads, seeks within a segment, play/pause and sound. Mission control sound and video sound must not compete.
-- Restore missing navigator data and useful labels at all three zoom levels.
-- Keep photo resolution suitable for the main viewer, scroll only the relevant pane, and expose shareable current-time URLs.
-- Restore A11 sample collections, A13 spacecraft information and A17 biometric readings from the original content/data. Do not treat these as disposable divergence.
+## 3. Audit URLs, assets, and historical dates
 
-## R3 — Restore recognizable native MOCRviz
+Inventory supported production routes and verify built-output behavior for the
+homepage, `/11/`, `/13/`, `/17/`, GET links, channel links, photo links, old
+redirects, asset aliases, case-sensitive media paths, social metadata, countdown
+dates, launch boundaries, and mission-end dates. Fix unsupported historical URLs
+or document an intentional redirect/retirement decision.
 
-MOCRviz is a primary experience, not an audio-element demo. Build it as a normal typed right-hand panel with:
+## 4. Validate release environments
 
-- Real mission-specific channel names, availability, role descriptions and selection.
-- Original isometric room asset and correct clickable console positions.
-- Per-channel activity timeline using real CDN activity chunks, with GET cursor and seek.
-- Real binary audiowaveform peaks and playhead synchronized to tape-relative time.
-- Channel transcript where historical data exists, with clickable GETs.
-- Shared transport, correct tape bank/channel paths, tape boundary handling, unavailable-data and audio failure states.
+Verify on real phones and the staging host:
 
-Load expensive data lazily and bound caches. Abort/ignore stale loads when channels/tapes change. A missing historical recording must be visibly unavailable, never filled with fabricated waveform/activity/transcript. Original asset and data trees remain untouched.
+- keyboard navigation, focus visibility, and screen-reader names;
+- portrait and landscape layout, panel reachability, and page overflow;
+- full-screen behavior and autoplay/media restrictions;
+- production cache headers, route fallbacks, redirects, and CDN paths;
+- Linux visual baselines and built-output browser checks;
+- deployment and rollback procedure using the current host configuration.
 
-## R4 — Verify the result, then record evidence
+Do not restore the retired `/mobile/`, A13 `spacecraft_dev/`, or A17 `nominee/`
+applications to satisfy these checks.
 
-1. `npm run check` (strict typecheck, lint, formatting, unit tests) before every commit. Run `npm run build` for integration changes.
-2. Open Chrome tabs for production, local typed and local legacy sites. Match GET and viewport; dismiss splash and pause. Check all missions at desktop, and typed app at 768×1024 and 390×844. Record actual results and external-service failures separately.
-3. Exercise GET input, timeline, transcript/TOC/commentary/photo/search seek, play/pause/mute, tab switching and MOCR channel changes. Check that GET and historical date remain coherent and no controls overlap.
-4. Run Playwright screenshots and behavioral/layout assertions. Screenshot tests are blocking against reviewed **typed-app** baselines; production screenshots are the reference for human comparison, not an exact-pixel gate under the owner's revised goal. Never update baselines simply to make a failure disappear. Record intentional differences and inspect the images first.
-5. For controls, run `npm run test:controls-reference`; its temporary production/local component crops remain in ignored test output. Run `npx playwright test --project=visual tests/visual/controls.spec.ts` for state, clipping and reachability checks. Follow the measured button contract in `PHASE6-visual-reference.md`. A passing whole-page screenshot does not establish that small controls resemble production.
+## 5. Release decision and cutover
+
+Summarize the evidence and unresolved limitations in the tracker. Cut over all
+three missions together only after the release audit is accepted, the production
+and rollback procedures are rehearsed, and the final source/build checks are
+green. Preserve the previous production deployment for rollback.
+
+## Verification baseline
+
+- Run `npm run check` before every commit and `npm run build` for application or
+  build-output changes.
+- Use visible production, typed, and local-legacy browser windows as described in
+  [PHASE6-visual-reference.md](PHASE6-visual-reference.md).
+- Exercise GET input, navigator, transcript/TOC/commentary/photo/search seeks,
+  play/pause/mute, tab switching, dashboard, share/fullscreen/help controls, and
+  MOCR channel changes for the affected scope.
+- Run the relevant Playwright behavioral and visual checks. Inspect images before
+  changing a reviewed typed baseline; production screenshots remain reference
+  evidence, not an exact-pixel gate.
+- For control changes, run `npm run test:controls-reference` and
+  `npx playwright test --project=visual tests/visual/controls.spec.ts`.
 
 ### Fixed comparison GETs
-
-Use these established times unchanged (historical labels from the abandoned plan were unreliable; GET values are test coordinates):
 
 | Snapshot    | A11        | A13        | A17        |
 | ----------- | ---------- | ---------- | ---------- |
@@ -63,10 +89,12 @@ Use these established times unchanged (historical labels from the abandoned plan
 | final-phase | 195:03:00  | 141:00:00  | 295:00:00  |
 | end         | 195:18:35  | 142:54:41  | 301:51:59  |
 
-Three missions × six GETs × desktop 1440×900 / tablet 768×1024 / phone 390×844 = 54 views. Original Windows production references are in `tests/visual/baseline.spec.ts-snapshots/`. Typed snapshots are separate; these must never be described as automatically proving production parity. MOCRviz requires its own open-panel comparisons in A11/A13.
+The complete responsive matrix is three missions × six GETs × desktop
+1440×900, tablet 768×1024, and phone 390×844. Standard photography views do
+not establish MOCRviz behavior; inspect the open MOCR panel on Apollo 11 and 13.
 
-## Exit and later work
+## Deferred beyond release
 
-Recovery can be called complete only when the repaired scope has browser evidence, useful controls, honest data states and green automated checks. List residual gaps explicitly. Staging/deployment is subsequent work; do not delete legacy references or ship merely because the build succeeds. Existing `deploy/` instructions are operational references, not readiness evidence.
-
-After product acceptance: verify built output, deep links, hosting redirects, rollback and mobile use on staging. Keep prior production available for rollback. Future missions and the Python ingestion replacement remain separate tracks documented in `04-data-and-content-strategy.md`.
+Future Apollo missions and the replacement ingestion pipeline are separate work.
+Their scope is recorded in [00-decisions.md](00-decisions.md) and
+[04-data-and-content-strategy.md](04-data-and-content-strategy.md).

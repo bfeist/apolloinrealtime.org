@@ -5,13 +5,13 @@
 Begin every session with these reads, in order:
 
 1. [docs-plan/08-progress-tracker.md](docs-plan/08-progress-tracker.md) — actual state and next action.
-2. [docs-plan/05-migration-plan.md](docs-plan/05-migration-plan.md) — current recovery sequence and verification.
+2. [docs-plan/05-migration-plan.md](docs-plan/05-migration-plan.md) — remaining release sequence and verification.
 3. [docs-plan/README.md](docs-plan/README.md) — product intent, feature contract, and source map.
 
 Read [00-decisions.md](docs-plan/00-decisions.md) for architectural
 constraints and [PHASE6-visual-reference.md](docs-plan/PHASE6-visual-reference.md)
 before changing layout. The tracker is the only current-status document.
-Finish the active recovery task before moving to future missions, the data
+Finish the active release task before moving to future missions, the data
 pipeline, or deployment. User instructions take precedence over older docs.
 
 ## Product standard
@@ -55,7 +55,7 @@ Its source is `legacy/landing/_website/_webroot/`; reusable copies live in
 ## Reference trees and git hygiene
 
 `legacy/`, `legacy-src/`, `legacy-oracle/`, and `public/{11,13,17}/`
-are read-only during recovery. The last group includes assets used by the
+are read-only during application and release work. The last group includes assets used by the
 typed app, not just obsolete scripts. Never remove or edit these trees as
 part of cleanup. Read [07-repo-and-git-strategy.md](docs-plan/07-repo-and-git-strategy.md)
 for provenance and targeted restoration sources if drift is found.

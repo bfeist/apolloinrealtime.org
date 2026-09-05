@@ -1,4 +1,4 @@
-// Flat config — typescript-eslint strictTypeChecked, per docs-plan/05.
+// Flat config with typescript-eslint strict type checking.
 import tseslint from "typescript-eslint";
 import prettier from "eslint-config-prettier";
 

@@ -1,8 +1,8 @@
 ﻿# Apollo in Real Time v2 (AiRT2)
 
 One shared static application for Apollo 11, 13, and 17, replacing three
-related websites that evolved independently. The TypeScript application is
-under active repair; it is not ready for production cutover.
+related websites that evolved independently. Local recovery is complete;
+release audits and production cutover remain outstanding.
 
 The goal is to preserve the recognizable mission experience: synchronized
 audio and video, mission timeline, transcripts, commentary, photography,
@@ -28,13 +28,13 @@ npm run dev
 Run `npm run check` for TypeScript, lint, formatting, and unit tests.
 Run `npm run build` and `npm run preview` to verify the static build.
 Browser and visual verification are defined in the
-[recovery plan](docs-plan/05-migration-plan.md).
+[remaining release plan](docs-plan/05-migration-plan.md).
 
 ## Continuing the work
 
 Read [AGENTS.md](AGENTS.md), then the
 [progress tracker](docs-plan/08-progress-tracker.md) and
-[recovery plan](docs-plan/05-migration-plan.md), in that order.
+[remaining release plan](docs-plan/05-migration-plan.md), in that order.
 The tracker records actual verification and remaining work; the existence
 of modules and passing unit tests does not establish product parity.
 

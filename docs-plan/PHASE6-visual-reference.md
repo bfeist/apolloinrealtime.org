@@ -28,10 +28,10 @@ the unified responsive app; legacy mobile redirects are not its layout spec.
 
 ## Desktop structure
 
-The May 2026 reference measurement at 1667 x 1005 found a roughly 147 px
-header, 40% left column, 70 px channel strip, and remaining width for the
-right content. These are reference proportions, not fixed dimensions to
-force on every viewport. Recheck in the browser before tuning.
+At a 1667 × 1005 reference viewport, production uses a roughly 147 px header,
+40% left column, 70 px channel strip, and the remaining width for right-side
+content. These are reference proportions, not fixed dimensions. Recheck them
+in the browser before tuning.
 
 ```text
 +-------------------------------------------------------------------+
@@ -72,17 +72,13 @@ A large transcript must not expand the entire application height or force
 controls offscreen. Search replaces or overlays the appropriate content and
 can be dismissed without losing access to navigation.
 
-Typography comes from the actual legacy CSS and rendered browser. The old
-source inventory mentions Michroma, Oswald, Roboto Mono, and Roboto Slab in
-different roles; it is not evidence that every mission title uses Roboto
-Slab. Avoid guessing a new typographic theme from the old prose.
+Typography comes from the legacy CSS and rendered production browser. Verify
+the mission and component before changing typefaces or weights.
 
-## Button contract (measured on live production, September 2026)
+## Button contract
 
-The first recovery pass accepted visibly wrong button styling. Whole-page
-typed screenshots did not detect that mistake: they only detected subsequent
-changes to the mistake. Inspect component crops at native size as well as the
-whole page before accepting a new reference.
+These measurements come from live production. Inspect component crops at native
+size as well as the whole page before accepting a new reference.
 
 - Text and app tabs: 38 px high, Oswald 12 px / weight 400, left/top-aligned
   labels with 7.8 px top/side padding, 4 px rounded corners on all four corners.
@@ -139,10 +135,9 @@ Inspect production with MOCR Audio open on both A11 and A13. Preserve:
 - The selected channel transcript where available, with current text and
   timestamp navigation synchronized to playback.
 
-The audio engine may be implemented incrementally, but a native audio
-control and button grid alone cannot satisfy the product contract. Empty
-recording periods, unavailable data, and media errors should be visible and
-truthful. Never fabricate waveform/activity data to imitate a screenshot.
+A native audio control and button grid alone do not satisfy the product
+contract. Empty recording periods, unavailable data, and media errors must be
+visible and truthful. Never fabricate waveform or activity data.
 
 ## Responsive inspection
 
