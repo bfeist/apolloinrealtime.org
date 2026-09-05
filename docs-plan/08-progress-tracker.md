@@ -2,15 +2,12 @@
 
 ## Resume here
 
-**2026-09-05: Shared right-column top-tab padding adjusted. No production cutover.**
-Photography / Mission Control Audio / mission-specific top buttons now have an
-11 px desktop horizontal inset and retain an 8 px phone inset, without changing
-their 38 px height. `npm run check`, build, and all six local desktop/phone
-control cases pass; visible Apollo 13 desktop review confirms the three tabs
-are fully contained. The production-reference control gate remains blocked by
-the already-recorded shared text-tab font-size difference (local 13 px, live
-12 px), unrelated to the app-tab padding. Resume long-session media resilience
-work in [05-migration-plan.md](05-migration-plan.md).
+**2026-09-05: Share/Play label inset adjusted. No production cutover.**
+The desktop Share and Play labels now begin 5 px from the top of their 38 px
+control faces (previously 2.4 px), with icon placement and phone behavior
+unchanged. `npm run check`, build, and all six local desktop/phone control cases
+pass; visible Apollo 13 review confirms both labels are contained. Resume
+long-session media resilience work in [05-migration-plan.md](05-migration-plan.md).
 
 Useful review routes:
 
@@ -82,6 +79,7 @@ ingestion pipeline remain deferred beyond this release.
 
 | Date       | Work                                                                                                                                                         | Verification                                                                                                                                           |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-09-05 | Moved the desktop Share and Play labels down with a 5 px top inset, retaining control height and icon placement.                                            | Visible A13 review; `npm run check` (276), build, and all six `controls.spec.ts` desktop/phone cases pass.                                           |
 | 2026-09-05 | Increased shared right-column top-tab horizontal padding to 11 px on desktop, retaining 8 px on phones and the original 38 px control height.               | Visible A13 desktop review; `npm run check` (276), build, and all six `controls.spec.ts` desktop/phone cases pass. Production gate has pre-existing 13 px text-tab mismatch. |
 | 2026-09-05 | Restored Apollo 11 Astromaterial Samples to its production-shaped introductory panel, including the five timed collection rows, source copy, and curation image. | Visible live/local desktop comparison at GET 109:34:00; mission-specific panel browser test; `npm run check` (276) and build pass.                  |
 | 2026-09-05 | Sized top app tabs to their label content and prevented wrapping after the text-size increase.                                                               | `npm run check` (276), build, all six `controls.spec.ts` desktop/phone cases, and local browser tab-strip review pass.                               |
