@@ -45,6 +45,10 @@ const VIDEO_RECT_HEIGHT_DENOM = 6;
 const PHOTO_TICK_HEIGHT_DENOM = 6;
 /** Tier 2 TOC tick height as a fraction: `tier2.height / TOC_TICK_HEIGHT_DENOM`. */
 const TOC_TICK_HEIGHT_DENOM = 3;
+/** Legacy navigator time marks occur every 30 minutes, starting at launch. */
+const TIME_TICK_INTERVAL_SECONDS = 30 * 60;
+/** Legacy `gHeightTimeTickDenominator`: a tick spans its whole tier. */
+const TIME_TICK_HEIGHT_DENOM = 1;
 
 /** `graphFontFamily` in the legacy file. */
 const FONT_FAMILY = "Roboto Mono";
@@ -449,7 +453,7 @@ export class NavigatorRenderer {
     });
     label.content = secondsToTimeStr(seconds);
     let labelX = tier3X - label.bounds.width / 2;
-    if (clampLabel || tier3X < 60 || tier3X > layout.width - 60) {
+    if (clampLabel) {
       if (labelX < 5) labelX = 5;
       else if (labelX > layout.width - label.bounds.width - 5) {
         labelX = layout.width - label.bounds.width - 5;
@@ -591,7 +595,10 @@ export class NavigatorRenderer {
     }
   }
 
-  /** GET-aligned ticks, including countdown; adapt spacing to keep labels readable. */
+  /**
+   * Legacy GET-aligned half-hour marks. Tier 2 has marks only; tier 3 adds
+   * labels rotated counter-clockwise from their bottom-aligned anchor.
+   */
   private drawTimeTicks(
     group: PaperGroup,
     tier: TierLayout,
@@ -600,25 +607,29 @@ export class NavigatorRenderer {
     layout: NavigatorLayout,
     level: NavigatorTier,
   ): void {
-    const intervals = [60, 120, 300, 600, 1800, 3600, 7200, 14400];
-    const interval = intervals.find((step) => step * tier.pixelsPerSecond >= 100) ?? 28800;
-    for (
-      let seconds = Math.ceil(start / interval) * interval;
-      seconds <= end;
-      seconds += interval
-    ) {
+    for (let seconds = 0; seconds <= end; seconds += TIME_TICK_INTERVAL_SECONDS) {
+      if (seconds < start) continue;
       const x = tier.left + (seconds - start) * tier.pixelsPerSecond;
       const bottom = tier.top + tier.height;
-      this.addLine(group, x, tier.top, bottom, NAVIGATOR_COLORS.overlayTimeTick);
-      this.addLabel(
+      this.addLine(
         group,
-        secondsToTimeStr(seconds),
-        x + 3,
-        level === 3 ? bottom - tier.height / 6 - 3 : bottom - 2,
-        7 + layout.fontScaleFactor,
-        "#888888",
-        tier.left + tier.width - x - 5,
+        x,
+        bottom - tier.height / TIME_TICK_HEIGHT_DENOM,
+        bottom,
+        NAVIGATOR_COLORS.overlayTimeTick,
       );
+      if (level !== 3) continue;
+
+      const label = new this.paper.PointText({
+        justification: "left",
+        fontFamily: FONT_FAMILY,
+        fontSize: 9 + layout.fontScaleFactor,
+        fillColor: NAVIGATOR_COLORS.overlayTimeTick,
+      });
+      label.point = { x: x - 2, y: bottom - 5 };
+      label.rotate(-90);
+      label.content = secondsToTimeStr(seconds);
+      group.addChild(label);
     }
   }
 

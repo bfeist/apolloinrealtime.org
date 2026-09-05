@@ -36,11 +36,16 @@ function makeItem(): PaperPath {
     segments: [{ handleOut: { x: 0, y: 0 } }, { handleOut: { x: 0, y: 0 } }],
     remove: vi.fn(),
     scale: vi.fn(),
+    rotate: vi.fn(),
   };
 }
 
-function makePointText(): PaperPointText {
-  return {
+interface FakePointText extends PaperPointText {
+  rotationAngle: number | null;
+}
+
+function makePointText(): FakePointText {
+  const text: FakePointText = {
     strokeColor: "",
     fillColor: "",
     strokeWidth: 0,
@@ -49,7 +54,12 @@ function makePointText(): PaperPointText {
     bounds: { width: 40, height: 12 },
     remove: vi.fn(),
     scale: vi.fn(),
+    rotationAngle: null,
+    rotate: (angle: number): void => {
+      text.rotationAngle = angle;
+    },
   };
+  return text;
 }
 
 interface FakePaper extends PaperScopeLike {
@@ -273,6 +283,20 @@ describe("NavigatorRenderer", () => {
     expect(navCursor.children.length).toBeGreaterThan(0);
   });
 
+  it("keeps the playback cursor label centered at the detailed-tier edge", () => {
+    const paper = makeFakePaper(A13.width, A13.height);
+    const r = new NavigatorRenderer(paper, { ...A13 });
+    r.mount(CANVAS);
+    r.render(-A13.countdownSeconds);
+
+    const label = groupAt(paper, 5).children.find(
+      (item): item is FakePointText =>
+        typeof item === "object" && item !== null && "content" in item,
+    );
+
+    expect(label?.point.x).toBe(-20);
+  });
+
   it("destroy() removes groups and detaches handlers", () => {
     const paper = makeFakePaper(A13.width, A13.height);
     const r = new NavigatorRenderer(paper, {
@@ -470,6 +494,27 @@ describe("NavigatorRenderer overlay support", () => {
     // tier 2 gets border + time ticks (drawn whenever overlays is non-null).
     expect(groupAt(paper, 0).children).toHaveLength(1);
     expect(groupAt(paper, 2).children.length).toBeGreaterThan(1); // time ticks
+  });
+
+  it("uses the legacy rotated labels only in the detailed timeline tier", () => {
+    const paper = makeFakePaper(A13.width, A13.height);
+    const r = new NavigatorRenderer(paper, { ...A13, overlays: {} });
+    r.mount(CANVAS);
+
+    const tier2HasText = groupAt(paper, 2).children.some(
+      (item) => typeof item === "object" && item !== null && "content" in item,
+    );
+    const tier3TimeLabel = groupAt(paper, 4).children.find(
+      (item): item is FakePointText =>
+        typeof item === "object" &&
+        item !== null &&
+        "content" in item &&
+        item.content === "000:00:00",
+    );
+
+    expect(tier2HasText).toBe(false);
+    expect(tier3TimeLabel).toBeDefined();
+    expect(tier3TimeLabel?.rotationAngle).toBe(-90);
   });
 
   it("all overlays combined: tier1Group and tier2Group have more children", () => {

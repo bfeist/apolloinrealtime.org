@@ -35,6 +35,7 @@ interface PaperItem {
   strokeWidth: number;
   remove(): void;
   scale(hor: number, ver: number): void;
+  rotate(angle: number): void;
 }
 
 interface PaperPath extends PaperItem {
