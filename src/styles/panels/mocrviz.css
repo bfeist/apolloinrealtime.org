@@ -150,7 +150,7 @@
   background: #828282;
   box-shadow: inset -1px -1px 7px 3px rgb(0 0 0 / 25%);
   font-family: "Oswald", sans-serif;
-  font-size: 10px;
+  font-size: 11px;
 }
 .mocrviz-panel .mocrviz-transcript-tab:first-child {
   min-width: 90px;
