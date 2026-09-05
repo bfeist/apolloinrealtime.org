@@ -6,8 +6,8 @@ export const TIMELINE = {
   height: 350,
   rowHeight: 5,
   channelStroke: 4,
-  waveformCenter: 235,
-  waveformHeight: 100,
+  waveformGap: 10,
+  waveformHeight: 60,
 };
 
 export interface TimelineHover {
@@ -83,7 +83,8 @@ export function drawTimeline(canvas: HTMLCanvasElement, state: TimelineState): v
   }
 
   const waveRate = state.waveform ? state.waveform.sampleRate / state.waveform.samplesPerPixel : 0;
-  const middleY = TIMELINE.waveformCenter;
+  const activityHeight = state.channels.length * TIMELINE.rowHeight;
+  const middleY = activityHeight + TIMELINE.waveformGap + TIMELINE.waveformHeight / 2;
   if (state.waveform && waveRate > 0) {
     ctx.strokeStyle = "#7cb7e0";
     ctx.lineWidth = 0.8;
@@ -102,14 +103,10 @@ export function drawTimeline(canvas: HTMLCanvasElement, state: TimelineState): v
     ctx.fillText(state.waveformMessage, 10, middleY + 4, width - 20);
   }
 
-  ctx.font = 'bold 12px "Roboto Mono", monospace';
-  ctx.fillStyle = "#ddd";
-  ctx.fillText(state.labels.get(state.channel) ?? String(state.channel), 10, height - 75);
-
   if (state.activityMessage) {
     ctx.font = '10px "Roboto Mono", monospace';
     ctx.fillStyle = "#777";
-    ctx.fillText(state.activityMessage, 10, height - 48, width - 20);
+    ctx.fillText(state.activityMessage, 10, activityHeight + 8, width - 20);
   }
 
   // The real playhead remains centered while the recording moves beneath it.

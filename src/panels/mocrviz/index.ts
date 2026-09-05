@@ -5,6 +5,7 @@ import { findTapeForGet, loadTapeRangesData } from "../../data/tapeRangesData.js
 import { secondsToTimeStr } from "../../shell/clock.js";
 import { channelsFor, type MissionChannels } from "./channels.js";
 import { MocrvizAudioController } from "./audio.js";
+import { createMocrvizAbout } from "./about.js";
 import { waveformDataUrl, type MocrMissionId } from "./urls.js";
 import {
   activityChunks,
@@ -167,9 +168,11 @@ function mountMocrvizPanel(
     button.style.width = `${String((size / 746) * 100)}%`;
     room.append(button);
   }
-  const channelName = element("h3", "mocrviz-channel-name");
-  const channelDescription = element("p", "mocrviz-channel-description");
-  controls.append(room, channelName, channelDescription);
+  const controllerDetails = element("div", "mocrviz-controller-details");
+  const channelName = element("span", "mocrviz-channel-name");
+  const channelDescription = element("span", "mocrviz-channel-description");
+  controllerDetails.append(channelName, ": ", channelDescription);
+  controls.append(room, controllerDetails);
 
   const transcriptPanel = element("section", "mocrviz-transcript-panel");
   const transcriptTitle = element("div", "mocrviz-transcript-title");
@@ -188,33 +191,14 @@ function mountMocrvizPanel(
   search.setAttribute("aria-label", "Search this channel transcript");
   search.hidden = true;
   const transcriptList = element("div", "mocrviz-transcript", "Loading channel transcript…");
-  const about = element("div", "mocrviz-transcript-about");
-  about.hidden = true;
-  about.append(
-    element("h4", "", "About This Mission Control Audio"),
-    element(
-      "p",
-      "",
-      "These recordings contain the individual flight-controller and backroom communication loops captured throughout the mission.",
-    ),
-    element("h4", "", "About These Transcripts"),
-    element(
-      "p",
-      "",
-      "The channel transcripts were generated automatically and may contain errors. The original audio remains the historical source.",
-    ),
-  );
+  const about = createMocrvizAbout(options.mission, options.mediaRoot);
   transcriptMonitor.append(search, transcriptList, about);
-  const transcriptNote = element(
-    "p",
-    "mocrviz-transcript-note",
-    "Machine transcription · may contain errors",
-  );
-  transcriptPanel.append(transcriptTitle, transcriptTabs, transcriptMonitor, transcriptNote);
+  transcriptPanel.append(transcriptTitle, transcriptTabs, transcriptMonitor);
   bottom.append(controls, transcriptPanel);
   const audio = element("audio", "mocrviz-audio");
   audio.preload = "metadata";
   const status = element("p", "mocrviz-status");
+  status.setAttribute("aria-live", "polite");
   container.append(canvas, bottom, status, audio);
 
   const controller = new MocrvizAudioController(

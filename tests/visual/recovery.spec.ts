@@ -102,6 +102,11 @@ for (const mission of ["11", "13"]) {
       "src",
       new RegExp(`media.apolloinrealtime.org/A${mission}/MOCR_audio/`),
     );
+    await page.getByRole("button", { name: "ABOUT", exact: true }).click();
+    await expect(page.locator(".mocrviz-transcript-about")).toContainText(
+      mission === "11" ? "11,000 hours" : "7,200 hours",
+    );
+    await expect(page.locator(".mocrviz-about-images img")).toHaveCount(mission === "11" ? 5 : 6);
     await page.getByRole("button", { name: "Photography", exact: true }).click();
     await expect(page.locator("#mocrviz-host")).toBeHidden();
     await expect(page.locator("#photodiv")).toBeVisible();
@@ -191,6 +196,21 @@ for (const mission of ["11", "13"]) {
   }
 }
 
+for (const mission of ["11", "13"]) {
+  for (const width of [1440, 390]) {
+    test(`recovery MOCR About screenshot A${mission} at ${String(width)}`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/${mission}/?t=000:00:00&ch=14`);
+      await page.getByRole("button", { name: "ABOUT", exact: true }).click();
+      const about = page.locator(".mocrviz-transcript-about");
+      await expect(about.locator("img").first()).toBeVisible();
+      await expect(about).toHaveScreenshot(`mocr-about-a${mission}-${String(width)}.png`, {
+        animations: "disabled",
+      });
+    });
+  }
+}
+
 test("recovery MOCR timeline previews channel and GET before seeking smoothly", async ({
   page,
 }) => {
@@ -198,9 +218,12 @@ test("recovery MOCR timeline previews channel and GET before seeking smoothly", 
   const canvas = page.locator(".mocrviz-timeline");
   await expect(canvas).toBeVisible();
   await page.getByRole("button", { name: "ABOUT", exact: true }).click();
-  await expect(
-    page.getByRole("heading", { name: "About This Mission Control Audio", exact: true }),
-  ).toBeVisible();
+  const about = page.locator(".mocrviz-transcript-about");
+  await expect(about.locator(".title").first()).toHaveText("About This Mission Control Audio");
+  await expect(about).toContainText("7,200 hours");
+  await expect(about).toContainText("3,936,510 utterances");
+  await expect(about.locator(".mocrviz-about-images img")).toHaveCount(6);
+  await expect(page.locator(".mocrviz-transcript-note")).toHaveCount(0);
   await page.getByRole("button", { name: "SEARCH", exact: true }).click();
   const channelSearch = page.getByRole("searchbox", { name: "Search this channel transcript" });
   await expect(channelSearch).toBeVisible();
