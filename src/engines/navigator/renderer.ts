@@ -462,11 +462,12 @@ export class NavigatorRenderer {
     const labelY = layout.tier3.top + 12.5;
     label.point = { x: labelX, y: labelY };
 
-    // Background plate behind the label (legacy passes `timeText.bounds`; we
-    // rebuild the equivalent rectangle from the label position + measured size).
+    // Use Paper's true text bounds, as the legacy navigator does. A PointText
+    // baseline is not its bounds bottom, so deriving this from `labelY` shifts
+    // the plate upward relative to the rendered mission time.
     const labelRect = new this.paper.Rectangle(
-      labelX,
-      labelY - label.bounds.height,
+      label.bounds.x,
+      label.bounds.y,
       label.bounds.width,
       label.bounds.height,
     );

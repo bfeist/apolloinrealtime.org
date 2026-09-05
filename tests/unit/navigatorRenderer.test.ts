@@ -51,7 +51,9 @@ function makePointText(): FakePointText {
     strokeWidth: 0,
     content: "",
     point: { x: 0, y: 0 },
-    bounds: { width: 40, height: 12 },
+    get bounds(): PaperPointTextBounds {
+      return { x: text.point.x, y: text.point.y - 9, width: 40, height: 12 };
+    },
     remove: vi.fn(),
     scale: vi.fn(),
     rotationAngle: null,
