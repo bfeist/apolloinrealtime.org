@@ -2,13 +2,11 @@
 
 ## Resume here
 
-**2026-09-05: MOCRviz visual/content parity repair completed. No production cutover.**
-Apollo 11/13 now preserve the original mission-specific About copy, typography,
-archive links, tape imagery, transcript statistics, and OpenAI mark. The activity rows
-reserve their own 240 px band, followed by a 10 px gap and 60 px waveform band;
-the redundant canvas channel caption is removed. Controller details are inline,
-and diagnostic text no longer consumes visible transcript space. Next, run the
-long-session media resilience work in
+**2026-09-05: MOCRviz waveform parity repair completed. No production cutover.**
+Apollo 11/13 now render the waveform like the legacy Paper.js view: a solid
+full-opacity `#7cb7e0` min/max envelope with a continuous one-pixel baseline for
+exact-zero samples. The corrected lower placement and separation from the
+activity rows remain intact. Next, run the long-session media resilience work in
 [05-migration-plan.md](05-migration-plan.md).
 
 Useful review routes:
@@ -48,8 +46,9 @@ opened the expected 3900 × 3900 LPI source in a separate tab. Representative
 Apollo 11, 13, and 17 source URLs returned HTTP 200 at verification time.
 
 The MOCRviz parity repair was compared visibly against live Apollo 11 and 13 at
-matching GETs. Eleven focused browser cases pass the shared channel/GET hover
-preview, subsecond redraw, seek/channel selection, complete mission-specific
+matching GETs and against the preserved waveform renderer. Twelve focused
+browser cases pass the shared channel/GET hover preview, subsecond redraw,
+seek/channel selection, exact-zero waveform baseline, complete mission-specific
 About content, and six Apollo 11/13 MOCR snapshots at 1440, 768, and 390 px plus
 four About snapshots at desktop and phone widths. Six local control cases and
 three live/local production-reference cases also pass.
@@ -80,6 +79,7 @@ ingestion pipeline remain deferred beyond this release.
 
 | Date       | Work                                                                                                                                                         | Verification                                                                                                                                           |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-09-05 | Replaced dim MOCR waveform strokes with the original solid blue filled envelope and retained a continuous one-pixel line through exact-zero samples.          | Legacy renderer/source comparison; visible A11/A13 checks; synthetic-silence regression and all 12 focused MOCR browser cases pass.                    |
 | 2026-09-05 | Completed Apollo 11/13 MOCRviz visual/content parity: original About content and typography, waveform spacing, canvas-label removal, and compact controller/transcript layout. | Matching-GET live A11/A13 review; 11 focused MOCR, 6 control, and 3 live-reference browser cases pass; `npm run check` (276) and build pass.          |
 | 2026-09-05 | Restored Apollo 11/13 MOCRviz production-style layout, hover/seek feedback, 10 Hz motion, native waveform scaling, transcript views, and phone reachability. | Live A11/A13 comparison; 9 focused MOCR browser cases, 6 control cases, and 3 live control-reference cases pass; `npm run check` (276) and build pass. |
 | 2026-09-05 | Consolidated planning docs around current state and unfinished work; removed the two historical inventories and corrected adjacent stale references.         | Local Markdown links and Prettier pass; `npm run check` passes 276 tests; protected reference trees unchanged.                                         |

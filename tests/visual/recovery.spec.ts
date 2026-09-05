@@ -1,5 +1,15 @@
 import { expect, test } from "@playwright/test";
 
+function silentWaveform(length = 1_000_000): Buffer {
+  const buffer = Buffer.alloc(20 + length * 2);
+  buffer.writeUInt32LE(1, 0);
+  buffer.writeUInt32LE(1, 4);
+  buffer.writeUInt32LE(8_000, 8);
+  buffer.writeUInt32LE(512, 12);
+  buffer.writeUInt32LE(length, 16);
+  return buffer;
+}
+
 for (const mission of ["11", "13", "17"]) {
   for (const width of [1440, 768, 390]) {
     test(`recovery A${mission} layout and transport at ${String(width)}`, async ({ page }) => {
@@ -195,6 +205,32 @@ for (const mission of ["11", "13"]) {
     });
   }
 }
+
+test("recovery MOCR silent waveform retains the legacy blue baseline", async ({ page }) => {
+  await page.route(/audiowaveform_512\/.*\.dat$/, async (route) => {
+    await route.fulfill({
+      body: silentWaveform(),
+      contentType: "application/octet-stream",
+    });
+  });
+  await page.goto("/13/?t=000:00:00&ch=14");
+  const canvas = page.locator(".mocrviz-timeline");
+  await expect(canvas).toBeVisible();
+  await expect
+    .poll(async () =>
+      canvas.evaluate((element) => {
+        const timeline = element as HTMLCanvasElement;
+        const context = timeline.getContext("2d");
+        if (!context) return "";
+        const scale = timeline.width / timeline.clientWidth;
+        const x = Math.round((timeline.clientWidth / 2 - 50) * scale);
+        // 48 activity rows × 5 px + 10 px gap + half of the 60 px waveform.
+        const y = Math.round(280 * scale);
+        return [...context.getImageData(x, y, 1, 1).data].join(",");
+      }),
+    )
+    .toBe("124,183,224,255");
+});
 
 for (const mission of ["11", "13"]) {
   for (const width of [1440, 390]) {

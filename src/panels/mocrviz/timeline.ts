@@ -86,17 +86,44 @@ export function drawTimeline(canvas: HTMLCanvasElement, state: TimelineState): v
   const activityHeight = state.channels.length * TIMELINE.rowHeight;
   const middleY = activityHeight + TIMELINE.waveformGap + TIMELINE.waveformHeight / 2;
   if (state.waveform && waveRate > 0) {
-    ctx.strokeStyle = "#7cb7e0";
-    ctx.lineWidth = 0.8;
-    ctx.beginPath();
+    const lower = new Float32Array(width);
+    const upper = new Float32Array(width);
+    lower.fill(Number.NaN);
+    upper.fill(Number.NaN);
+    let firstX = width;
+    let lastX = -1;
+    const halfHeight = TIMELINE.waveformHeight / 2;
     for (let x = 0; x < width; x++) {
       const tapeSecond = state.seconds - state.tapeStart + (x - width / 2) / waveRate;
       const peak = waveformPeak(state.waveform, tapeSecond, tapeSecond + 1 / waveRate);
       if (!peak) continue;
-      ctx.moveTo(x, middleY - peak[1] * (TIMELINE.waveformHeight / 2));
-      ctx.lineTo(x, middleY - peak[0] * (TIMELINE.waveformHeight / 2));
+      // The legacy Paper.js path always left a one-pixel body at zero amplitude.
+      lower[x] = middleY - peak[0] * halfHeight + 0.5;
+      upper[x] = middleY - peak[1] * halfHeight - 0.5;
+      firstX = Math.min(firstX, x);
+      lastX = x;
     }
-    ctx.stroke();
+
+    ctx.fillStyle = "#7cb7e0";
+    ctx.strokeStyle = "#7cb7e0";
+    ctx.lineWidth = 0.1;
+    if (lastX >= firstX) {
+      ctx.beginPath();
+      ctx.moveTo(firstX + 0.1, lower[firstX] ?? middleY + 0.5);
+      for (let x = firstX + 1; x <= lastX; x++) {
+        const y = lower[x];
+        if (y !== undefined && !Number.isNaN(y)) ctx.lineTo(x + 0.1, y);
+      }
+      for (let x = lastX; x >= firstX; x--) {
+        const y = upper[x];
+        if (y !== undefined && !Number.isNaN(y)) ctx.lineTo(x - 0.5, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Keep digital-zero samples as the same solid blue line as the filled envelope.
+      ctx.fillRect(firstX, Math.floor(middleY), lastX - firstX + 1, 1);
+    }
   } else if (state.waveformMessage) {
     ctx.fillStyle = "#777";
     ctx.font = '10px "Roboto Mono", monospace';
