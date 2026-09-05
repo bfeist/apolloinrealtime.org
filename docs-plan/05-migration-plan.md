@@ -48,6 +48,7 @@ Load expensive data lazily and bound caches. Abort/ignore stale loads when chann
 2. Open Chrome tabs for production, local typed and local legacy sites. Match GET and viewport; dismiss splash and pause. Check all missions at desktop, and typed app at 768×1024 and 390×844. Record actual results and external-service failures separately.
 3. Exercise GET input, timeline, transcript/TOC/commentary/photo/search seek, play/pause/mute, tab switching and MOCR channel changes. Check that GET and historical date remain coherent and no controls overlap.
 4. Run Playwright screenshots and behavioral/layout assertions. Screenshot tests are blocking against reviewed **typed-app** baselines; production screenshots are the reference for human comparison, not an exact-pixel gate under the owner's revised goal. Never update baselines simply to make a failure disappear. Record intentional differences and inspect the images first.
+5. For controls, run `npm run test:controls-reference`; its temporary production/local component crops remain in ignored test output. Run `npx playwright test --project=visual tests/visual/controls.spec.ts` for state, clipping and reachability checks. Follow the measured button contract in `PHASE6-visual-reference.md`. A passing whole-page screenshot does not establish that small controls resemble production.
 
 ### Fixed comparison GETs
 

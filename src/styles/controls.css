@@ -1,0 +1,120 @@
+/* Measured against live A11/A13/A17, September 2026.
+   The rounded, inset button faces are part of the original console design. */
+@import "./control-icons.css";
+
+.airt-tabs-wrapper {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1.666fr);
+  gap: 2px;
+  align-items: stretch;
+}
+.airt-button-row {
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+}
+.airt-button-row--small {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(2, 18px);
+  grid-template-areas: "search realtime about share play" "dashboard sound fullscreen share play";
+  gap: 2px;
+}
+.airt-tab,
+.airt-app-tab,
+.airt-action-btn {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+  height: 38px;
+  padding: 7.8px 7.8px 0;
+  border: 0;
+  border-right: 1px solid #8c8c8c;
+  border-bottom: 1px solid #8c8c8c;
+  border-radius: 4px;
+  background-color: #8e8e8e;
+  color: #000;
+  box-shadow: inset -1px -1px 7px 3px rgba(0, 0, 0, 0.25);
+  font-family: var(--airt-font-oswald);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: normal;
+  text-align: left;
+  text-transform: uppercase;
+  transition: background-color 150ms ease-in-out;
+}
+.airt-tab {
+  flex: 1 1 0;
+}
+.airt-app-tab {
+  flex: 0 1 140px;
+}
+.airt-tab:is(:hover, :active, .is-active),
+.airt-app-tab:is(:hover, :active, .is-active, .selected) {
+  background-color: #7bbfd8;
+  text-shadow:
+    1px 1px 1px rgba(255, 255, 255, 0.5),
+    -1px -1px 1px rgba(255, 255, 255, 0.5);
+}
+.airt-action-btn {
+  height: 18px;
+  background-size: 15px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-origin: border-box;
+}
+.airt-action-btn--labeled {
+  height: 38px;
+  padding: 2.4px 0 0;
+  text-align: center;
+  justify-content: center;
+  background-position: 50% 85%;
+}
+.airt-action-btn:is(:hover, :active, .is-active) {
+  background-color: #ffc688;
+}
+:is(.airt-tab, .airt-app-tab, .airt-action-btn, .thirtybtn-channel):focus-visible {
+  outline: 2px solid #ffc688;
+  outline-offset: -2px;
+}
+#searchBtn {
+  grid-area: search;
+}
+#dashboardBtn {
+  grid-area: dashboard;
+}
+#realtimeBtn {
+  grid-area: realtime;
+}
+#soundBtn {
+  grid-area: sound;
+}
+#aboutBtn {
+  grid-area: about;
+}
+#fullscreenBtn {
+  grid-area: fullscreen;
+}
+#shareBtn {
+  grid-area: share;
+}
+#playPauseBtn {
+  grid-area: play;
+}
+
+@media (max-width: 640px) {
+  .airt-tabs-wrapper {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .airt-button-row--small {
+    grid-template-rows: repeat(2, 28px);
+  }
+  .airt-action-btn {
+    height: 28px;
+  }
+  .airt-action-btn--labeled {
+    height: 58px;
+    padding-top: 7px;
+    background-position: 50% 75%;
+  }
+}

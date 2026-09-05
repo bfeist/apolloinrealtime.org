@@ -47,11 +47,16 @@ export default defineConfig({
     },
     {
       name: "visual",
-      testMatch: /(?:visual|recovery)\.spec\.ts$/,
+      testMatch: /(?:visual|recovery|controls)\.spec\.ts$/,
       use: {
         baseURL: LOCAL_BASE,
         ...devices["Desktop Chrome"],
       },
+    },
+    {
+      name: "controls-reference",
+      testMatch: /controls-reference\.spec\.ts$/,
+      use: { ...devices["Desktop Chrome"] },
     },
   ],
 });

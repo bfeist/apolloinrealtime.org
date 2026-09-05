@@ -239,7 +239,7 @@ const A11_ENTRIES: readonly (readonly [number, string, string])[] = [
   ],
   [
     5,
-    "PROCEDURES",
+    "OPS & PRO",
     "Operations and Procedures Officer – Supervised the application of mission rules and detailed implementation of the Mission Control Center/Ground Operational Support Systems mission control procedures.",
   ],
   [
@@ -357,7 +357,7 @@ const A11_ENTRIES: readonly (readonly [number, string, string])[] = [
   ],
   [
     35,
-    "RCVY ST 2",
+    "EVAL",
     "Recovery Operations Control Room (ROCR), Evaluator / Display Controller - Assimilating and evaluating all data necessary to select the most desirable target points for any situation and recommending them to the Recovery Officer.",
   ],
   [36, "DOD COORD", ""],
@@ -395,9 +395,9 @@ const A11_ENTRIES: readonly (readonly [number, string, string])[] = [
     "Monitored and evaluated performance of propulsion-related aspects of the launch vehicle during prelaunch and ascent. During the Apollo program there were three Booster positions, who worked only until Trans Lunar Injection (TLI); after that, their consoles were vacated. Booster had the power to send an abort command to the spacecraft. All Booster technicians were employed at the Marshall Space Flight Center and reported to JSC for the launches. (right seat)",
   ],
   [50, "FLIGHT", "FD clean voice-only recording of Flight Director [R]"],
-  [51, "AFD CONF", "Assistant Flight Director - Comm line."],
+  [51, "CONF LOOP", "Assistant Flight Director - Comm line."],
   [52, "GOSS 2", "Ground Operational Support System (GOSS) - Comm line."],
-  [53, "ALSEP EAO 2", ""],
+  [53, "EASEP", ""],
   [54, "MOCR DYN", "Comm line."],
   [55, "GOSS CONF", "Ground Operational Support System (GOSS) - Comm line."],
   [56, "GOSS 4", "Ground Operational Support System (GOSS) - Comm line."],
@@ -409,7 +409,11 @@ const A11_ENTRIES: readonly (readonly [number, string, string])[] = [
 
 const A11_CHANNELS: MissionChannels = {
   all: buildAll(A11_ENTRIES),
-  available: A13_CHANNELS.available,
+  // Keep the original A11 shell order, which differs from A13.
+  available: [
+    2, 3, 50, 7, 8, 14, 15, 47, 48, 49, 19, 20, 21, 22, 12, 13, 17, 18, 58, 57, 16, 5, 9, 6, 11, 42,
+    43, 28, 29, 32, 33, 34, 51, 52, 53, 54, 55, 56, 23, 24, 25, 26, 27, 59, 35, 44, 45, 46,
+  ],
   redacted: A13_CHANNELS.redacted,
   defaultChannel: 14,
 };

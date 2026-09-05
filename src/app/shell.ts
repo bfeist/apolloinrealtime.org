@@ -247,14 +247,14 @@ function buildHtml(config: MissionConfig, debug: boolean): string {
                   title="Description of events and post-mission interviews with the crew">Commentary</button>
         </div>
         <div class="airt-button-row airt-button-row--small">
-          <button id="searchBtn" class="airt-action-btn" type="button" title="Search mission" aria-label="Search">⌕</button>
-          <button id="dashboardBtn" class="airt-action-btn" type="button" title="Show/hide Mission Status" aria-label="Dashboard">▤</button>
-          <button id="playPauseBtn" class="airt-action-btn" type="button" title="Play/Pause" aria-label="Play/Pause">⏸</button>
-          <button id="soundBtn" class="airt-action-btn" type="button" title="Sound on/off" aria-label="Sound">🔊</button>
-          <button id="realtimeBtn" class="airt-action-btn" type="button" title="Sync to today's clock" aria-label="Sync to today's clock">↺</button>
-          <button id="shareBtn" class="airt-action-btn" type="button" title="Share this moment" aria-label="Share this moment">↗</button>
-          <button id="aboutBtn" class="airt-action-btn" type="button" title="How to explore" aria-label="How to explore">?</button>
-          <button id="fullscreenBtn" class="airt-action-btn" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
+          <button id="searchBtn" class="airt-action-btn" type="button" title="Search mission" aria-label="Search"></button>
+          <button id="realtimeBtn" class="airt-action-btn" type="button" title="Sync to today's clock" aria-label="Sync to today's clock"></button>
+          <button id="aboutBtn" class="airt-action-btn" type="button" title="How to explore" aria-label="How to explore"></button>
+          <button id="dashboardBtn" class="airt-action-btn" type="button" title="Show/hide Mission Status" aria-label="Dashboard"></button>
+          <button id="soundBtn" class="airt-action-btn" type="button" title="Sound on/off" aria-label="Sound"></button>
+          <button id="fullscreenBtn" class="airt-action-btn" type="button" title="Fullscreen" aria-label="Fullscreen"></button>
+          <button id="shareBtn" class="airt-action-btn airt-action-btn--labeled" type="button" title="Share this moment" aria-label="Share this moment">Share</button>
+          <button id="playPauseBtn" class="airt-action-btn airt-action-btn--labeled" type="button" title="Play/Pause" aria-label="Play">Play</button>
         </div>
       </div>
 

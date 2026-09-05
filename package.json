@@ -19,6 +19,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:visual": "playwright test --project=visual",
+    "test:controls-reference": "playwright test --project=controls-reference",
     "test:visual:update": "playwright test --project=visual --update-snapshots",
     "test:baseline": "playwright test --project=baseline --update-snapshots",
     "test:all": "npm run lint && npm run tsc && npm run build && npm run test",

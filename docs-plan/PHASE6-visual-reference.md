@@ -77,6 +77,42 @@ source inventory mentions Michroma, Oswald, Roboto Mono, and Roboto Slab in
 different roles; it is not evidence that every mission title uses Roboto
 Slab. Avoid guessing a new typographic theme from the old prose.
 
+## Button contract (measured on live production, September 2026)
+
+The first recovery pass accepted visibly wrong button styling. Whole-page
+typed screenshots did not detect that mistake: they only detected subsequent
+changes to the mistake. Inspect component crops at native size as well as the
+whole page before accepting a new reference.
+
+- Text and app tabs: 38 px high, Oswald 12 px / weight 400, left/top-aligned
+  labels with 7.8 px top/side padding, 4 px rounded corners on all four corners.
+  Gray face `#8e8e8e`, right/bottom 1 px `#8c8c8c` edges, inset shadow
+  `-1px -1px 7px 3px rgba(0,0,0,.25)`. Selected/hover face `#7bbfd8`
+  with the original subtle white text shadow. No flat teal rectangles.
+- Action controls: three columns of two 18 px icon buttons, then two full-height
+  buttons labeled Share and Play/Pause. Gaps are 2 px. Original vector icons
+  are 15 px; action hover/dashboard-active uses `#ffc688`. Play and sound
+  artwork must track the actual transport state, without emoji or text substitutes.
+- Desktop text tabs/actions divide the available row about 3 : 1.666.
+  App tabs are 140 px wide when space allows. A17 has the same left controls;
+  its original photography area has no corresponding app-tab row.
+- Mission channels: 70 px column, 18 px buttons, 2 px vertical gaps, Roboto Mono
+  bold 11 px, 1 px vertical / 2 px horizontal padding, 3 px corners and inset shadow.
+  Silent face/text: `#292929 / #595959`; speaking: `#636363 / black`;
+  selected/hover: `#7cb7e0 / black`. Actual tape activity determines speaking.
+  Silence never disables selection. Flex children must not shrink below their
+  text height; overflow scrolls. A11 has its own original labels and order.
+- Phone layout deliberately puts actions below text tabs, with 28 px small
+  buttons and 58 px labeled buttons. Channels form a scrollable three-row strip.
+  Check full label bounds and access to the last channel.
+
+`npm run test:controls-reference` opens the live and local sites and compares
+rendered button faces plus channel labels/order for all three missions. It
+attaches named production/local crops only to ignored Playwright output. This
+gate cannot be bypassed by updating typed snapshots. `controls.spec.ts`
+separately checks hover/selection, label clipping and last-channel selection
+on desktop and phone.
+
 ## Right area and photography
 
 A large contained image occupies the right viewer, with caption/attribution

@@ -39,6 +39,7 @@ import { createDashboardPanel } from "../panels/dashboard/index.js";
 import { createSearchPanel } from "../panels/search/index.js";
 import type { MocrvizPanel } from "../panels/mocrviz/index.js";
 import { channelsFor } from "../panels/mocrviz/channels.js";
+import { createChannelActivity } from "../panels/mocrviz/channelActivity.js";
 import { renderShell, setActiveTab, type ShellElements } from "./shell.js";
 import { parseDeepLink } from "./deepLink.js";
 import { MissionPlayback, realtimeGet } from "./playback.js";
@@ -689,6 +690,15 @@ function mountMocrvizPanel(
       ? initialChannel
       : catalog.defaultChannel;
   const buttons = new Map<number, HTMLButtonElement>();
+  const channelActivity = createChannelActivity(
+    mission,
+    (active) => {
+      for (const [id, button] of buttons) {
+        button.classList.toggle("is-speaking", active.includes(id));
+      }
+    },
+    `${config.mediaRoot}/MOCR_audio`,
+  );
   const highlight = (channel: number): void => {
     selected = channel;
     for (const [id, button] of buttons) {
@@ -697,6 +707,7 @@ function mountMocrvizPanel(
     }
   };
   const tick = (): void => {
+    channelActivity.update(ref.value);
     panel?.setMuted(ref.muted);
     panel?.setClock(ref.value, ref.playing && ref.mocrActive);
   };
@@ -885,13 +896,13 @@ ready(() => {
   const transport = (): void => {
     const play = document.getElementById("playPauseBtn");
     if (play) {
-      play.textContent = currentSecondsRef.playing ? "Ⅱ" : "▶";
+      play.textContent = currentSecondsRef.playing ? "Pause" : "Play";
       play.setAttribute("aria-label", currentSecondsRef.playing ? "Pause" : "Play");
       play.setAttribute("aria-pressed", String(currentSecondsRef.playing));
     }
     const sound = document.getElementById("soundBtn");
     sound?.setAttribute("aria-pressed", String(currentSecondsRef.muted));
-    if (sound) sound.textContent = currentSecondsRef.muted ? "MUTE" : "SND";
+    sound?.setAttribute("title", currentSecondsRef.muted ? "Unmute sound" : "Mute sound");
     document.dispatchEvent(new Event("airt:transport"));
   };
   document.getElementById("playPauseBtn")?.addEventListener("click", () => {
