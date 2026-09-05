@@ -4,8 +4,9 @@
 
 **2026-09-05: GitHub repository consolidation complete. No production cutover.**
 `https://github.com/bfeist/apolloinrealtime.org` is now the canonical remote and
-uses the rewritten `main` as its default branch. Namespaced legacy branches and
-tags are published there. The Apollo 11, 13, and 17 repositories have prominent
+uses the rewritten `main` as its default branch. All 17 source branch lines are
+published as `legacy/<source>/<branch>` alongside the retained tags and internal
+provenance refs. The Apollo 11, 13, and 17 repositories have prominent
 abandonment notices linking to the consolidated repository. Resume long-session
 media resilience work in [05-migration-plan.md](05-migration-plan.md).
 
@@ -60,8 +61,11 @@ repository-only change, so no new browser comparison was required.
 
 The original four import merges were subsequently reconnected to the granular
 filtered source tips instead of attaching all histories to one recent merge.
-`main` now reaches 1,518 commits through the semantically correct import graph;
-the complete source graphs, including auxiliary branches, remain namespaced.
+`main` now reaches 1,519 commits through the semantically correct import graph;
+the complete source graphs remain namespaced. All 17 locally or remotely known
+source branches have canonical aliases. In particular,
+`legacy/apollo17/develop` has the same 919-commit topology as the source branch;
+the other non-default live source branches also match their source commit counts.
 
 ## Remaining release work
 
@@ -89,6 +93,7 @@ ingestion pipeline remain deferred beyond this release.
 
 | Date       | Work                                                                                                                                                                                    | Verification                                                                                                                                                                  |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-05 | Published stable `legacy/<source>/<branch>` aliases for all 17 locally or remotely known branches from Apollo 11, Apollo 13, Apollo 17, and the original landing repository.           | Remote audit finds all 17 aliases; Apollo 17 `develop` retains all 919 commits; every live non-default branch count matches its source; Git fsck passes.                    |
 | 2026-09-05 | Published the rewritten repository to `bfeist/apolloinrealtime.org`, made `main` the GitHub default, and added linked abandonment notices to the Apollo 11, 13, and 17 repositories.    | Remote HEAD resolves to `main`; all legacy refs were pushed; the three notice commits are published; GitHub's 23-commit activity figure matches the selected one-week window. |
 | 2026-09-05 | Repaired the four original import merge parents so granular filtered legacy histories appear at their actual import points instead of beneath one recent multi-parent merge.            | `main` reaches 1,516 commits; all source commit counts, merge-parent mapping, path audit, Git fsck, and `npm run check` (276) pass.                                           |
 | 2026-09-05 | Removed copied pre-pipeline material and rewrote all refs to expunge removed legacy files while retaining the four source repositories' complete commit topology under namespaced refs. | Per-repository commit counts match all four sources; reachable-path audit, Git fsck, `npm run check` (276), and repository repack pass.                                       |

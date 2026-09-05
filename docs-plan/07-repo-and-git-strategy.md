@@ -23,7 +23,12 @@ Those histories are filtered to the current AiRT2 path set: commit metadata,
 parents, branches, and tags remain, while files absent from the current tree do
 not retain historical blobs. Each source repository's imported default-branch
 tip is the second parent of its original import merge on `main`. Auxiliary
-branches and tags remain available through the namespaced refs.
+branches are published as `legacy/<source>/<original-branch>`; for example, the
+919-commit Apollo 17 development line is `legacy/apollo17/develop`. Namespaced
+tags and the older internal `heads/` and `remotes/origin/` refs remain available
+as additional provenance pointers. The three legacy `master` aliases stop at
+their filtered archival tips, immediately before the later README-only
+abandonment-notice commits in the now-frozen source repositories.
 
 If runtime drift is found, inspect a targeted diff against the appropriate
 adjacent webroot and restore only the affected files. The retired `/mobile/`
