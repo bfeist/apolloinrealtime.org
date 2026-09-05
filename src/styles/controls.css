@@ -38,7 +38,7 @@
   font-family: var(--airt-font-oswald);
   font-size: 13px;
   font-weight: 400;
-  line-height: normal;
+  line-height: 1;
   text-align: left;
   text-transform: uppercase;
   transition: background-color 150ms ease-in-out;

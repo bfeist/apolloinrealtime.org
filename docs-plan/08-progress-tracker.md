@@ -2,12 +2,12 @@
 
 ## Resume here
 
-**2026-09-05: Button typography adjustment completed. No production cutover.**
-Shared text-tab labels are 13 px and MOCR transcript-tab labels are 11 px,
-with their existing sizes and touch targets retained. `npm run check`, build,
-and the six desktop/phone cross-mission control cases pass; desktop browser
-inspection confirmed contained labels. Next, resume long-session media
-resilience work in [05-migration-plan.md](05-migration-plan.md).
+**2026-09-05: Button label alignment adjustment completed. No production cutover.**
+Shared and MOCR transcript-tab labels now sit explicitly at the top-left of
+their inset button faces. `npm run check`, build, and all six desktop/phone
+cross-mission control cases pass (the A13 channel-activity fixture passed on
+the focused retry); browser inspection confirmed the revised placement. Next,
+resume long-session media resilience work in [05-migration-plan.md](05-migration-plan.md).
 
 Useful review routes:
 
@@ -79,6 +79,7 @@ ingestion pipeline remain deferred beyond this release.
 
 | Date       | Work                                                                                                                                                         | Verification                                                                                                                                           |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-09-05 | Explicitly aligned shared and MOCR transcript-tab labels to the top-left of their inset control faces.                                                       | `npm run check` (276), build, six `controls.spec.ts` desktop/phone cases (A13 fixture passed on retry), and local browser review pass.                |
 | 2026-09-05 | Increased shared text-tab labels to 13 px and MOCR transcript-tab labels to 11 px following visual review, retaining all button dimensions and states.      | `npm run check` (276), build, and all six `controls.spec.ts` desktop/phone cases pass; desktop browser review confirmed contained labels.             |
 | 2026-09-05 | Force-regenerated and inspected all ten retained Apollo 11/13 MOCR and About visual baselines after the waveform rendering repair.                            | Six MOCR images updated, four About images byte-identical; subsequent unchanged-reference run passes all 12 focused MOCR cases.                       |
 | 2026-09-05 | Replaced dim MOCR waveform strokes with the original solid blue filled envelope and retained a continuous one-pixel line through exact-zero samples.          | Legacy renderer/source comparison; visible A11/A13 checks; synthetic-silence regression and all 12 focused MOCR browser cases pass.                    |
