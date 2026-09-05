@@ -7,10 +7,11 @@ and 17 routes now open on responsive mission-specific entry overlays using the
 preserved production imagery, insignia, wording, inventories, one-minute and
 in-progress choices, fullscreen control, instructions/credits entry, and forum
 link. Both entry choices start the shared transport; query-string deep links
-still enter the mission directly and paused. Visible Chrome comparisons covered
-live/local Apollo 11, 13, and 17 desktop pages plus local 390 x 844 views. Six
-focused desktop/phone browser cases pass, as do `npm run check` (279 tests) and
-`npm run build`. The broader recovery run passed 26/36 cases; its ten MOCR
+still enter the mission directly and paused. The two large entry-button labels
+are explicitly anchored to the top-left of their inset faces. Visible Chrome
+comparisons covered live/local Apollo 11, 13, and 17 desktop pages plus local
+390 x 844 views. Six focused desktop/phone browser cases pass, as do
+`npm run check` (279 tests) and `npm run build`. The broader recovery run passed 26/36 cases; its ten MOCR
 snapshot expectations retain unrelated pre-existing typography drift and were
 not regenerated. Push the current branch to exercise the first dev deployment,
 then validate the homepage and all three bare/deep-linked mission routes on the
@@ -118,6 +119,7 @@ preserved ingestion pipeline remain deferred beyond this release.
 
 | Date       | Work                                                                                                                                                                                    | Verification                                                                                                                                                                      |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-05 | Anchored the T-MINUS 1M and NOW mission-entry labels to the top-left of their button faces.                                                                                              | Direct Apollo 13 render inspection and all six desktop/phone mission-entry browser cases pass.                                                                                     |
 | 2026-09-05 | Restored responsive, mission-specific Apollo 11/13/17 entry overlays with production imagery/copy, entry controls, instructions, and forum access while preserving deep links.          | Direct live/local desktop and local phone review; six focused browser cases, `npm run check` (279), and build pass. Broader recovery: 26/36, with ten unrelated stale MOCR snapshots. |
 | 2026-09-05 | Restored mission-specific transcript role-name substitution across transcript, commentary, and search displays, including PAO and Mission Control labels.                               | Live A13 naming reference and 1440/390 local review; six all-mission desktop/phone cases; `npm run check` (279) and build pass.                                                   |
 | 2026-09-05 | Matched shared transcript/commentary typography and three-column flow to production, removing table spacing and fixed column widths while restoring wrapped, right-aligned speakers.    | Live A13 measurement and 1440/768/390 local review; six desktop/phone mission cases; `npm run check` (276) and build pass. Control-reference gate retains its known tab-size gap. |

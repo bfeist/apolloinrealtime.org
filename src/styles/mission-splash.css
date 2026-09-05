@@ -159,6 +159,9 @@
 }
 
 .mission-splash__button {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
   width: 176px;
   min-height: 64px;
   padding: 14px 16px;
