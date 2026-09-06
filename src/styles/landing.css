@@ -1,6 +1,6 @@
 ﻿/* Preserve the production landing page's composition, assets, and typography.
    Source: ../apolloinrealtime.org/_website/_webroot/styles.css. */
-:root {
+body[data-mission="landing"] {
   color-scheme: dark;
   font-family: "Roboto Mono", monospace;
   font-size: 16px;
@@ -8,28 +8,28 @@
   background: #131313;
 }
 
-* {
+body[data-mission="landing"] * {
   box-sizing: border-box;
   margin: 0;
 }
 
-body {
+body[data-mission="landing"] {
   min-width: 280px;
   min-height: 100vh;
   background: #131313 url("/landing/background_1080_30percent.jpg") center top / cover no-repeat;
 }
 
-img {
+body[data-mission="landing"] img {
   border: none;
   vertical-align: middle;
 }
 
-a,
-a:visited {
+body[data-mission="landing"] a,
+body[data-mission="landing"] a:visited {
   color: #9ee9ff;
 }
 
-a:focus-visible {
+body[data-mission="landing"] a:focus-visible {
   outline: 3px solid #9ee9ff;
   outline-offset: 8px;
 }
