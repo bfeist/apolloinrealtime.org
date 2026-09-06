@@ -83,7 +83,6 @@ npm run dev
 | `http://localhost:5173/11/`  | Apollo 11            |
 | `http://localhost:5173/13/`  | Apollo 13            |
 | `http://localhost:5173/17/`  | Apollo 17            |
-| `http://localhost:5173/dev/` | Module smoke harness |
 
 Run `npm run check` for type checking, linting, formatting, and unit tests. Run
 `npm run build` and `npm run preview` to verify the production build.

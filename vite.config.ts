@@ -6,7 +6,6 @@ import { defineConfig, type Plugin } from "vite";
  * ------------
  *  /                 -> landing page
  *  /11/ /13/ /17/    -> shared typed mission application
- *  /dev/              -> raw per-module smoke harness (development only)
  *
  * Shared CSVs, photos, MOCRviz data/images, and vendored paper.js live under
  * public/{N}/. Original website source remains in the adjacent repositories.
@@ -20,7 +19,7 @@ const trailingSlashRedirect = (): Plugin => ({
       const url = req.url ?? "";
       // Rewriting development endpoints such as /@vite/client would bypass
       // Vite's client transform and break dynamic CSS imports.
-      const match = /^(\/(?:11|13|17|dev))(\?.*)?$/.exec(url);
+      const match = /^(\/(?:11|13|17))(\?.*)?$/.exec(url);
       if (match) req.url = `${match[1]}/${match[2] ?? ""}`;
       next();
     });
