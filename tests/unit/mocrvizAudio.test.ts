@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { parseTapeRangesData } from "../../src/data/tapeRangesData";
-import { MocrvizAudioController, type HtmlAudioLike } from "../../src/panels/mocrviz/audio";
+import { MocrvizAudioController, type HtmlAudioLike } from "../../src/components/mocrviz/audio";
 
 class FakeAudio implements HtmlAudioLike {
   src = "";

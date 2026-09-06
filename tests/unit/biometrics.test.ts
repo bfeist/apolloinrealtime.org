@@ -5,7 +5,7 @@ import {
   biometricValueAt,
   loadBiometrics,
   parseBiometrics,
-} from "../../src/panels/biometrics/data";
+} from "../../src/components/biometrics/data";
 
 describe("biometric recording samples", () => {
   it("rejects malformed data, orders times and resolves duplicate timestamps", () => {

@@ -1,5 +1,5 @@
 /* Transcript / utterance table — mirrors the legacy `.utteranceTable` look
-   used by `src/panels/transcript/index.ts`. */
+   used by `src/components/transcript/index.tsx`. */
 
 .transcript_container,
 .commentary_container {

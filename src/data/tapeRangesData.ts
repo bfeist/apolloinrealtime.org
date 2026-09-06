@@ -1,7 +1,7 @@
 /**
  * MOCR audio tape ranges loader + indexer.
  *
- * Typed reference module for `MOCRviz/data/tape_ranges.csv` (Phase 4.5).
+ * Typed reference module for `MOCRviz/data/tape_ranges.csv`.
  *
  * Legacy origin: `public/{11,13}/MOCRviz/MOCRviz.js`
  * `processTapeRangeData()` + `getTapeByGETseconds()`.

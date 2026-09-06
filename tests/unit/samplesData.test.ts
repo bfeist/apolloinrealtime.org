@@ -5,7 +5,7 @@ import {
   parseSamplePublications,
   sampleCatalogLinks,
   samplePhotoUrls,
-} from "../../src/panels/samples/data.js";
+} from "../../src/components/samples/data.js";
 
 describe("Apollo 11 sample indexes", () => {
   it("keeps unrecorded collection times distinct from launch", () => {

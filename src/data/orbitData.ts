@@ -1,7 +1,7 @@
 /**
  * Orbit data loader + indexer.
  *
- * Typed reference module for `indexes/orbitData.csv` (Phase 5).
+ * Typed reference module for `indexes/orbitData.csv`.
  *
  * Legacy origin: the adjacent mission webroots' `ajax.js` `processOrbitData()`.
  * Manages lunar orbit sequence indexes and their duration windows.

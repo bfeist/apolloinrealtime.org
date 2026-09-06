@@ -1,16 +1,5 @@
-/**
- * Typed YouTube IFrame API loader.
- *
- * The three legacy `public/{11,13,17}/index.js` files each independently
- * inject `<script src="https://www.youtube.com/iframe_api">` into the
- * document and define a global `onYouTubeIframeAPIReady` callback. This
- * module collapses that into one promise-returning loader (Phase 4).
- *
- * Player construction (`new YT.Player(...)`) and the state-change wiring
- * stay with the caller for now — they are too entangled with mission state
- * (gMediaList, transcript scrolling, navigator redraws) to extract cleanly
- * until Phase 5 panel extraction.
- */
+/** Shared YouTube API loading and transport reconciliation.
+ * MissionVideo owns player creation, subscriptions, and destruction. */
 
 let loadPromise: Promise<YTNamespace> | null = null;
 
@@ -56,7 +45,7 @@ export function syncYouTubePlayback(
 export function loadYouTubeIframeApi(): Promise<YTNamespace> {
   if (loadPromise) return loadPromise;
 
-  // Already loaded by an earlier script (e.g. legacy `index.js`)? Use it.
+  // Reuse the API when returning to a mission through React Router.
   if (window.YT?.Player !== undefined) {
     loadPromise = Promise.resolve(window.YT);
     return loadPromise;

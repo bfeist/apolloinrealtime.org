@@ -3,8 +3,15 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "node"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "vite/client",
+      "node"
+    ],
     "strict": true,
     "noImplicitAny": true,
     "noImplicitOverride": true,
@@ -20,15 +27,23 @@
     "skipLibCheck": true,
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "jsx": "react-jsx"
   },
   "include": [
     "src/**/*.ts",
     "tests/**/*.ts",
     "vite.config.ts",
     "vitest.config.ts",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "src/**/*.tsx",
+    "tests/**/*.tsx"
   ],
-  "exclude": ["node_modules", ".local"]
+  "exclude": [
+    "node_modules",
+    ".local"
+  ]
 }

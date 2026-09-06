@@ -1,7 +1,7 @@
 /**
  * Commentary data loader + indexer.
  *
- * Typed reference module for `indexes/commentaryData.csv` (Phase 5).
+ * Typed reference module for `indexes/commentaryData.csv`.
  *
  * Legacy origin: the adjacent mission webroots' `ajax.js` `processCommentaryData()`.
  * In A13, `commentaryData.csv` has a two-column schema (`timeId|text`).

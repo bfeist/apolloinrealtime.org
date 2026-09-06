@@ -1,5 +1,5 @@
 /* TOC (Table of Contents) panel — mirrors legacy `TOC.html` selectors so
-   the typed `src/panels/toc/index.ts` slots into the same look. */
+   the typed `src/components/toc/index.tsx` slots into the same look. */
 
 .TOC_container {
   font-family: var(--airt-font-mono);

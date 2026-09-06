@@ -1,8 +1,5 @@
-/* Entry stylesheet for the typed mission app at /{11,13,17}/.
-   Imports the base + every panel CSS in the order tokens → base → panels.
-   Per-mission overrides live in `missions/{N}.css` and are imported by
-   each mission's HTML file directly (so the production build can split
-   them per mission if needed). */
+/* Shared mission styles. PageHead manages this stylesheet and each mission's
+   small override so navigation to the homepage removes mission globals. */
 
 @import "./base.css";
 @import "./mission-splash.css";

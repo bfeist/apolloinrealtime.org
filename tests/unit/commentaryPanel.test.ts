@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { commentaryItemId, defaultAttribution } from "../../src/panels/commentary";
+import { commentaryItemId, defaultAttribution } from "../../src/components/commentary/model";
 
 describe("commentaryItemId", () => {
   it("prefixes the timeId with 'comid' to match the legacy DOM id", () => {

@@ -5,8 +5,8 @@
 Begin every session with these reads, in order:
 
 1. [docs-plan/README.md](docs-plan/README.md) — product intent, feature contract, and source map.
-2. [00-decisions.md](docs-plan/00-decisions.md) — architectural and scope constraints.
-3. [visual-reference.md](docs-plan/visual-reference.md) — layout and interaction reference.
+2. [visual-reference.md](docs-plan/visual-reference.md) — layout and interaction reference.
+3. [src/README.md](src/README.md) — React composition, state, and data flow.
 
 Finish the requested application work before moving to future missions or
 rebuilding the data pipeline. User instructions take precedence over older docs.
@@ -14,17 +14,17 @@ rebuilding the data pipeline. User instructions take precedence over older docs.
 ## Product standard
 
 This project consolidates three working mission experiences. Preserve their
-recognizable layout, content, and interactions. The September 2026 salvage
-request accepts modest visual differences; exact production pixel equality
-is not required. Broken layout and missing visualizations are unacceptable.
+recognizable layout, content, and interactions. Modest visual differences are
+acceptable; exact production pixel equality is not required. Broken layout and
+missing visualizations are unacceptable.
 
 Use live `https://apolloinrealtime.org/{11,13,17}/` and the adjacent
 `../Apollo_11`, `../Apollo_13`, and `../Apollo17.org` repositories as
 references. Open real browser windows and inspect the same mission, GET,
 viewport, and selected panel before and after changes.
 Do not declare parity from screenshots of the splash screen, DOM existence,
-or unit tests alone. MOCRviz completion is authorized by the salvage request;
-the former audio-MVP sign-off gate is superseded.
+or unit tests alone. Existing reviewed application snapshots can verify
+behavior-preserving refactors against the baseline on `main`.
 
 The homepage reference is `https://apolloinrealtime.org/` itself. Preserve
 its original wording, mission photographs, insignia, Saturn V background,
@@ -34,12 +34,17 @@ live in `public/landing/`.
 
 ## Implementation constraints
 
-- Vanilla TypeScript, ESM, Vite, strict types. No React or other framework.
-- No jQuery, peaks.js, or new runtime package dependencies in `src/` or the
-  shipped app. Paper.js is the existing vendored exception. Keep build tools
-  pinned; ship static HTML, CSS, and JavaScript.
-- Build the typed app in `src/`; bootstrap through `src/app/missionApp.ts`.
-  Never integrate by shimming legacy globals or loading legacy app scripts.
+- React, strict TypeScript, ESM, and Vite. React Router owns `src/pages/`;
+  feature UI lives in `src/components/`.
+- Zustand owns shared mission time, transport, and UI state. TanStack Query
+  owns fetched data through typed fetchers and hooks, following `../issirt`.
+  Keep transient component state local; do not duplicate the mission clock.
+- Bootstrap through `src/app/missionApp.ts` and compose routes/providers in
+  `src/App.tsx`. Render UI in JSX; restrict imperative effects to external
+  media/canvas integrations, with cleanup on unmount.
+- No jQuery, peaks.js, legacy app scripts, or legacy-global shims. Paper.js
+  remains vendored for the navigator. Keep dependencies pinned and ship static
+  HTML, CSS, and JavaScript without an application server.
 - Apollo 13 is the first implementation reference. Verify Apollo 11 and 17
   before calling shared work complete. Preserve mission-specific data,
   channel catalogs, console positions, and capabilities.

@@ -1,7 +1,7 @@
 /**
  * Video segments loader + indexer.
  *
- * Typed reference module for `indexes/videoSegmentData.csv` (Phase 5).
+ * Typed reference module for `indexes/videoSegmentData.csv`.
  *
  * Legacy origin: the adjacent mission webroots' `ajax.js` `processVideoSegmentData()`.
  * The legacy code stored `gVideoSegments[]` as `[startTimeStr, endTimeStr,

@@ -1,7 +1,7 @@
 /**
  * Utterance (transcript) data loader + indexer.
  *
- * Typed reference module for `indexes/utteranceData.csv` (Phase 5).
+ * Typed reference module for `indexes/utteranceData.csv`.
  *
  * Legacy origin: the adjacent mission webroots' `ajax.js` `processUtteranceData()`.
  * Each mission loads pipe-split transcript rows.

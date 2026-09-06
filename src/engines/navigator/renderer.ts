@@ -90,6 +90,9 @@ export class NavigatorRenderer {
    * Using Tool for all missions keeps the code uniform.
    */
   private _tool: PaperTool | null = null;
+  // Scope.project/view change on the next mount: cleanup must target our own objects.
+  private _project: PaperProject | null = null;
+  private _view: PaperView | null = null;
   /** Canvas element stored for removing the DOM `mouseleave` listener. */
   private _canvas: HTMLCanvasElement | null = null;
   /** Stable bound reference so `removeEventListener` matches `addEventListener`. */
@@ -120,31 +123,37 @@ export class NavigatorRenderer {
   mount(canvas: HTMLCanvasElement): void {
     if (this.mounted) return;
     this.paper.setup(canvas);
+    this._project = this.paper.project;
+    this._view = this.paper.view;
+    try {
+      this.tier1Group = new this.paper.Group();
+      this.tier1NavGroup = new this.paper.Group();
+      this.tier2Group = new this.paper.Group();
+      this.tier2NavGroup = new this.paper.Group();
+      this.tier3Group = new this.paper.Group();
+      this.cursorGroup = new this.paper.Group();
+      this.navCursorGroup = new this.paper.Group();
 
-    this.tier1Group = new this.paper.Group();
-    this.tier1NavGroup = new this.paper.Group();
-    this.tier2Group = new this.paper.Group();
-    this.tier2NavGroup = new this.paper.Group();
-    this.tier3Group = new this.paper.Group();
-    this.cursorGroup = new this.paper.Group();
-    this.navCursorGroup = new this.paper.Group();
+      this.paper.view.onResize = (): void => {
+        this.render(this.currentSeconds);
+      };
+      const tool = new this.paper.Tool();
+      tool.onMouseMove = (event): void => {
+        this.handleMouseMove(event.point);
+      };
+      tool.onMouseUp = (event): void => {
+        this.handleMouseUp(event.point);
+      };
+      canvas.addEventListener("mouseleave", this._onMouseLeave);
+      this._tool = tool;
+      this._canvas = canvas;
 
-    this.paper.view.onResize = (): void => {
+      this.mounted = true;
       this.render(this.currentSeconds);
-    };
-    const tool = new this.paper.Tool();
-    tool.onMouseMove = (event): void => {
-      this.handleMouseMove(event.point);
-    };
-    tool.onMouseUp = (event): void => {
-      this.handleMouseUp(event.point);
-    };
-    canvas.addEventListener("mouseleave", this._onMouseLeave);
-    this._tool = tool;
-    this._canvas = canvas;
-
-    this.mounted = true;
-    this.render(this.currentSeconds);
+    } catch (error) {
+      this.destroy();
+      throw error;
+    }
   }
 
   /**
@@ -168,9 +177,9 @@ export class NavigatorRenderer {
     this.paper.view.draw();
   }
 
-  /** Tear down groups and detach handlers. */
+  /** Release only this renderer's Paper resources, including failed partial mounts. */
   destroy(): void {
-    if (!this.mounted) return;
+    if (!this.mounted && !this._project) return;
     for (const group of [
       this.tier1Group,
       this.tier1NavGroup,
@@ -182,14 +191,19 @@ export class NavigatorRenderer {
     ]) {
       group?.remove();
     }
-    this.paper.view.onResize = null;
+    if (this._view) this._view.onResize = null;
     if (this._tool) {
       this._tool.onMouseMove = null;
       this._tool.onMouseUp = null;
+      this._tool.remove();
       this._tool = null;
     }
     this._canvas?.removeEventListener("mouseleave", this._onMouseLeave);
     this._canvas = null;
+    this._project?.remove();
+    this._project = null;
+    this._view = null;
+    this.hoverPoint = null;
     this.mounted = false;
   }
 

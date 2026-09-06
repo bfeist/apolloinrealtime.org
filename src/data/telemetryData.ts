@@ -1,7 +1,7 @@
 /**
  * Telemetry data loader + indexer.
  *
- * Typed reference module for `indexes/telemetryData.csv` (Phase 5).
+ * Typed reference module for `indexes/telemetryData.csv`.
  *
  * Legacy origin: the adjacent mission webroots' `ajax.js` `processTelemetryData()`.
  * Normalizes telemetry positions, velocities, and distances relative to

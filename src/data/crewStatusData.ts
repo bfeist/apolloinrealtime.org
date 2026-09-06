@@ -1,7 +1,7 @@
 /**
  * Crew status data loader + indexer.
  *
- * Typed reference module for `indexes/crewStatusData.csv` (Phase 5).
+ * Typed reference module for `indexes/crewStatusData.csv`.
  *
  * Legacy origin: the adjacent mission webroots' `ajax.js` `processCrewStatusData()`.
  * Each row has a start time and status text. End times are backfilled

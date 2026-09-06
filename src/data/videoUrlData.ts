@@ -1,7 +1,7 @@
 /**
  * Video URL/Segment source data loader + indexer.
  *
- * Typed reference module for `indexes/videoURLData.csv` (Phase 5).
+ * Typed reference module for `indexes/videoURLData.csv`.
  *
  * Legacy origin: the adjacent mission webroots' `ajax.js` `processVideoURLData()`.
  * Normalizes different column formats across missions into a consistent typed model.

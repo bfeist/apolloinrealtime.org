@@ -1,0 +1,308 @@
+import { lazy, Suspense, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { PageHead } from "../components/layout/PageHead.js";
+import { MissionHeader } from "../components/layout/MissionHeader.js";
+import { MissionSplash } from "../components/layout/MissionSplash.js";
+import { MissionDialogs } from "../components/layout/MissionDialogs.js";
+import { TransportControls } from "../components/layout/TransportControls.js";
+import { MissionVideo } from "../components/video/MissionVideo.js";
+import { TranscriptPanel } from "../components/transcript/index.js";
+import { TocPanel } from "../components/toc/index.js";
+import { CommentaryPanel } from "../components/commentary/index.js";
+import { SearchPanel } from "../components/search/index.js";
+import { PhotoPanel } from "../components/photo/index.js";
+import { DashboardPanel } from "../components/dashboard/index.js";
+import { ChannelStrip } from "../components/mocrviz/ChannelStrip.js";
+import { useMissionStore, type RightTab } from "../store/missionStore.js";
+import { useVideoSegmentData } from "../api/useMissionData.js";
+import { findVideoSegmentIndex } from "../data/videoSegmentData.js";
+import { secondsToTimeStr } from "../shell/clock.js";
+
+const MocrvizPanel = lazy(() =>
+  import("../components/mocrviz/index.js").then((m) => ({ default: m.MocrvizPanel })),
+);
+const SpacecraftPanel = lazy(() =>
+  import("../components/spacecraft/index.js").then((m) => ({ default: m.SpacecraftPanel })),
+);
+const SamplesPanel = lazy(() =>
+  import("../components/samples/index.js").then((m) => ({ default: m.SamplesPanel })),
+);
+
+const textTabs = [
+  {
+    id: "transcript",
+    label: "Transcript",
+    title: "Every word spoken on the mission",
+    Panel: TranscriptPanel,
+  },
+  {
+    id: "toc",
+    label: "Mission Milestones",
+    title: "Points of interest throughout the mission",
+    Panel: TocPanel,
+  },
+  {
+    id: "commentary",
+    label: "Commentary",
+    title: "Description of events and post-mission interviews with the crew",
+    Panel: CommentaryPanel,
+  },
+] as const;
+
+export function MissionPage({ config }: { config: MissionConfig }) {
+  const location = useLocation();
+  // Also remount for browser back/forward between query links on one mission.
+  return <MissionExperience key={location.key} config={config} />;
+}
+
+/** Composition only: panels select data/time themselves rather than receiving every tick. */
+function MissionExperience({ config }: { config: MissionConfig }) {
+  const [splash, setSplash] = useState(() => window.location.search === "");
+  const [about, setAbout] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const textTab = useMissionStore((s) => s.textTab);
+  const rightTab = useMissionStore((s) => s.rightTab);
+  const searchVisible = useMissionStore((s) => s.searchVisible);
+  const override = useMissionStore((s) => s.dashboardOverride);
+  const videos = useVideoSegmentData(config);
+  const inVideo = useMissionStore((s) =>
+    videos.data ? findVideoSegmentIndex(videos.data, s.seconds) >= 0 : false,
+  );
+  const dashboardVisible = override ?? (!searchVisible && !inVideo);
+  const [opened, setOpened] = useState<RightTab[]>([rightTab]);
+  if (!opened.includes(rightTab)) setOpened([...opened, rightTab]);
+  useEffect(() => {
+    // One clock publisher. High-frequency canvas/audio consumers use the same GET;
+    // text panels select a row index so they render only when the active row changes.
+    const timer = window.setInterval(() => {
+      useMissionStore.getState().tick();
+    }, 100);
+    return () => {
+      window.clearInterval(timer);
+      useMissionStore.getState().setPlaying(false);
+    };
+  }, []);
+  const showAbout = (): void => {
+    if (config.id === "17") setSplash(false);
+    setAbout(true);
+  };
+  const share = (): void => {
+    const state = useMissionStore.getState();
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.searchParams.set("t", secondsToTimeStr(state.seconds));
+    if (state.rightTab === "mocr" && state.selectedChannel !== null)
+      url.searchParams.set("ch", String(state.selectedChannel));
+    setShareUrl(url.toString());
+  };
+  const rightTabs: { id: RightTab; label: string }[] = [
+    { id: "photo", label: "Photography" },
+    ...(config.id !== "17" ? [{ id: "mocr" as const, label: "Mission Control Audio" }] : []),
+    ...(config.id === "13" ? [{ id: "spacecraft" as const, label: "Spacecraft" }] : []),
+    ...(config.id === "11" ? [{ id: "samples" as const, label: "Astromaterial Samples" }] : []),
+  ];
+  return (
+    <>
+      <PageHead config={config} />
+      <div id="mission-root">
+        <div
+          className="airt-app"
+          role="application"
+          aria-label={config.name}
+          aria-hidden={splash || undefined}
+        >
+          <MissionHeader config={config} />
+          <main className="airt-main">
+            <section className="airt-left" aria-label="Mission video and transcript">
+              <div className="airt-monitor airt-monitor--top">
+                <MissionVideo config={config} />
+                <div
+                  className="airt-dashboard-overlay"
+                  data-overlay="dashboard"
+                  hidden={!dashboardVisible}
+                >
+                  <div className="airt-overlay__head">
+                    <span className="airt-overlay__title">Mission Status</span>
+                    <button
+                      className="airt-overlay__close"
+                      type="button"
+                      data-close="dashboard"
+                      aria-label="Close"
+                      onClick={() => {
+                        useMissionStore.getState().setDashboardVisible(false);
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div id="dashboardContent" className="airt-dashboard">
+                    <DashboardPanel config={config} />
+                  </div>
+                </div>
+                <div id="searchOverlay" className="airt-search-overlay" hidden={!searchVisible}>
+                  <div className="airt-overlay__head">
+                    <span className="airt-overlay__title">Search</span>
+                    <button
+                      id="searchClose"
+                      className="airt-overlay__close"
+                      type="button"
+                      aria-label="Close"
+                      onClick={() => {
+                        useMissionStore.getState().setSearchVisible(false);
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div id="searchPanelHost" className="airt-search-overlay__results">
+                    <SearchPanel config={config} />
+                  </div>
+                </div>
+              </div>
+              <div className="airt-tabs-wrapper">
+                <div className="airt-button-row" role="tablist" aria-label="Mission text">
+                  {textTabs.map(({ id, label, title }) => (
+                    <button
+                      key={id}
+                      id={`${id}Tab`}
+                      className={`airt-tab${textTab === id ? " is-active" : ""}`}
+                      type="button"
+                      role="tab"
+                      aria-selected={textTab === id}
+                      aria-controls={`${id}Wrapper`}
+                      title={title}
+                      onClick={() => {
+                        useMissionStore.getState().setTextTab(id);
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <TransportControls
+                  config={config}
+                  dashboardVisible={dashboardVisible}
+                  onAbout={showAbout}
+                  onShare={share}
+                />
+              </div>
+              <div className="airt-monitor airt-monitor--text">
+                {textTabs.map(({ id, Panel }) => (
+                  <div
+                    key={id}
+                    id={`${id}Wrapper`}
+                    className="airt-text-panel"
+                    role="tabpanel"
+                    aria-labelledby={`${id}Tab`}
+                    hidden={textTab !== id}
+                  >
+                    <Panel config={config} />
+                  </div>
+                ))}
+              </div>
+            </section>
+            <section
+              className="airt-channels"
+              aria-label="Mission Control channels"
+              hidden={config.id === "17"}
+            >
+              <div className="airt-channels__title">Mission Control Channels</div>
+              <div id="thirtytrack-container" className="airt-channels__list">
+                <ChannelStrip config={config} />
+              </div>
+            </section>
+            <section
+              className={`airt-right${rightTab === "mocr" ? " is-mocrviz-active" : ""}`}
+              aria-label="Photography"
+            >
+              <div className="airt-right__tabs">
+                {rightTabs.map(({ id, label }) => (
+                  <button
+                    key={id}
+                    id={`${id}Tab`}
+                    className={`airt-app-tab${rightTab === id ? " is-active" : ""}`}
+                    type="button"
+                    aria-selected={rightTab === id}
+                    onClick={() => {
+                      useMissionStore.getState().setRightTab(id);
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="airt-right__body">
+                <PhotoPanel config={config} />
+                <div
+                  id="mocrviz-host"
+                  className="airt-mocrviz-host"
+                  style={{ padding: 0 }}
+                  hidden={rightTab !== "mocr"}
+                >
+                  {opened.includes("mocr") && (
+                    <Suspense fallback="Loading Mission Control recordings...">
+                      <MocrvizPanel config={config} />
+                    </Suspense>
+                  )}
+                </div>
+                {config.id === "13" && (
+                  <div
+                    id="spacecraft-host"
+                    className="airt-mocrviz-host spacecraft-panel"
+                    hidden={rightTab !== "spacecraft"}
+                  >
+                    {opened.includes("spacecraft") && (
+                      <Suspense fallback="Loading...">
+                        <SpacecraftPanel config={config} visible={rightTab === "spacecraft"} />
+                      </Suspense>
+                    )}
+                  </div>
+                )}
+                {config.id === "11" && (
+                  <div
+                    id="samples-host"
+                    className="airt-mocrviz-host"
+                    style={{ padding: 0 }}
+                    hidden={rightTab !== "samples"}
+                  >
+                    {opened.includes("samples") && (
+                      <Suspense fallback="Loading...">
+                        <SamplesPanel config={config} />
+                      </Suspense>
+                    )}
+                  </div>
+                )}
+              </div>
+            </section>
+          </main>
+          <div
+            id="debug-host"
+            className="airt-debug"
+            hidden={!new URLSearchParams(window.location.search).has("debug")}
+          >
+            <h2>config</h2>
+            <pre>{JSON.stringify(config, null, 2)}</pre>
+          </div>
+        </div>
+        <MissionDialogs
+          config={config}
+          about={about}
+          shareUrl={shareUrl}
+          onClose={() => {
+            setAbout(false);
+            setShareUrl(null);
+          }}
+        />
+        {splash && (
+          <MissionSplash
+            config={config}
+            onDismiss={() => {
+              setSplash(false);
+            }}
+            onAbout={showAbout}
+          />
+        )}
+      </div>
+    </>
+  );
+}

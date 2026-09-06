@@ -1,7 +1,7 @@
 /**
  * Clock + GET (Ground Elapsed Time) conversion utilities.
  *
- * Extracted from the legacy `public/{11,13,17}/index.js` files (Phase 4).
+ * Extracted from the legacy `public/{11,13,17}/index.js` files.
  * The three legacy implementations are byte-equivalent for these functions;
  * this typed module is the single source of truth going forward.
  *

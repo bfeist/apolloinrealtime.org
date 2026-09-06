@@ -38,6 +38,12 @@ export default defineConfig({
   },
   projects: [
     {
+      name: "main-comparison",
+      testMatch: /main-comparison\.spec\.ts$/,
+      snapshotPathTemplate: ".local/comparison-snapshots/{arg}-{projectName}{ext}",
+      use: { baseURL: LOCAL_BASE, ...devices["Desktop Chrome"] },
+    },
+    {
       name: "baseline",
       testMatch: /baseline\.spec\.ts$/,
       use: {
@@ -47,7 +53,7 @@ export default defineConfig({
     },
     {
       name: "visual",
-      testMatch: /(?:visual|recovery|controls)\.spec\.ts$/,
+      testMatch: /(?:visual|recovery|controls|routing)\.spec\.ts$/,
       use: {
         baseURL: LOCAL_BASE,
         ...devices["Desktop Chrome"],

@@ -1,5 +1,5 @@
 /* Photo panel — mirrors legacy `imageBlock` / `galleryItemContainer`
-   selectors used by `src/panels/photo/index.ts`. Phase 6.5 lays the
+   selectors used by `src/components/photo/index.tsx`. The shell lays the
    gallery out as a right-edge vertical rail.
 
    Gallery dimensions match production exactly:

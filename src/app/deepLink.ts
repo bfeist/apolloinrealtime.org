@@ -8,7 +8,7 @@
  *   ?t=rt          stay in live "real-time" mode (no manual seek)
  *   ?ch=N          select MOCR channel N (integer; A11/A13 only)
  *
- * Photo IDs (`?img=...`) are resolved by missionApp after photo data loads.
+ * Photo IDs (`?img=...`) are resolved by PhotoPanel after photo data loads.
  */
 
 import { timeStrToSeconds } from "../shell/clock.js";

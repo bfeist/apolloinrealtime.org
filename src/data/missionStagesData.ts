@@ -1,7 +1,7 @@
 /**
  * Mission stages loader + indexer.
  *
- * Typed reference module for `indexes/missionStagesData.csv` (Phase 5).
+ * Typed reference module for `indexes/missionStagesData.csv`.
  *
  * Legacy origin: the adjacent mission webroots' `ajax.js` `processMissionStagesData()`.
  * The legacy code stored `gMissionStages[]` as `[startTimeStr, name,

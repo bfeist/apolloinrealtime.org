@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { timeToWakeup } from "../../src/panels/crewStatus";
+import { timeToWakeup } from "../../src/components/crewStatus/data.js";
 
 const entries: CrewStatusEntry[] = [
   {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { missionDay } from "../../src/panels/dashboard";
+import { missionDay } from "../../src/components/dashboard/data.js";
 
 describe("missionDay", () => {
   it("returns 1 from launch through end of day 1", () => {

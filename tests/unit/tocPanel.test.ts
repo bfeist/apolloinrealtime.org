@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { groupTocEntries, tocItemId } from "../../src/panels/toc";
+import { groupTocEntries, tocItemId } from "../../src/components/toc/model";
 import { parseTocData } from "../../src/data/tocData";
 
 const SAMPLE_ROWS: string[][] = [

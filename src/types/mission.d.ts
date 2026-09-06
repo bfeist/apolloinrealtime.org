@@ -112,7 +112,3 @@ interface MissionHeadOptions {
   /** A17's manifest is "manifest.json", A11/A13 use "site.webmanifest". */
   manifestFile: "site.webmanifest" | "manifest.json";
 }
-
-interface Window {
-  MISSION?: MissionConfig;
-}

@@ -1,5 +1,5 @@
 ﻿/* A13's retained educational panel; deliberately separate from mission chrome. */
-.spacecraft-panel {
+.airt-mocrviz-host.spacecraft-panel {
   height: 100%;
   min-height: 0;
   overflow: auto;
@@ -62,7 +62,7 @@
   line-height: 1.6;
 }
 @media (max-width: 700px) {
-  .spacecraft-panel {
+  .airt-mocrviz-host.spacecraft-panel {
     height: auto;
     min-height: 500px;
   }

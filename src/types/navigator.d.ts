@@ -104,6 +104,12 @@ interface PaperMouseEvent {
 interface PaperTool {
   onMouseMove: ((event: PaperMouseEvent) => void) | null;
   onMouseUp: ((event: PaperMouseEvent) => void) | null;
+  remove: () => boolean;
+}
+
+interface PaperProject {
+  /** Removes the owned view, DOM handlers, and Paper scope registration. */
+  remove: () => boolean;
 }
 
 interface PaperView {
@@ -118,6 +124,7 @@ interface PaperView {
  */
 interface PaperScopeLike {
   setup: (canvas: HTMLCanvasElement | string) => void;
+  readonly project: PaperProject;
   readonly view: PaperView;
   Group: new () => PaperGroup;
   Point: {

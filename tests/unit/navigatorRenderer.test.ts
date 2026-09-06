@@ -67,10 +67,12 @@ function makePointText(): FakePointText {
 interface FakePaper extends PaperScopeLike {
   groups: FakeGroup[];
   drawCount: number;
+  activeTool: PaperTool | null;
   /** The most-recently-created Tool instance (set by `new paper.Tool()`). */
   lastTool: {
     onMouseMove: ((e: PaperMouseEvent) => void) | null;
     onMouseUp: ((e: PaperMouseEvent) => void) | null;
+    remove: () => boolean;
   } | null;
 }
 
@@ -79,6 +81,7 @@ function makeFakePaper(width: number, height: number): FakePaper {
   const groups: FakeGroup[] = [];
   let drawCount = 0;
   let lastTool: FakePaper["lastTool"] = null;
+  let activeTool: PaperTool | null = null;
 
   const view = {
     size: { width, height },
@@ -141,7 +144,13 @@ function makeFakePaper(width: number, height: number): FakePaper {
     const t = {
       onMouseMove: null as ((e: PaperMouseEvent) => void) | null,
       onMouseUp: null as ((e: PaperMouseEvent) => void) | null,
+      remove: vi.fn(() => {
+        if (activeTool === t) activeTool = null;
+        return true;
+      }),
     };
+    // Paper only activates a new Tool when the scope has no active tool.
+    activeTool ??= t;
     lastTool = t;
     return t;
   } as unknown as PaperScopeLike["Tool"];
@@ -154,7 +163,11 @@ function makeFakePaper(width: number, height: number): FakePaper {
     get lastTool(): FakePaper["lastTool"] {
       return lastTool;
     },
+    get activeTool(): PaperTool | null {
+      return activeTool;
+    },
     setup: vi.fn(),
+    project: { remove: vi.fn(() => true) },
     view,
     Group,
     Point,
@@ -310,8 +323,70 @@ describe("NavigatorRenderer", () => {
     expect(paper.groups.every((g) => g.removed)).toBe(true);
     expect(paper.lastTool?.onMouseMove).toBeNull();
     expect(paper.lastTool?.onMouseUp).toBeNull();
+    expect(paper.lastTool?.remove).toHaveBeenCalledOnce();
+    expect(paper.project.remove).toHaveBeenCalledOnce();
+    expect(paper.activeTool).toBeNull();
     expect(paper.view.onResize).toBeNull();
     expect(canvasRemove).toHaveBeenCalledWith("mouseleave", expect.any(Function));
+  });
+
+  it("a remount activates the new tool and old cleanup cannot clear its handlers", () => {
+    const paper = makeFakePaper(A13.width, A13.height);
+    const firstSeek = vi.fn();
+    const secondSeek = vi.fn();
+    const first = new NavigatorRenderer(paper, { ...A13, onSeek: firstSeek });
+    first.mount(CANVAS);
+    const firstProject = paper.project;
+    first.destroy();
+    const secondProject = { remove: vi.fn(() => true) };
+    Object.defineProperty(paper, "project", { value: secondProject, configurable: true });
+    const second = new NavigatorRenderer(paper, { ...A13, onSeek: secondSeek });
+    second.mount(CANVAS);
+    const nextTool = paper.activeTool;
+    const nextResize = paper.view.onResize;
+    expect(nextTool).not.toBeNull();
+    nextTool?.onMouseUp?.({ point: { x: 500, y: 25 } });
+    expect(secondSeek).toHaveBeenCalledOnce();
+    expect(firstSeek).not.toHaveBeenCalled();
+    first.destroy();
+    expect(paper.activeTool).toBe(nextTool);
+    expect(paper.view.onResize).toBe(nextResize);
+    expect(firstProject.remove).toHaveBeenCalledOnce();
+    expect(secondProject.remove).not.toHaveBeenCalled();
+    second.destroy();
+    expect(secondProject.remove).toHaveBeenCalledOnce();
+  });
+
+  it("cleanup removes the owned project/view even if the shared scope changes", () => {
+    const paper = makeFakePaper(A13.width, A13.height);
+    const renderer = new NavigatorRenderer(paper, A13);
+    renderer.mount(CANVAS);
+    const ownedProject = paper.project;
+    const ownedView = paper.view;
+    const unrelatedProject = { remove: vi.fn(() => true) };
+    const unrelatedResize = vi.fn();
+    const unrelatedView = { ...ownedView, onResize: unrelatedResize };
+    Object.defineProperty(paper, "project", { value: unrelatedProject });
+    Object.defineProperty(paper, "view", { value: unrelatedView });
+    renderer.destroy();
+    expect(ownedProject.remove).toHaveBeenCalledOnce();
+    expect(ownedView.onResize).toBeNull();
+    expect(unrelatedProject.remove).not.toHaveBeenCalled();
+    expect(unrelatedView.onResize).toBe(unrelatedResize);
+  });
+
+  it("releases the project when mounting fails after Paper setup", () => {
+    const paper = makeFakePaper(A13.width, A13.height);
+    vi.spyOn(paper, "Group").mockImplementationOnce(function () {
+      throw new Error("canvas failure");
+    });
+    const renderer = new NavigatorRenderer(paper, A13);
+    expect(() => {
+      renderer.mount(CANVAS);
+    }).toThrow("canvas failure");
+    expect(paper.project.remove).toHaveBeenCalledOnce();
+    renderer.destroy();
+    expect(paper.project.remove).toHaveBeenCalledOnce();
   });
 
   it("exposes the legacy color palette", () => {

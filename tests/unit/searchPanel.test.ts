@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildSearchIndex, searchIndex } from "../../src/panels/search";
+import { buildSearchIndex, searchIndex } from "../../src/components/search/model";
 
 const utterances: UtteranceData = {
   entries: [

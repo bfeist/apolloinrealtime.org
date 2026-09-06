@@ -1,29 +1,5 @@
-/**
- * Navigator layout + coordinate math.
- *
- * Extracted from the adjacent mission webroots' `navigator.js` files (Phase 4). This module
- * is the pure-math subset of the navigator: tier sizing, pixels-per-second,
- * seconds<->x mapping per tier, and the zoom-pane (nav box) position +
- * derived "start seconds" anchors that feed tier 2 and tier 3.
- *
- * Paper.js rendering, mouse handlers, and the mutable `g*` globals stay in
- * the legacy file for now — they get untangled when the caller itself
- * converts to ESM in Phase 5 (per the wire-up lesson in
- * `/memories/repo/airt2.md`). This module has no Paper.js or DOM dependency
- * and is safe to use from any context.
- *
- * Variable name mapping (legacy -> typed):
- *   gNavZoomFactor           -> NavigatorLayoutInput.zoomFactor (default 25)
- *   gNavigatorWidth/Height   -> NavigatorLayoutInput.width/height
- *   cMissionDurationSeconds  -> NavigatorLayoutInput.missionDurationSeconds
- *   cCountdownSeconds        -> NavigatorLayoutInput.countdownSeconds
- *   gTierNTop/Left/Width/Height/PixelsPerSecond/SecondsPerPixel
- *                            -> NavigatorLayout.tierN.{top,left,width,height,pixelsPerSecond,secondsPerPixel}
- *   gTierSpacing             -> NavigatorLayout.tierSpacing
- *   gFontScaleFactor         -> NavigatorLayout.fontScaleFactor
- *   gTier1/2NavBoxLocX       -> result of computeTier{1,2}NavBoxX(...)
- *   gTier2/3StartSeconds     -> result of tier{2,3}StartSecondsFromNavBoxX(...)
- */
+/** Pure timeline coordinates: tier dimensions, pixel/time mapping, and zoom
+ * windows. The canvas renderer consumes this model; it has no DOM dependency. */
 
 /** Legacy `gNavZoomFactor` default. */
 export const DEFAULT_NAV_ZOOM_FACTOR = 25;

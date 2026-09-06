@@ -3,7 +3,7 @@ import {
   computeTelemetryDisplay,
   frameOfReferenceAt,
   interpolateTelemetryField,
-} from "../../src/panels/telemetry";
+} from "../../src/components/telemetry/data.js";
 
 const entries: TelemetryEntry[] = [
   {

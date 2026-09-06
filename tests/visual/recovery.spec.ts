@@ -334,9 +334,11 @@ for (const mission of ["11", "13", "17"] as const) {
       "https://forum.apolloinrealtime.org",
     );
     await page.getByRole("button", { name: "Instructions / Credits", exact: true }).click();
-    await expect(page.getByRole("heading", { name: `Explore Apollo ${mission}` })).toBeVisible();
-    await page.getByRole("button", { name: "Close instructions", exact: true }).click();
-    await page.getByRole("button", { name: "T-Minus 1m", exact: true }).click();
+    await expect(page.locator("#aboutDialog .mission-about__intro h2")).toBeVisible();
+    await page.getByRole("button", { name: "Close instructions and credits", exact: true }).click();
+    // A17 opens help beneath the mission header and dismisses its splash.
+    if (mission === "17") await page.locator("#playPauseBtn").click();
+    else await page.getByRole("button", { name: "T-Minus 1m", exact: true }).click();
     await expect(splash).toBeHidden();
     await expect(page.locator("#playPauseBtn")).toHaveAttribute("aria-pressed", "true");
 

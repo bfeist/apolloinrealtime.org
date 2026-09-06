@@ -7,7 +7,7 @@ references. Original source remains in the adjacent `../Apollo_11`,
 `../Apollo_13`, and `../Apollo17.org` repositories. This document describes
 the target structure.
 
-The September 2026 goal is recognizable, usable parity. Exact pixel equality
+The product standard is recognizable, usable parity. Exact pixel equality
 is unnecessary. Preserve the information hierarchy, proportions, real
 content, and useful interactions; fix overflow and reflow for smaller screens.
 
@@ -160,3 +160,8 @@ both viewport changes and tab changes.
 Production references guide structure; reviewed typed-app screenshots can
 then detect accidental visual regressions. Keep those roles distinct and
 never replace the production reference images with typed output.
+
+For a behavior-preserving refactor, compare the existing app on `main` with
+the feature branch at the same states, or run the existing reviewed Playwright
+image comparisons. Preserve the baseline until differences are understood;
+do not regenerate snapshots simply because the rendering implementation changed.

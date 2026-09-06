@@ -1,5 +1,5 @@
 // Apollo 17 mission config. Extracted from `public/17/index.js` (lines 1-22)
-// during Phase 2 of the migration. KeyCDN variants stripped per plan.
+// from the original site. Media URLs use the shared media host.
 //
 // Note: A17's legacy code uses `g`-prefixed names for several variables that
 // A11/A13 prefix with `c` (gStopCache, gDefaultStartTimeId, gBackground_color_active,

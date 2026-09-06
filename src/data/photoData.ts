@@ -1,7 +1,7 @@
 /**
  * Photo data loader + indexer.
  *
- * Typed reference module for `indexes/photoData.csv` (Phase 5).
+ * Typed reference module for `indexes/photoData.csv`.
  *
  * Legacy origin: the adjacent mission webroots' `ajax.js` `processPhotoData()`.
  * Each mission loads pipe-split photo metadata rows.

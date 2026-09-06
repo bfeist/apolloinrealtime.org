@@ -4,7 +4,7 @@
  * The Apollo mission webroots ship pipe-delimited (`|`) text files under
  * `indexes/`. The legacy `public/{11,13,17}/ajax.js` files each repeat the
  * same fetch + split pattern for nine different index files; this module
- * collapses that into one typed loader (Phase 4).
+ * collapses that into one typed loader.
  *
  * Mission-specific processing (text substitutions, dedup, sort) stays at
  * the caller — this module only handles transport + parsing.

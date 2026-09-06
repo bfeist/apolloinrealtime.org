@@ -5,7 +5,7 @@ import {
   subChannelId,
   tapeFolderUrl,
   waveformDataUrl,
-} from "../../src/panels/mocrviz/urls";
+} from "../../src/components/mocrviz/urls";
 
 describe("subChannelId", () => {
   it("passes channels 1..30 through unchanged", () => {

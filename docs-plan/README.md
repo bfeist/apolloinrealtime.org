@@ -51,11 +51,24 @@ The discarded A13 `spacecraft_dev/` prototype is not the production spacecraft
 information panel. Shared code must never substitute one mission's data for
 another. Future missions opt in only when real datasets are available.
 
-## Current implementation constraints
+## Architecture and scope
 
-- `src/app/playback.ts` owns GET and transport intent. Panels consume shared seek
-  and transport events; they do not create local clocks. Async initialization
-  must not overwrite a newer user seek.
+- React with strict TypeScript, ESM, and Vite. React Router composes the landing
+  and mission pages; JSX components own the rendered shell and feature panels.
+- `src/store/missionStore.ts` owns shared GET, transport, tab selection, and
+  seek actions. It uses the pure clock in `src/app/playback.ts`; components
+  subscribe through Zustand selectors and do not create local clocks. Route
+  initialization happens before mounting, so data requests cannot overwrite
+  a newer user seek.
+- TanStack Query owns remote data. `src/api/dataFetchers.ts` calls the existing
+  typed adapters, and `src/api/useMissionData.ts` exposes mission-keyed query
+  hooks, following the fetcher/hook pattern in `../issirt`. Static mission
+  indexes are cached; optional panel queries load on demand. Local component
+  state owns transient details such as disclosures and text input.
+- Imperative media and canvas engines stay behind React refs and effects with
+  cleanup. Do not rebuild panels with DOM factories, legacy app scripts,
+  jQuery, peaks.js, or legacy-global shims. Paper.js remains vendored for the
+  navigator. Keep dependencies pinned and deploy only static HTML/CSS/JS.
 - `videoURLData.csv` describes media files; `videoSegmentData.csv` describes
   actual footage intervals and controls dashboard visibility.
 - The shell owns available space. Media aspect ratios cannot enlarge grid tracks;
@@ -66,6 +79,11 @@ another. Future missions opt in only when real datasets are available.
   paired with its matching positions.
 - MOCRviz, spacecraft, and samples are lazy right-column panels. Apollo 17
   biometrics use the shared GET inside the dashboard.
+- Preserve `/{11,13,17}/` routes, GET/channel links, media paths, metadata, and
+  share previews. Keep one shared style system with explicit mission differences.
+  The separate mobile apps, A13 `spacecraft_dev`, and A17 `nominee` remain retired.
+- Apollo 8, 9, 10, 12, 14, 15, and 16 are separate future work. Additional missions
+  require real datasets and recordings; pipeline modernization is also separate.
 - Vite route normalization applies only to application routes. Development
   endpoints such as `/@vite/client` must survive.
 - Browser interaction and visual inspection remain required; DOM presence and
@@ -73,32 +91,36 @@ another. Future missions opt in only when real datasets are available.
 
 ## Where to work
 
-| Location                      | Responsibility                                                        |
-| ----------------------------- | --------------------------------------------------------------------- |
-| `src/app/missionApp.ts`       | App composition, clock coordination, event wiring, and panel mounting |
-| `src/app/shell.ts`            | Shared shell and controls                                             |
-| `src/app/deepLink.ts`         | GET and channel URL handling                                          |
-| `src/missions/`, `src/types/` | Mission configuration and typed data contracts                        |
-| `src/data/`                   | Mission CSV adapters and time-indexed lookup                          |
-| `src/engines/`                | Navigator and YouTube integration                                     |
-| `src/panels/`                 | Typed feature panels, including MOCRviz                               |
-| `src/styles/`                 | Shared layout, tokens, panel styles, and small mission overrides      |
-| `public/{11,13,17}/`          | Read-only assets and data used by the typed app                       |
-| `mission-data/{11,13,17}/`    | Preserved non-runtime inputs, working data, and branch variants       |
-| `pipeline/{11,13,17}/`        | Preserved legacy Python processes; not yet a supported toolchain      |
-| Adjacent Apollo repositories  | Original website and processing source; browser references            |
-| `tests/`                      | Unit, browser, and visual verification                                |
+| Location                               | Responsibility                                                      |
+| -------------------------------------- | ------------------------------------------------------------------- |
+| `src/app/missionApp.ts`, `src/App.tsx` | React bootstrap, router, query provider, and route initialization   |
+| `src/pages/`                           | Landing page and shared mission page composition                    |
+| `src/components/`                      | Shell, controls, and feature panels; local state and engine effects |
+| `src/store/missionStore.ts`            | Shared mission clock, transport, navigation, and user actions       |
+| `src/api/`                             | Typed fetchers, mission query hooks, and query cache                |
+| `src/app/deepLink.ts`                  | GET and channel URL handling                                        |
+| `src/missions/`, `src/types/`          | Mission configuration and typed data contracts                      |
+| `src/data/`                            | Mission CSV adapters and time-indexed lookup                        |
+| `src/engines/`                         | Navigator and YouTube integration                                   |
+| `src/styles/`                          | Shared layout, tokens, panel styles, and small mission overrides    |
+| `public/{11,13,17}/`                   | Read-only assets and data used by the typed app                     |
+| `mission-data/{11,13,17}/`             | Preserved non-runtime inputs, working data, and branch variants     |
+| `pipeline/{11,13,17}/`                 | Preserved legacy Python processes; not yet a supported toolchain    |
+| Adjacent Apollo repositories           | Original website and processing source; browser references          |
+| `tests/`                               | Unit, browser, and visual verification                              |
 
 ## Documentation authority
 
 1. This document — current product and experience contract.
-2. [00-decisions.md](00-decisions.md) — architectural and scope constraints.
-3. [visual-reference.md](visual-reference.md) — layout, control, and
+2. [visual-reference.md](visual-reference.md) — layout, control, and
    production-comparison reference.
-4. [04-data-and-content-strategy.md](04-data-and-content-strategy.md) — current
-   data/media rules and deferred ingestion work.
-5. [07-repo-and-git-strategy.md](07-repo-and-git-strategy.md) — provenance and
+3. [04-data-and-content-strategy.md](04-data-and-content-strategy.md) — current
+   data/media rules and preserved processing material.
+4. [07-repo-and-git-strategy.md](07-repo-and-git-strategy.md) — provenance and
    reference-tree preservation.
+
+See [src/README.md](../src/README.md) for the source walkthrough and examples
+of the state/data flow.
 
 When browser or source behavior contradicts prose, investigate the live evidence
 and correct the documentation. Git retains removed historical analyses and

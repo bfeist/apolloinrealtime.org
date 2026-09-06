@@ -6,9 +6,9 @@ import {
   parseChannelTranscript,
   parseWaveform,
   waveformPeak,
-} from "../../src/panels/mocrviz/data.js";
-import { activityTimeAtX, waveformTimeAtX } from "../../src/panels/mocrviz/timeline.js";
-import { channelsFor } from "../../src/panels/mocrviz/channels.js";
+} from "../../src/components/mocrviz/data.js";
+import { activityTimeAtX, waveformTimeAtX } from "../../src/components/mocrviz/timeline.js";
+import { channelsFor } from "../../src/components/mocrviz/channels.js";
 
 describe("historical MOCR data", () => {
   it("reads real-format signed waveform peaks and tape-relative windows", () => {

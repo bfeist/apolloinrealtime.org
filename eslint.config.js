@@ -1,5 +1,6 @@
 // Flat config with typescript-eslint strict type checking.
 import tseslint from "typescript-eslint";
+import reactHooks from "eslint-plugin-react-hooks";
 import prettier from "eslint-config-prettier";
 
 // tseslint.config() is flagged as @deprecated by typescript-eslint's own
@@ -35,6 +36,11 @@ export default tseslint.config(
       "@typescript-eslint/no-unnecessary-condition": "error",
       "no-console": ["warn", { allow: ["warn", "error"] }],
     },
+  },
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    plugins: { "react-hooks": reactHooks },
+    rules: { "react-hooks/rules-of-hooks": "error", "react-hooks/exhaustive-deps": "error" },
   },
   prettier,
 );

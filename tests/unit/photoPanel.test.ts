@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { galleryItemId, parseAsRollImg } from "../../src/panels/photo";
+import { galleryItemId, parseAsRollImg } from "../../src/components/photo/model";
 
 describe("galleryItemId", () => {
   it("prefixes the timeId with 'gallerytimeid'", () => {

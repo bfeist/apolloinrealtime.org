@@ -6,7 +6,7 @@ import {
   displaySpeakerLabel,
   utteranceItemId,
   utteranceTypeClass,
-} from "../../src/panels/transcript";
+} from "../../src/components/transcript/model";
 
 describe("utteranceItemId", () => {
   it("prefixes the timeId with 'uttid' to match the legacy DOM id", () => {

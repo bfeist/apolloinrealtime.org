@@ -1,5 +1,5 @@
 // Apollo 11 mission config. Extracted from `public/11/index.js` (lines 1-30)
-// during Phase 2 of the migration. KeyCDN variants stripped per plan.
+// from the original site. Media URLs use the shared media host.
 export const a11Config: MissionConfig = {
   id: "11",
   name: "Apollo 11",

@@ -66,8 +66,9 @@ Discover and share notable moments with other explorers in the
 ## Developing the site
 
 This repository contains the current static application for Apollo 11, Apollo
-13, Apollo 17, and the mission landing page. It is written in strict TypeScript
-with native browser APIs and Vite; the historical media and mission datasets are
+13, Apollo 17, and the mission landing page. It uses React and strict TypeScript
+with Vite, React Router for pages, Zustand for shared interaction state, and
+TanStack Query for mission data. The historical media and mission datasets are
 served separately.
 
 Use the Node.js version in [`.nvmrc`](.nvmrc), then run:
@@ -77,20 +78,22 @@ npm ci
 npm run dev
 ```
 
-| Local URL                    | Purpose              |
-| ---------------------------- | -------------------- |
-| `http://localhost:5173/`     | Mission landing page |
-| `http://localhost:5173/11/`  | Apollo 11            |
-| `http://localhost:5173/13/`  | Apollo 13            |
-| `http://localhost:5173/17/`  | Apollo 17            |
+| Local URL                   | Purpose              |
+| --------------------------- | -------------------- |
+| `http://localhost:5173/`    | Mission landing page |
+| `http://localhost:5173/11/` | Apollo 11            |
+| `http://localhost:5173/13/` | Apollo 13            |
+| `http://localhost:5173/17/` | Apollo 17            |
 
 Run `npm run check` for type checking, linting, formatting, and unit tests. Run
 `npm run build` and `npm run preview` to verify the production build.
 
-Contributors should begin with [AGENTS.md](AGENTS.md), followed by the
-[product contract and documentation map](docs-plan/README.md),
-[architectural decisions](docs-plan/00-decisions.md), and
-[visual reference](docs-plan/visual-reference.md).
+The [source walkthrough](src/README.md) explains where components, pages,
+state, and data hooks live. Contributors should also read [AGENTS.md](AGENTS.md),
+the [product and architecture contract](docs-plan/README.md), and the
+[visual reference](docs-plan/visual-reference.md). Existing Playwright interaction
+and visual checks cover the rendered application; use `npm run test:visual`
+for the screenshot suite without replacing unexplained failing snapshots.
 
 The original Apollo 11, Apollo 13, Apollo 17, and landing-page histories remain
 available under the namespaced `legacy/*` Git refs. Preserved source data and

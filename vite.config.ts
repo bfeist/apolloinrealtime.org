@@ -1,3 +1,4 @@
+import react from "@vitejs/plugin-react";
 import { resolve } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 
@@ -38,7 +39,7 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
-  plugins: [trailingSlashRedirect()],
+  plugins: [react(), trailingSlashRedirect()],
   build: {
     outDir: ".local/dist",
     emptyOutDir: true,

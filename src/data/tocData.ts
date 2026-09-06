@@ -1,7 +1,7 @@
 /**
  * Table-of-Contents data loader + indexer.
  *
- * Typed reference module for `indexes/TOCData.csv` (Phase 5 starter).
+ * Typed reference module for `indexes/TOCData.csv`.
  *
  * Legacy origin: the adjacent mission webroots' `ajax.js` `processTOCData()` and
  * `index.js` `scrollToClosestTOC()`. Each mission
