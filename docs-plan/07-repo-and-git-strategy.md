@@ -38,5 +38,4 @@ abandonment-notice commits in the now-frozen source repositories.
 If runtime drift is found, inspect a targeted diff against the appropriate
 adjacent webroot and restore only the affected files. The retired `/mobile/`
 applications, A13 `spacecraft_dev/`, and A17 `nominee/` remain out of scope.
-CRLF/LF-only differences are harmless. Preserve the existing production
-deployment as the rollback reference until cutover and rollback are verified.
+CRLF/LF-only differences are harmless.

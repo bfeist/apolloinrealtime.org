@@ -91,19 +91,15 @@ another. Future missions opt in only when real datasets are available.
 
 ## Documentation authority
 
-1. [08-progress-tracker.md](08-progress-tracker.md) — current state, next action,
-   evidence, and unresolved work.
-2. [05-migration-plan.md](05-migration-plan.md) — remaining release sequence and
-   verification matrix.
-3. This document — current product and experience contract.
-4. [00-decisions.md](00-decisions.md) — architectural and scope constraints.
-5. [PHASE6-visual-reference.md](PHASE6-visual-reference.md) — layout, control, and
-   production-comparison contract.
-6. [04-data-and-content-strategy.md](04-data-and-content-strategy.md) — current
+1. This document — current product and experience contract.
+2. [00-decisions.md](00-decisions.md) — architectural and scope constraints.
+3. [visual-reference.md](visual-reference.md) — layout, control, and
+   production-comparison reference.
+4. [04-data-and-content-strategy.md](04-data-and-content-strategy.md) — current
    data/media rules and deferred ingestion work.
-7. [07-repo-and-git-strategy.md](07-repo-and-git-strategy.md) — provenance and
+5. [07-repo-and-git-strategy.md](07-repo-and-git-strategy.md) — provenance and
    reference-tree preservation.
 
-The tracker is the only current-status summary. When browser or source behavior
-contradicts prose, investigate the live evidence and correct the documentation.
-Git retains removed historical analyses and completed recovery narratives.
+When browser or source behavior contradicts prose, investigate the live evidence
+and correct the documentation. Git retains removed historical analyses and
+completed recovery narratives.

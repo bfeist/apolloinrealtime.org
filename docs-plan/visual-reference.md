@@ -5,8 +5,7 @@ Use live [Apollo 11](https://apolloinrealtime.org/11/),
 [Apollo 17](https://apolloinrealtime.org/17/) as the visual and interaction
 references. Original source remains in the adjacent `../Apollo_11`,
 `../Apollo_13`, and `../Apollo17.org` repositories. This document describes
-the target structure, not the current typed app's completion status. See the
-tracker for observed gaps and evidence.
+the target structure.
 
 The September 2026 goal is recognizable, usable parity. Exact pixel equality
 is unnecessary. Preserve the information hierarchy, proportions, real
@@ -22,10 +21,19 @@ content, and useful interactions; fix overflow and reflow for smaller screens.
 5. Capture and inspect screenshots before and after changes. Use actual
    browser-observed positions when old prose and the screen disagree.
 
-Use the snapshot GET table in [05-migration-plan.md](05-migration-plan.md).
-Also inspect the open MOCR panel for A11 and A13: the standard photography
+Use the fixed comparison GETs below. Also inspect the open MOCR panel for A11
+and A13: the standard photography
 screenshots cannot prove that MOCRviz works. Phone/tablet acceptance concerns
 the unified responsive app; legacy mobile redirects are not its layout spec.
+
+| Snapshot     | A11        | A13        | A17        |
+| ------------ | ---------- | ---------- | ---------- |
+| pre-launch   | -002:00:00 | -002:00:00 | -002:00:00 |
+| launch       | 000:00:00  | 000:00:00  | 000:00:00  |
+| key-event-1  | 004:06:54  | 055:54:53  | 022:00:00  |
+| key-event-2  | 075:31:12  | 087:58:00  | 118:00:00  |
+| late mission | 195:03:00  | 141:00:00  | 295:00:00  |
+| end          | 195:18:35  | 142:54:41  | 301:51:59  |
 
 ## Desktop structure
 

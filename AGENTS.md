@@ -4,15 +4,12 @@
 
 Begin every session with these reads, in order:
 
-1. [docs-plan/08-progress-tracker.md](docs-plan/08-progress-tracker.md) — actual state and next action.
-2. [docs-plan/05-migration-plan.md](docs-plan/05-migration-plan.md) — remaining release sequence and verification.
-3. [docs-plan/README.md](docs-plan/README.md) — product intent, feature contract, and source map.
+1. [docs-plan/README.md](docs-plan/README.md) — product intent, feature contract, and source map.
+2. [00-decisions.md](docs-plan/00-decisions.md) — architectural and scope constraints.
+3. [visual-reference.md](docs-plan/visual-reference.md) — layout and interaction reference.
 
-Read [00-decisions.md](docs-plan/00-decisions.md) for architectural
-constraints and [PHASE6-visual-reference.md](docs-plan/PHASE6-visual-reference.md)
-before changing layout. The tracker is the only current-status document.
-Finish the active release task before moving to future missions, rebuilding the
-data pipeline, or deployment. User instructions take precedence over older docs.
+Finish the requested application work before moving to future missions or
+rebuilding the data pipeline. User instructions take precedence over older docs.
 
 ## Product standard
 
@@ -55,7 +52,7 @@ live in `public/landing/`.
 
 ## Reference trees and git hygiene
 
-`public/{11,13,17}/` is read-only during application and release work because
+`public/{11,13,17}/` is read-only during application work because
 it contains assets used by the typed app, not just obsolete scripts. Preserved
 non-runtime sources and intermediates live in `mission-data/`; legacy Python
 processes live in `pipeline/` and are not yet a working replacement pipeline.
@@ -66,14 +63,14 @@ namespaced `legacy/*` refs; do not delete those refs during cleanup. Read
 provenance and targeted restoration sources if drift is found.
 
 Inspect the working tree before edits and preserve unrelated user changes.
-Commit each meaningful completed unit with `phase(N): short description`;
-never commit without `npm run check` green. Do not rewrite history or deploy
-as a side effect of application repair.
+Use concise conventional commit subjects such as `fix:`, `feat:`, `test:`, or
+`docs:`; never commit without `npm run check` green. Do not rewrite history or
+deploy as a side effect of application repair.
 
 ## Verification and handoff
 
 - Run `npm run check` before each commit; run `npm run build` for changes
-  affecting the app or build output. Use the plan's browser and Playwright
+  affecting the app or build output. Use the applicable browser and Playwright
   checks for the affected scope.
 - For layout work, inspect desktop, tablet, and phone; verify no accidental
   page overflow, clipped controls, empty panes, or hidden active tabs.
@@ -82,12 +79,11 @@ as a side effect of application repair.
   Never update snapshots solely to silence an unexplained failure.
 - Verify visible controls actually work. Distinguish code bugs from blocked
   third-party media, and record the precise unverified behavior.
-- Before starting, mark the tracker task in progress. Before ending, rewrite
-  its single resume block with remaining work, tests, browser evidence, and
-  limitations; add one concise session-log entry. Never append competing
-  resume blocks or claim a phase complete because its modules exist.
+- In the final handoff, summarize completed work, verification, and any precise
+  limitations. Keep durable behavior and architecture in the reference docs;
+  do not maintain a session ledger.
 
 Use bounded subagents for independent source analysis or implementation when
-helpful. Give them the relevant plan, constraints, and exclusive file
-ownership. Keep integration, tracker updates, browser comparison, test
-interpretation, and communication in the coordinating agent.
+helpful. Give them the relevant constraints and exclusive file ownership. Keep
+integration, browser comparison, test interpretation, and communication in the
+coordinating agent.

@@ -53,7 +53,7 @@ an explicit redaction placeholder; no other pipeline repair was attempted.
 
 ## Future ingestion work
 
-The replacement ingestion pipeline rebuild is deferred and does not block release.
+The replacement ingestion pipeline rebuild is separate from the current app.
 Existing CSVs remain the runtime input until a separately verified pipeline can
 regenerate equivalent output.
 
