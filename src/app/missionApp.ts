@@ -57,6 +57,13 @@ const CONFIGS: Record<string, MissionConfig> = {
 };
 let seekRevision = 0;
 
+function openMissionAbout(config: MissionConfig): void {
+  const dialog = document.getElementById("aboutDialog");
+  if (!(dialog instanceof HTMLDialogElement) || dialog.open) return;
+  if (config.id === "17") dialog.show();
+  else dialog.showModal();
+}
+
 function readMissionId(): "11" | "13" | "17" | null {
   const id = document.body.dataset.mission;
   return id === "11" || id === "13" || id === "17" ? id : null;
@@ -993,8 +1000,7 @@ ready(() => {
     }
   });
   document.getElementById("aboutBtn")?.addEventListener("click", () => {
-    const dialog = document.getElementById("aboutDialog");
-    if (dialog instanceof HTMLDialogElement) dialog.showModal();
+    openMissionAbout(config);
   });
   mountMissionSplash({
     config,
@@ -1005,8 +1011,7 @@ ready(() => {
       transport();
     },
     onAbout: () => {
-      const dialog = document.getElementById("aboutDialog");
-      if (dialog instanceof HTMLDialogElement) dialog.showModal();
+      openMissionAbout(config);
     },
   });
   document.addEventListener("airt:playing", (event) => {

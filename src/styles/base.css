@@ -703,3 +703,379 @@ button {
   color: #ddd;
   border: 1px solid #555;
 }
+.mission-about {
+  box-sizing: border-box;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  max-height: none;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  color: #999;
+  background: #000;
+  border: 0;
+  border-radius: 0;
+  font: 16px/1.2 var(--airt-font-sans);
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: cover;
+}
+body[data-mission="11"] .mission-about {
+  background-image: url("/11/img/bg_help.jpg");
+}
+body[data-mission="13"] .mission-about {
+  background-image: url("/13/img/bg_help.jpg");
+}
+body[data-mission="17"] .mission-about {
+  top: calc(var(--airt-header-h) + 12px);
+  height: calc(100vh - var(--airt-header-h) - 12px);
+  background-image: url("/17/img/bg_help.jpg");
+  text-shadow:
+    1px 1px 1px #000,
+    1px 1px 9px #000;
+}
+.mission-about__intro,
+.mission-about__credits {
+  box-sizing: border-box;
+  float: left;
+  margin-top: 86px;
+  padding: 0 20px;
+}
+.mission-about__intro {
+  width: 55%;
+  padding-left: 9%;
+  text-align: right;
+}
+.mission-about__credits {
+  width: 40%;
+  padding-right: 0;
+  text-align: left;
+}
+.mission-about h2,
+.mission-about h3,
+.mission-about h4 {
+  clear: both;
+  margin: 0 0 10px;
+  color: #5e92a6;
+  font-family: var(--airt-font-sans);
+  font-weight: 400;
+  text-transform: none;
+}
+.mission-about__intro h2 {
+  position: absolute;
+  top: 35px;
+  left: 0;
+  width: 100%;
+  padding: 0;
+  font-family: var(--airt-font-display);
+  font-size: 1.6em;
+  line-height: 1;
+  text-align: center;
+}
+.mission-about h3 {
+  font-size: 1.45em;
+}
+.mission-about__intro h3 {
+  margin-bottom: 5px;
+}
+.mission-about h4 {
+  margin: 30px 0 6px;
+  font-size: 1.1em;
+}
+.mission-about__intro p {
+  margin: 0 0 16px;
+}
+.mission-about__credits p {
+  margin: 0 0 30px;
+}
+.mission-about a {
+  color: #5e92a6;
+  text-decoration: none;
+}
+.mission-about a:hover {
+  text-decoration: underline;
+}
+.mission-about img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 0 20px;
+}
+.mission-about blockquote {
+  margin: 20px 0;
+  color: #ddd;
+  font: 0.8em/1.4 var(--airt-font-sans);
+}
+.mission-about blockquote footer {
+  margin-top: 20px;
+  color: #999;
+  font: 1.1em/1.2 var(--airt-font-sans);
+}
+body[data-mission="17"] .mission-about,
+body[data-mission="17"] .mission-about h3,
+body[data-mission="17"] .mission-about h4,
+body[data-mission="17"] .mission-about blockquote,
+body[data-mission="17"] .mission-about blockquote footer {
+  font-family: var(--airt-font-slab);
+}
+body[data-mission="11"] .mission-about__intro p,
+body[data-mission="13"] .mission-about__intro p {
+  font-size: 0.89em;
+}
+body[data-mission="11"] .mission-about__intro h3,
+body[data-mission="13"] .mission-about__intro h3 {
+  font-size: 1.29em;
+}
+body[data-mission="11"] .mission-about blockquote,
+body[data-mission="13"] .mission-about blockquote {
+  font-size: 0.712em;
+}
+body[data-mission="11"] .mission-about__credits,
+body[data-mission="13"] .mission-about__credits,
+body[data-mission="17"] .mission-about__credits {
+  font-size: 0.89em;
+}
+body[data-mission="17"] .mission-about blockquote {
+  font-size: 1em;
+}
+body[data-mission="17"] .mission-about__intro h2 {
+  left: 4%;
+  width: 92%;
+}
+body[data-mission="17"] .mission-about__intro h3 {
+  font-size: 1em;
+}
+body[data-mission="17"] .mission-about__intro {
+  padding-right: 55px;
+}
+body[data-mission="17"] .mission-about__credits h3 {
+  color: #fff;
+  font-size: 1.25em;
+}
+body[data-mission="17"] .mission-about__intro {
+  margin-top: 135px;
+}
+body[data-mission="17"] .mission-about__credits {
+  width: 38%;
+  margin-top: 147px;
+}
+.mission-about__awards {
+  position: absolute;
+  right: 18px;
+  bottom: 8px;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+.mission-about__awards img {
+  width: auto;
+  max-width: none;
+  margin: 0;
+}
+.mission-about__header-help {
+  position: fixed;
+  z-index: 1001;
+  top: 6px;
+  right: 6px;
+  left: 6px;
+  display: grid;
+  grid-template-columns: 364px minmax(0, 1fr);
+  height: var(--airt-header-h);
+  color: #ddd;
+  pointer-events: none;
+}
+.mission-about__legend {
+  padding: 10px 45px 0 74px;
+  background: #000;
+  font: 17px/19px var(--airt-font-slab);
+}
+.mission-about__legend > div {
+  white-space: nowrap;
+}
+.mission-about__legend ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85em;
+}
+.mission-about__legend li {
+  margin: 6px 0;
+  color: #ccc;
+  white-space: nowrap;
+}
+.mission-about__legend i {
+  display: inline-block;
+  width: 5px;
+  height: 20px;
+  margin-right: 5px;
+  vertical-align: bottom;
+}
+.mission-about__legend i + i {
+  margin-left: -3px;
+}
+.mission-about__legend .is-interest {
+  background: orange;
+}
+.mission-about__legend .is-photo {
+  background: #00c000;
+}
+.mission-about__legend .is-crew {
+  background: cadetblue;
+}
+.mission-about__legend .is-mocr {
+  background: #8a95b6;
+}
+.mission-about__legend .is-pao {
+  background: #535353;
+}
+.mission-about__legend .is-video,
+.mission-about__legend .is-animation {
+  width: 26px;
+  border: 1px solid blue;
+  background: #010047;
+}
+.mission-about__legend .is-animation {
+  margin-left: 7px;
+  border-color: #4d0062;
+  background: #270047;
+}
+.mission-about__navigator-key {
+  margin: 0;
+  padding: 0 10px;
+  background: rgba(0, 0, 0, 0.5);
+  list-style: none;
+  font: 16px/normal var(--airt-font-slab);
+  text-align: center;
+}
+.mission-about__navigator-key li {
+  position: relative;
+  border-right: 1px solid orange;
+  border-left: 1px solid orange;
+}
+.mission-about__navigator-key li::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  border-top: 1px solid orange;
+  content: "";
+}
+.mission-about__navigator-key span {
+  position: relative;
+  padding: 1px 10px;
+  background: rgba(0, 0, 0, 0.75);
+  border-right: 1px solid orange;
+  border-left: 1px solid orange;
+  font-family: var(--airt-font-slab);
+}
+.mission-about__navigator-key li:nth-child(1) {
+  height: 21px;
+  margin-top: 13px;
+  line-height: 1.6;
+}
+.mission-about__navigator-key li:nth-child(2) {
+  height: 27px;
+  margin-top: 5px;
+  line-height: 1.9;
+}
+.mission-about__navigator-key li:nth-child(3) {
+  height: 59px;
+  margin-top: 7px;
+  line-height: 3.75;
+}
+.mission-about__credits {
+  border: 0;
+}
+.mission-about__credits strong {
+  color: #eee;
+  font-weight: 400;
+}
+.mission-about__credits h3 {
+  margin: 0;
+}
+.mission-about__credits p {
+  margin: 0.4em 0 30px;
+  font-size: 1em;
+  line-height: 1.5;
+}
+.mission-about__subheading {
+  color: #5e92a6;
+  font-size: 1.1em;
+}
+.mission-about__legal {
+  color: #999;
+  font-size: 1em;
+}
+.mission-about form {
+  position: absolute;
+  z-index: 1;
+  top: 7px;
+  right: 15px;
+}
+.mission-about form .airt-btn {
+  width: 31px;
+  height: 31px;
+  padding: 0;
+  color: #5e92a6;
+  background: transparent;
+  border: 2px solid #5e92a6;
+  border-radius: 50%;
+  font:
+    28px/24px Arial,
+    sans-serif;
+}
+.mission-about form .airt-btn:hover,
+.mission-about form .airt-btn:focus-visible {
+  color: #7bbfd8;
+  border-color: #7bbfd8;
+}
+@media (min-width: 1660px) {
+  .mission-about {
+    font-size: 19px;
+  }
+  body[data-mission="17"] .mission-about {
+    font-size: 24px;
+  }
+}
+@media (max-width: 767px) {
+  .mission-about {
+    width: calc(100vw - 16px);
+    height: calc(100vh - 16px);
+    font-size: 13px;
+  }
+  .mission-about__intro,
+  .mission-about__credits {
+    float: none;
+    width: 100%;
+    margin-top: 0;
+    padding: 20px;
+    text-align: left;
+  }
+  .mission-about__intro {
+    padding-top: 90px;
+  }
+  .mission-about__intro h2 {
+    top: 30px;
+    padding: 0 55px 0 20px;
+    font-size: 18px;
+    text-align: left;
+  }
+  body[data-mission="17"] .mission-about {
+    top: 0;
+    height: 100vh;
+  }
+  body[data-mission="17"] .mission-about__intro,
+  body[data-mission="17"] .mission-about__credits {
+    width: 100%;
+    margin-top: 0;
+  }
+  .mission-about__header-help,
+  .mission-about__awards {
+    display: none;
+  }
+}

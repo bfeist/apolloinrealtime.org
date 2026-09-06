@@ -5,6 +5,7 @@
  */
 
 import { secondsToTimeStr } from "../shell/clock.js";
+import { missionAboutContent, missionAboutHeaderHelp } from "./aboutContent.js";
 
 export interface ShellElements {
   root: HTMLElement;
@@ -303,13 +304,10 @@ function buildHtml(config: MissionConfig, debug: boolean): string {
     <label for="shareUrl">Copy this link to return to the same mission time and channel.</label>
     <input id="shareUrl" type="text" readonly />
   </dialog>
-  <dialog id="aboutDialog" class="airt-dialog">
-    <form method="dialog"><button class="airt-btn" aria-label="Close instructions">Close</button></form>
-    <h2>Explore ${missionName}</h2>
-    <p>Press Play to follow the mission. Enter a Ground Elapsed Time, click the timeline, or select a transcript line, milestone or photograph to jump to that moment.</p>
-    <p>The three timeline rows zoom from the whole mission to individual events. Move across a row to explore; click to seek. Search finds words in transcripts, commentary and photo captions.</p>
-    ${showMocrTab ? "<p>Select a Mission Control channel to hear that console. The activity timeline, waveform and transcript follow the same mission clock. Photography returns to the spacecraft audio.</p>" : ""}
-    <p><a href="https://apolloinrealtime.org/${config.id}/" target="_blank" rel="noopener">Original website and historical project credits</a></p>
+  <dialog id="aboutDialog" class="airt-dialog mission-about">
+    <form method="dialog"><button class="airt-btn" aria-label="Close instructions and credits">×</button></form>
+    ${missionAboutHeaderHelp(config)}
+    ${missionAboutContent(config)}
   </dialog>
   <div id="debug-host" class="airt-debug" ${debug ? "" : "hidden"}></div>
 </div>`.trim();

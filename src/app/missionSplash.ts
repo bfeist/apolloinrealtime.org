@@ -49,7 +49,15 @@ export function mountMissionSplash(options: MissionSplashOptions): void {
       console.warn("Fullscreen unavailable", error);
     });
   });
-  splash.querySelector("[data-action='about']")?.addEventListener("click", options.onAbout);
+  splash.querySelector("[data-action='about']")?.addEventListener("click", () => {
+    // Apollo 17's legacy help body starts beneath the live mission header.
+    if (config.id === "17") {
+      if (historicalInterval !== null) window.clearInterval(historicalInterval);
+      splash.remove();
+      app?.removeAttribute("aria-hidden");
+    }
+    options.onAbout();
+  });
 
   const updateHistoricalTime = (): void => {
     if (!splash.isConnected) return;
