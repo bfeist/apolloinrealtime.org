@@ -102,7 +102,7 @@ another. Future missions opt in only when real datasets are available.
 | `src/missions/`, `src/types/`          | Mission configuration and typed data contracts                      |
 | `src/data/`                            | Mission CSV adapters and time-indexed lookup                        |
 | `src/engines/`                         | Navigator and YouTube integration                                   |
-| `src/styles/`                          | Shared layout, tokens, panel styles, and small mission overrides    |
+| `src/styles/`, component `*.module.css` | Global tokens, shared shell modules, and co-located feature styles |
 | `public/{11,13,17}/`                   | Read-only assets and data used by the typed app                     |
 | `mission-data/{11,13,17}/`             | Preserved non-runtime inputs, working data, and branch variants     |
 | `pipeline/{11,13,17}/`                 | Preserved legacy Python processes; not yet a supported toolchain    |

@@ -1,7 +1,7 @@
 import { useMissionStore } from "../../store/missionStore.js";
 import { biometricValueAt } from "./data.js";
 import { useBiometricsData } from "./useBiometricsData.js";
-import "../../styles/panels/biometrics.css";
+import styles from "./BiometricsPanel.module.css";
 
 /** The four recorded streams remain independent; gaps display n/a. */
 export function BiometricsPanel({ config }: { config: MissionConfig }) {
@@ -9,9 +9,9 @@ export function BiometricsPanel({ config }: { config: MissionConfig }) {
   const query = useBiometricsData(config);
   const data = query.data;
   return (
-    <section className="biometrics-panel" aria-label="Crew biometric data">
+    <section className={styles.biometricsPanel} aria-label="Crew biometric data">
       <h3>Heart / Metabolic rates</h3>
-      <div className="biometrics-readings">
+      <div className={styles.biometricsReadings}>
         {data &&
           (
             [
@@ -19,16 +19,16 @@ export function BiometricsPanel({ config }: { config: MissionConfig }) {
               ["Schmitt", data.lmpHeart, data.lmpMetabolic],
             ] as const
           ).map(([name, heart, metabolic]) => (
-            <div className="biometrics-row" key={name}>
-              <span className="biometrics-name">{name}:</span>
+            <div className={styles.biometricsRow} data-testid="biometrics-row" key={name}>
+              <span className={styles.biometricsName}>{name}:</span>
               <span>
-                <span className="biometrics-value">
+                <span className={styles.biometricsValue}>
                   {biometricValueAt(heart, seconds) ?? "n/a"}
                 </span>{" "}
                 bpm
               </span>
               <span>
-                <span className="biometrics-value">
+                <span className={styles.biometricsValue}>
                   {biometricValueAt(metabolic, seconds) ?? "n/a"}
                 </span>{" "}
                 btu/hr
@@ -36,7 +36,7 @@ export function BiometricsPanel({ config }: { config: MissionConfig }) {
             </div>
           ))}
       </div>
-      <p className="biometrics-note">
+      <p className={styles.biometricsNote}>
         {query.isPending
           ? "Loading biometric records..."
           : query.isError || data?.unavailableStreams

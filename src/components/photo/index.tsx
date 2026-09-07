@@ -3,6 +3,9 @@ import { usePhotoData } from "../../api/useMissionData.js";
 import { findClosestPhotoIndex } from "../../data/photoData.js";
 import { useMissionStore } from "../../store/missionStore.js";
 import { galleryItemId, photoResolverFor } from "./model.js";
+import styles from "./PhotoPanel.module.css";
+import layout from "../../styles/base.module.css";
+import { cx } from "../../styles/classNames.js";
 
 export function PhotoPanel({ config }: { config: MissionConfig }) {
   const { data, error } = usePhotoData(config);
@@ -37,47 +40,54 @@ export function PhotoPanel({ config }: { config: MissionConfig }) {
 
   return (
     <>
-      <div id="photodiv" className="airt-photodiv" hidden={hidden}>
+      <div id="photodiv" className={layout.airtPhotodiv} hidden={hidden}>
         {error && <>failed: {error.message}</>}
         {entry && urls && (
-          <div className="imageBlock">
+          <div className={styles.imageBlock}>
             <a
               href={urls.highRes}
               target="_blank"
               rel="noopener noreferrer"
-              className="selectedPhotoLink"
+              className={styles.selectedPhotoLink}
+              data-testid="selected-photo-link"
               aria-label={`Open full-resolution photo ${entry.photoId} in a new window`}
             >
-              <img src={urls.full} alt={entry.photoId} className="selectedPhoto" />
+              <img
+                src={urls.full}
+                alt={entry.photoId}
+                className={styles.selectedPhoto}
+                data-testid="selected-photo"
+              />
             </a>
-            <div className="photodivcaption">{entry.description}</div>
-            <div className="photoMeta">
+            <div className={styles.photodivcaption}>{entry.description}</div>
+            <div className={styles.photoMeta}>
               {entry.timeStr} · {entry.photoId}
               {entry.credit === "" ? "" : ` · ${entry.credit}`}
             </div>
           </div>
         )}
       </div>
-      <div id="photoGallery" className="airt-photo-rail" ref={gallery} hidden={hidden}>
+      <div id="photoGallery" className={layout.airtPhotoRail} ref={gallery} hidden={hidden}>
         {data?.entries.map((photo, index) => (
           <button
             type="button"
             key={index}
             aria-label={`View photo ${photo.photoId} at ${photo.timeStr}`}
-            className={`galleryItemContainer${entry === photo ? " selected" : ""}`}
+            className={cx(styles.galleryItemContainer, entry === photo && styles.selected)}
             id={galleryItemId(photo.timeId)}
             data-timeid={photo.timeId}
+            aria-current={entry === photo ? "true" : undefined}
             onClick={() => {
               seek(photo.seconds);
             }}
           >
             <img
-              className="galleryImage"
+              className={cx(styles.galleryImage, layout.galleryImage)}
               loading="lazy"
               src={resolveUrls(photo).thumb}
               alt={photo.photoId}
             />
-            <div className="galleryOverlay">{photo.timeStr}</div>
+            <div className={styles.galleryOverlay}>{photo.timeStr}</div>
           </button>
         ))}
       </div>

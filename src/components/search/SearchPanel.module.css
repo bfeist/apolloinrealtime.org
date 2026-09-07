@@ -1,6 +1,7 @@
 /* Search panel — input + results list. */
 
-.search_panel {
+/* Component classes below are locally scoped. */
+.searchPanel {
   display: flex;
   flex-direction: column;
   gap: var(--airt-sp-2);

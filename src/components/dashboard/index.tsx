@@ -9,6 +9,7 @@ import { BiometricsPanel } from "../biometrics/index.js";
 import { CrewStatusPanel } from "../crewStatus/index.js";
 import { TelemetryPanel, type FrameOfReferenceRange } from "../telemetry/index.js";
 import { missionDay } from "./data.js";
+import styles from "./DashboardPanel.module.css";
 
 export { missionDay } from "./data.js";
 
@@ -29,28 +30,28 @@ export function DashboardPanel({ config }: { config: MissionConfig }) {
   const stage = stages.data.stages[findStageIndex(stages.data, seconds)];
   return (
     <>
-      <div className="dashboard_panel">
-        <div className="dash-row">
-          <span className="label">Mission Day:</span>
-          <span className="value">
+      <div className={styles.dashboardPanel}>
+        <div className={styles.dashRow}>
+          <span className={styles.label}>Mission Day:</span>
+          <span className={styles.value}>
             <span id="dashMissionDay">{missionDay(Math.max(0, seconds))}</span>/
             {Math.ceil(config.missionDurationSeconds / 86400)}
           </span>
         </div>
-        <div className="dash-row">
-          <span className="label">Mission Phase:</span>
-          <span className="value" id="dashMissionStage">
+        <div className={styles.dashRow}>
+          <span className={styles.label}>Mission Phase:</span>
+          <span className={styles.value} id="dashMissionStage">
             {stage?.name ?? "--"}
           </span>
         </div>
-        <div className="dash-row">
-          <span className="label">Crew Status:</span>
+        <div className={styles.dashRow}>
+          <span className={styles.label}>Crew Status:</span>
           <div id="dashCrewStatus">
             <CrewStatusPanel data={crew.data} seconds={seconds} />
           </div>
         </div>
-        <div className="dash-row">
-          <span className="label">Telemetry:</span>
+        <div className={styles.dashRow}>
+          <span className={styles.label}>Telemetry:</span>
           <div id="dashTelemetry">
             <TelemetryPanel
               data={telemetry.data}

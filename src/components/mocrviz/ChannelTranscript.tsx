@@ -5,6 +5,8 @@ import { secondsToTimeStr } from "../../shell/clock.js";
 import { useMissionStore } from "../../store/missionStore.js";
 import { MocrvizAbout } from "./MocrvizAbout.js";
 import { useChannelTranscript } from "./queries.js";
+import styles from "./MocrvizPanel.module.css";
+import { cx } from "../../styles/classNames.js";
 
 const EMPTY_TRANSCRIPT: readonly ChannelUtterance[] = [];
 
@@ -53,16 +55,17 @@ export const ChannelTranscript = memo(function ChannelTranscript({
   }, [active, query, mode, transcript.data]);
 
   return (
-    <section className="mocrviz-transcript-panel">
-      <div className="mocrviz-transcript-title">
-        Mission Control Audio Channel: <span className="mocrviz-transcript-channel">{label}</span>
+    <section className={styles.mocrvizTranscriptPanel}>
+      <div className={styles.mocrvizTranscriptTitle}>
+        Mission Control Audio Channel:{" "}
+        <span className={styles.mocrvizTranscriptChannel}>{label}</span>
       </div>
-      <div className="mocrviz-transcript-tabs">
+      <div className={styles.mocrvizTranscriptTabs}>
         {(["transcript", "search", "about"] as const).map((tab) => (
           <button
             key={tab}
             type="button"
-            className={`mocrviz-transcript-tab${mode === tab ? " is-active" : ""}`}
+            className={cx(styles.mocrvizTranscriptTab, mode === tab && styles.isActive)}
             onClick={() => {
               setMode(tab);
               if (tab !== "search") setSearch("");
@@ -73,10 +76,10 @@ export const ChannelTranscript = memo(function ChannelTranscript({
           </button>
         ))}
       </div>
-      <div className="mocrviz-transcript-monitor">
+      <div className={styles.mocrvizTranscriptMonitor}>
         <input
           ref={searchInput}
-          className="mocrviz-transcript-search"
+          className={styles.mocrvizTranscriptSearch}
           type="search"
           placeholder="Search this channel"
           aria-label="Search this channel transcript"
@@ -88,7 +91,7 @@ export const ChannelTranscript = memo(function ChannelTranscript({
         />
         <div
           ref={list}
-          className="mocrviz-transcript"
+          className={styles.mocrvizTranscript}
           hidden={mode === "about"}
           onScroll={(event) => {
             const host = event.currentTarget;
@@ -108,7 +111,8 @@ export const ChannelTranscript = memo(function ChannelTranscript({
                     <button
                       key={index}
                       type="button"
-                      className={`mocrviz-utterance${index === active ? " is-active" : ""}`}
+                      className={cx(styles.mocrvizUtterance, index === active && styles.isActive)}
+                      data-testid="mocr-utterance"
                       data-index={index}
                       onClick={() => {
                         setSearch("");

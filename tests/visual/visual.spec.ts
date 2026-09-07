@@ -72,11 +72,13 @@ async function gotoTypedAppAtGet(page: Page, mission: MissionId, get: string): P
 
   await expect(page.locator("#transcriptWrapper tr").first()).toBeAttached();
   await expect(page.locator("#photoGallery button").first()).toBeAttached();
-  await expect(page.locator(".selectedPhoto")).toBeVisible();
+  await expect(page.locator("[data-testid=selected-photo]")).toBeVisible();
   await expect
     .poll(
       () =>
-        page.locator(".selectedPhoto").evaluate((node) => (node as HTMLImageElement).naturalWidth),
+        page
+          .locator("[data-testid=selected-photo]")
+          .evaluate((node) => (node as HTMLImageElement).naturalWidth),
       { timeout: 20000, message: "The actual historical photo must load before capture" },
     )
     .toBeGreaterThan(0);

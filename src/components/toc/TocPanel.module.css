@@ -1,7 +1,8 @@
 /* TOC (Table of Contents) panel — mirrors legacy `TOC.html` selectors so
    the typed `src/components/toc/index.tsx` slots into the same look. */
 
-.TOC_container {
+/* Component classes below are locally scoped. */
+.TOCContainer {
   font-family: var(--airt-font-mono);
   font-size: var(--airt-fs-sm);
   color: var(--airt-fg-primary);
@@ -48,11 +49,11 @@ ul.TOC3 li.tocitem {
   color: var(--airt-fg-muted);
   margin-right: var(--airt-sp-2);
 }
-.TOC_item {
+.TOCItem {
   color: inherit;
 }
 
-li.tocitem.airt-row-active {
+li.tocitem.airtRowActive {
   background: var(--airt-row-active);
   color: var(--airt-fg-primary);
 }

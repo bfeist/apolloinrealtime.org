@@ -1,5 +1,6 @@
-﻿/* Preserve the production landing page's composition, assets, and typography.
+/* Preserve the production landing page's composition, assets, and typography.
    Source: ../apolloinrealtime.org/_website/_webroot/styles.css. */
+/* Component classes below are locally scoped. */
 body[data-mission="landing"] {
   color-scheme: dark;
   font-family: "Roboto Mono", monospace;
@@ -34,11 +35,11 @@ body[data-mission="landing"] a:focus-visible {
   outline-offset: 8px;
 }
 
-.landing-header {
+.landingHeader {
   padding: 2em 3em 0 2em;
 }
 
-.landing-header__content {
+.landingHeaderContent {
   display: flex;
   align-items: flex-start;
   padding-right: 3em;
@@ -47,7 +48,7 @@ body[data-mission="landing"] a:focus-visible {
     1px 1px 9px #000;
 }
 
-.landing-header__patch {
+.landingHeaderPatch {
   flex: none;
   width: 7em;
   height: 7em;
@@ -55,7 +56,7 @@ body[data-mission="landing"] a:focus-visible {
   margin-right: 20px;
 }
 
-.landing-header__heading {
+.landingHeaderHeading {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -67,7 +68,7 @@ body[data-mission="landing"] a:focus-visible {
   margin-bottom: 6px;
 }
 
-.landing-header__heading span {
+.landingHeaderHeading span {
   flex: none;
   background: #fff;
   color: #000;
@@ -80,53 +81,53 @@ body[data-mission="landing"] a:focus-visible {
   line-height: normal;
 }
 
-.landing-header__copy p {
+.landingHeaderCopy p {
   font-size: 0.8em;
   color: #fff;
 }
 
-.landing-header__introduction {
+.landingHeaderIntroduction {
   margin-top: 1.1em;
 }
 
-.landing-header__copy .landing-header__material {
+.landingHeaderCopy .landingHeaderMaterial {
   color: #5e92a6;
 }
 
-.landing-header__selection {
+.landingHeaderSelection {
   margin-top: 1em;
 }
 
-.landing-missions {
+.landingMissions {
   width: 100%;
   text-align: center;
   margin-top: 5em;
   padding: 0 20px 40px;
 }
 
-.landing-missions__grid {
+.landingMissionsGrid {
   display: flex;
   justify-content: center;
   gap: 40px;
 }
 
-.landing-mission {
+.landingMission {
   display: block;
   flex: 0 1 295px;
   min-width: 0;
   text-decoration: none;
 }
 
-.landing-mission:hover {
+.landingMission:hover {
   filter: brightness(1.2);
 }
 
-.landing-mission img {
+.landingMission img {
   width: 100%;
   height: auto;
 }
 
-.landing-mission h2 {
+.landingMission h2 {
   margin-top: 0.5em;
   font-family: "Michroma", sans-serif;
   color: #fff;
@@ -134,63 +135,63 @@ body[data-mission="landing"] a:focus-visible {
   font-weight: 400;
 }
 
-.landing-mission p {
+.landingMission p {
   font-size: 0.9em;
   color: #919191;
 }
 
-.landing-forum {
+.landingForum {
   font-size: 0.8em;
   margin-top: 2em;
 }
 
 @media (max-width: 760px) {
-  .landing-header {
+  .landingHeader {
     padding: 24px 20px 0;
   }
 
-  .landing-header__content {
+  .landingHeaderContent {
     padding-right: 0;
   }
 
-  .landing-header__patch {
+  .landingHeaderPatch {
     width: 72px;
     height: 72px;
     margin-right: 14px;
   }
 
-  .landing-header__heading {
+  .landingHeaderHeading {
     font-size: 1.5em;
     gap: 10px;
   }
 
-  .landing-header__heading span {
+  .landingHeaderHeading span {
     margin-left: 0;
     font-size: 0.65rem;
     padding: 3px 8px 4px;
   }
 
-  .landing-header__copy p {
+  .landingHeaderCopy p {
     font-size: 0.75em;
     line-height: 1.6;
   }
 
-  .landing-missions {
+  .landingMissions {
     margin-top: 3em;
   }
 
-  .landing-missions__grid {
+  .landingMissionsGrid {
     flex-direction: column;
     align-items: center;
     gap: 42px;
   }
 
-  .landing-mission {
+  .landingMission {
     flex: none;
     width: min(295px, 100%);
   }
 
-  .landing-forum {
+  .landingForum {
     margin-top: 3em;
     line-height: 1.8;
     overflow-wrap: anywhere;

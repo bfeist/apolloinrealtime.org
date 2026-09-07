@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import "../../styles/panels/mocrviz.css";
+import styles from "./MocrvizPanel.module.css";
+import { cx } from "../../styles/classNames.js";
 import { findTapeForGet } from "../../data/tapeRangesData.js";
 import { channelsFor, type MissionChannels } from "./channels.js";
 import { MocrvizAudioController } from "./audio.js";
@@ -156,10 +157,11 @@ function MissionControl({
             : `Tape ${tape.tapeId} · ${tape.channelBank} · CH ${String(channel)}`;
 
   return (
-    <div className="mocrviz-panel">
+    <div className={styles.mocrvizPanel}>
       <canvas
         ref={canvas}
-        className="mocrviz-timeline"
+        className={styles.mocrvizTimeline}
+        data-testid="mocr-timeline"
         role="application"
         tabIndex={0}
         aria-label="Recorded channel activity and audio waveform. Click to select a channel and seek in mission time."
@@ -194,11 +196,12 @@ function MissionControl({
           } else seek(Math.round(waveformTimeAtX(x, rect.width, seconds, waveform.data ?? null)));
         }}
       />
-      <div className="mocrviz-bottom">
-        <section className="mocrviz-controls">
-          <div className="mocrviz-room">
+      <div className={styles.mocrvizBottom}>
+        <section className={styles.mocrvizControls}>
+          <div className={styles.mocrvizRoom}>
             <img
-              className="mocrviz-room-image"
+              className={styles.mocrvizRoomImage}
+              data-testid="mocr-room-image"
               src={`/${mission}/MOCRviz/img/MOCR_consoles_dark_faded.png`}
               alt="Isometric layout of the Apollo Mission Operations Control Room"
               width={746}
@@ -211,8 +214,15 @@ function MissionControl({
                 <button
                   key={positionChannel}
                   type="button"
-                  className={`mocrviz-console${channel === id ? " is-active" : ""}${speaking?.includes(id) ? " is-speaking" : ""}${hovered === id ? " is-hovered" : ""}`}
+                  className={cx(
+                    styles.mocrvizConsole,
+                    channel === id && styles.isActive,
+                    speaking?.includes(id) && styles.isSpeaking,
+                    hovered === id && styles.isHovered,
+                  )}
                   data-channel-id={id}
+                  data-testid="mocr-console"
+                  data-hovered={hovered === id || undefined}
                   aria-label={`Channel ${String(id)}, ${entry?.label ?? label}`}
                   aria-pressed={channel === id}
                   title={`${entry?.label ?? label}: ${entry?.description ?? ""}`}
@@ -242,9 +252,11 @@ function MissionControl({
               );
             })}
           </div>
-          <div className="mocrviz-controller-details">
-            <span className="mocrviz-channel-name">{labels.get(displayChannel) ?? ""}</span>:{" "}
-            <span className="mocrviz-channel-description">{info?.description ?? ""}</span>
+          <div className={styles.mocrvizControllerDetails}>
+            <span className={styles.mocrvizChannelName} data-testid="mocr-channel-name">
+              {labels.get(displayChannel) ?? ""}
+            </span>
+            : <span className={styles.mocrvizChannelDescription}>{info?.description ?? ""}</span>
           </div>
         </section>
         <ChannelTranscript
@@ -255,12 +267,13 @@ function MissionControl({
           label={labels.get(channel) ?? "CHANNEL"}
         />
       </div>
-      <p className="mocrviz-status" aria-live="polite">
+      <p className={styles.mocrvizStatus} data-testid="mocr-status" aria-live="polite">
         {status}
       </p>
       <audio
         ref={audio}
-        className="mocrviz-audio"
+        className={styles.mocrvizAudio}
+        data-testid="mocr-audio"
         preload="metadata"
         muted={muted}
         onError={(event) => {

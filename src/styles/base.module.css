@@ -1,11 +1,7 @@
-/* Unified base + layout for /{11,13,17}/.
-   Imports the design tokens; per-panel CSS in `panels/*.css`; per-mission
-   overrides in `missions/{N}.css`.
+/* Unified shell layout for /{11,13,17}/. Feature styles are co-located with
+   their React components; small mission overrides remain explicit below.
 
    Phase 6.5 — 3-column production layout matching apolloinrealtime.org. */
-
-@import "./tokens.css";
-@import "./controls.css";
 
 *,
 *::before,
@@ -76,7 +72,7 @@ button {
 
 /* ── app shell layout ──────────────────────────────────────────────── */
 
-.airt-app {
+.airtApp {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
@@ -89,7 +85,7 @@ button {
 
 /* ── header ──────────────────────────────────────────────────────────── */
 
-.airt-header {
+.airtHeader {
   display: grid;
   grid-template-columns: 94px 250px minmax(0, 1fr);
   gap: 10px;
@@ -98,7 +94,7 @@ button {
   padding: 0;
   height: var(--airt-header-h);
 }
-.airt-header__logo {
+.airtHeaderLogo {
   display: block;
   width: 90px;
   height: 90px;
@@ -108,28 +104,28 @@ button {
   align-self: center;
   justify-self: center;
 }
-.airt-header__info {
+.airtHeaderInfo {
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 2px;
   min-width: 0;
 }
-.airt-header__pretitle {
+.airtHeaderPretitle {
   margin: 0;
   font-family: var(--airt-font-display);
   font-size: 10px; /* 0.5em × 20px base */
   color: var(--airt-fg-secondary);
 }
-.airt-header__title {
+.airtHeaderTitle {
   margin: 0;
   font-family: var(--airt-font-display);
-  font-size: var(--airt-fs-display); /* 20px — matches .info-wrapper .content */
+  font-size: var(--airt-fs-display); /* 20px — matches .infoWrapper .content */
   line-height: 1.1;
   font-weight: 400;
   color: var(--airt-accent); /* #5e92a6 — production .title color */
 }
-.airt-header__subtitle {
+.airtHeaderSubtitle {
   margin: 0 0 var(--airt-sp-2);
   font-family: var(--airt-font-display);
   font-size: 13px; /* 0.65em × 20px */
@@ -138,13 +134,13 @@ button {
   padding-bottom: var(--airt-sp-2);
 }
 
-.airt-clock {
+.airtClock {
   display: flex;
   flex-direction: column;
   gap: 1px;
   margin: 2px 0;
 }
-.airt-clock__row {
+.airtClockRow {
   display: flex;
   gap: var(--airt-sp-2);
   font-family: var(--airt-font-oswald);
@@ -153,25 +149,25 @@ button {
   color: var(--airt-fg-primary);
   line-height: 1;
 }
-.airt-clock__row--modern {
+.airtClockRowModern {
   color: var(--airt-fg-secondary);
   font-size: var(--airt-fs-sm);
   margin-top: 2px;
 }
 
-.airt-get {
+.airtGet {
   display: flex;
   align-items: center;
   gap: var(--airt-sp-2);
   margin-top: 2px;
 }
-.airt-get__label {
+.airtGetLabel {
   font-family: var(--airt-font-oswald);
   font-size: var(--airt-fs-sm);
   font-weight: 300;
   color: var(--airt-fg-secondary);
 }
-.airt-get__input {
+.airtGetInput {
   width: 11ch;
   flex: 0 0 11ch;
   background: var(--airt-bg-surface-hi);
@@ -184,12 +180,12 @@ button {
   font-size: 12px;
   font-weight: 400;
 }
-.airt-get__input:focus {
+.airtGetInput:focus {
   outline: 2px solid var(--airt-accent);
   outline-offset: 1px;
 }
 
-.airt-btn {
+.airtBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -203,19 +199,19 @@ button {
   border: 1px solid var(--airt-border-hi);
   transition: background 100ms ease;
 }
-.airt-btn:hover {
+.airtBtn:hover {
   background: var(--airt-border-hi);
 }
-.airt-btn--accent {
+.airtBtnAccent {
   background: var(--airt-accent);
   color: #000000;
   border-color: transparent;
 }
-.airt-btn--accent:hover {
+.airtBtnAccent:hover {
   background: var(--airt-accent-hi);
 }
 
-.airt-header__navigator {
+.airtHeaderNavigator {
   background: var(--airt-bg-monitor);
   border: 1px solid var(--airt-border);
   border-radius: var(--airt-radius-sm);
@@ -224,7 +220,7 @@ button {
   display: flex;
   overflow: hidden;
 }
-.airt-header__navigator > canvas {
+.airtHeaderNavigator > canvas {
   display: block;
   width: 100%;
   height: 100%;
@@ -234,7 +230,7 @@ button {
 
 /* ── main 3-column grid ─────────────────────────────────────────────── */
 
-.airt-main {
+.airtMain {
   display: grid;
   /* left ~40%  |  middle 70px channel strip  |  right ~56% */
   grid-template-columns: minmax(0, 1fr) var(--airt-channels-w) minmax(0, 1.4fr);
@@ -246,7 +242,7 @@ button {
 
 /* ── LEFT column ─────────────────────────────────────────────────────── */
 
-.airt-left {
+.airtLeft {
   display: grid;
   grid-template-rows: auto auto minmax(120px, 1fr);
   gap: var(--airt-sp-2);
@@ -255,7 +251,7 @@ button {
   overflow: hidden;
 }
 
-.airt-monitor {
+.airtMonitor {
   background: var(--airt-bg-monitor);
   border: 1px solid var(--airt-border);
   border-radius: var(--airt-radius-sm);
@@ -263,15 +259,15 @@ button {
   overflow: hidden;
   position: relative;
 }
-.airt-monitor--top {
+.airtMonitorTop {
   /* video slot — dashboard overlay is layered on top.
-     Aspect-ratio 4:3 mirrors the legacy `img.aspect-holder` trick. */
+     Aspect-ratio 4:3 mirrors the legacy `img.aspectHolder` trick. */
   width: 100%;
   min-height: 0;
   aspect-ratio: 4 / 3;
   max-height: calc(100dvh - 350px);
 }
-.airt-monitor--text {
+.airtMonitorText {
   display: flex;
   flex-direction: column;
 }
@@ -280,7 +276,7 @@ button {
    column. Default: dashboard visible, search hidden. The video plays
    underneath. Auto-show/hide rule (legacy manageOverlaysAutodisplay):
    hide dashboard once when entering a video segment, restore when out. */
-.airt-dashboard-overlay {
+.airtDashboardOverlay {
   position: absolute;
   inset: 0;
   background: rgba(8, 10, 14, 0.92);
@@ -290,26 +286,26 @@ button {
   z-index: var(--airt-z-overlay);
   transition: opacity 200ms ease;
 }
-.airt-dashboard-overlay[hidden] {
+.airtDashboardOverlay[hidden] {
   display: none;
 }
-.airt-dashboard-overlay.is-fading {
+.airtDashboardOverlay.isFading {
   opacity: 0;
   pointer-events: none;
 }
-.airt-overlay__head {
+.airtOverlayHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: var(--airt-sp-2) var(--airt-sp-3);
   border-bottom: 1px solid var(--airt-border);
 }
-.airt-overlay__title {
+.airtOverlayTitle {
   font-family: var(--airt-font-display); /* Michroma — matches production overlay .title */
   font-size: var(--airt-fs-md);
   color: var(--airt-accent);
 }
-.airt-overlay__close {
+.airtOverlayClose {
   width: 24px;
   height: 24px;
   border-radius: var(--airt-radius-sm);
@@ -319,37 +315,37 @@ button {
   font-size: 12px;
   line-height: 1;
 }
-.airt-overlay__close:hover {
+.airtOverlayClose:hover {
   background: var(--airt-border-hi);
   color: var(--airt-fg-primary);
 }
 
-.airt-dashboard {
+.airtDashboard {
   padding: var(--airt-sp-3);
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
   color: var(--airt-fg-primary);
 }
-.airt-dashboard[hidden] {
+.airtDashboard[hidden] {
   display: none;
 }
 
 /* Video player fills the left-column top monitor; lives underneath the
    dashboard overlay. */
-.airt-player-wrapper {
+.airtPlayerWrapper {
   position: absolute;
   inset: 0;
   background: #000;
 }
-.airt-player-wrapper[hidden] {
+.airtPlayerWrapper[hidden] {
   display: none;
 }
-.airt-player {
+.airtPlayer {
   width: 100%;
   height: 100%;
 }
-.airt-player-wrapper iframe {
+.airtPlayerWrapper iframe {
   width: 100%;
   height: 100%;
   border: 0;
@@ -357,7 +353,7 @@ button {
 }
 
 /* Search overlay (left column, sits on top of player like the dashboard) */
-.airt-search-overlay {
+.airtSearchOverlay {
   position: absolute;
   inset: 0;
   background: rgba(8, 10, 14, 0.92);
@@ -366,10 +362,10 @@ button {
   display: flex;
   flex-direction: column;
 }
-.airt-search-overlay[hidden] {
+.airtSearchOverlay[hidden] {
   display: none;
 }
-.airt-search-overlay__results {
+.airtSearchOverlayResults {
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
@@ -378,26 +374,26 @@ button {
 
 /* ── tabs row (transcript / TOC / commentary + small action btns) ── */
 /* Text panel hosts (transcript / TOC / commentary) */
-.airt-text-panel {
+.airtTextPanel {
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
   padding: 0;
 }
-.airt-text-panel[hidden] {
+.airtTextPanel[hidden] {
   display: none;
 }
 
 /* ── MIDDLE: narrow vertical channel strip ──────────────────────────── */
 
-.airt-channels {
+.airtChannels {
   display: flex;
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
   width: var(--airt-channels-w);
 }
-.airt-channels__title {
+.airtChannelsTitle {
   flex: 0 0 auto;
   margin-bottom: 5px;
   text-align: center;
@@ -407,7 +403,7 @@ button {
   color: var(--airt-fg-secondary);
   line-height: 1.3;
 }
-.airt-channels__list {
+.airtChannelsList {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -416,10 +412,10 @@ button {
   gap: 2px;
   scrollbar-width: none;
 }
-.airt-channels__list::-webkit-scrollbar {
+.airtChannelsList::-webkit-scrollbar {
   display: none;
 }
-.airt-channels__list .thirtybtn-channel {
+.airtChannelsList .thirtybtnChannel {
   display: block;
   flex: 0 0 18px;
   width: 100%;
@@ -440,19 +436,19 @@ button {
   box-shadow: inset -1px -1px 7px 3px rgba(0, 0, 0, 0.25);
   cursor: pointer;
 }
-.airt-channels__list .thirtybtn-channel.is-speaking {
+.airtChannelsList .thirtybtnChannel.isSpeaking {
   background: #636363;
   color: #000;
   border-color: #636363;
 }
-.airt-channels__list .thirtybtn-channel:is(:hover, .is-hovered, .is-active) {
+.airtChannelsList .thirtybtnChannel:is(:hover, .isHovered, .isActive) {
   background: #7cb7e0;
   color: #000;
   border-color: rgb(93, 153, 177);
 }
 
 /* Right column: photo viewer and thumbnail rail. */
-.airt-right {
+.airtRight {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: var(--airt-sp-2);
@@ -461,11 +457,11 @@ button {
   overflow: hidden;
 }
 
-.airt-right__tabs {
+.airtRightTabs {
   display: flex;
   gap: 2px;
 }
-.airt-right__body {
+.airtRightBody {
   position: relative;
   display: grid;
   /* big viewer | far-right thumbnail rail */
@@ -479,7 +475,7 @@ button {
   padding: var(--airt-sp-1);
 }
 
-.airt-photodiv {
+.airtPhotodiv {
   position: relative;
   min-height: 0;
   min-width: 0;
@@ -489,7 +485,7 @@ button {
   justify-content: center;
   background: var(--airt-bg-monitor);
 }
-.airt-photodiv img {
+.airtPhotodiv img {
   max-width: 100%;
   max-height: 100%;
   width: auto;
@@ -497,7 +493,7 @@ button {
   object-fit: contain;
 }
 
-.airt-photo-rail {
+.airtPhotoRail {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -507,12 +503,12 @@ button {
   scrollbar-color: green #000;
   padding-right: 2px;
 }
-.airt-photo-rail::-webkit-scrollbar-thumb {
+.airtPhotoRail::-webkit-scrollbar-thumb {
   background: #0f0f0f;
   border-color: green;
 }
-.airt-photo-rail img,
-.airt-photo-rail .galleryImage {
+.airtPhotoRail img,
+.airtPhotoRail .galleryImage {
   display: block;
   width: auto;
   height: auto;
@@ -523,17 +519,17 @@ button {
   border-radius: 2px;
   cursor: pointer;
 }
-.airt-photo-rail img:hover,
-.airt-photo-rail .galleryImage:hover {
+.airtPhotoRail img:hover,
+.airtPhotoRail .galleryImage:hover {
   border-color: var(--airt-accent);
 }
-.airt-photo-rail .galleryImage.selected,
-.airt-photo-rail .galleryImage.is-active {
+.airtPhotoRail .galleryImage.selected,
+.airtPhotoRail .galleryImage.isActive {
   border-color: var(--airt-accent);
   box-shadow: 0 0 0 1px var(--airt-accent);
 }
 
-.airt-mocrviz-host {
+.airtMocrvizHost {
   position: absolute;
   inset: 0;
   background: var(--airt-bg-surface);
@@ -542,13 +538,13 @@ button {
   overflow: auto;
   padding: 8px;
 }
-.airt-mocrviz-host[hidden] {
+.airtMocrvizHost[hidden] {
   display: none;
 }
 
 /* ── debug readout (?debug=1) ─────────────────────────────────────── */
 
-.airt-debug {
+.airtDebug {
   position: fixed;
   inset: auto var(--airt-sp-2) var(--airt-sp-2) auto;
   width: 360px;
@@ -563,10 +559,10 @@ button {
   overflow: auto;
   z-index: var(--airt-z-tooltip);
 }
-.airt-debug[hidden] {
+.airtDebug[hidden] {
   display: none;
 }
-.airt-debug h2 {
+.airtDebug h2 {
   margin: var(--airt-sp-3) 0 var(--airt-sp-1);
   color: var(--airt-accent);
   font-size: var(--airt-fs-sm);
@@ -588,94 +584,94 @@ button {
 
 /* Narrow viewports use normal page flow: every panel remains reachable. */
 @media (max-width: 1024px) {
-  .airt-app {
+  .airtApp {
     height: auto;
     min-height: 100dvh;
     overflow: visible;
   }
-  .airt-header {
+  .airtHeader {
     grid-template-columns: 80px 250px minmax(0, 1fr);
   }
-  .airt-main {
+  .airtMain {
     height: auto;
     overflow: visible;
     grid-template-columns: minmax(0, 1fr) 76px;
     grid-template-rows: auto auto;
   }
-  .airt-left {
+  .airtLeft {
     grid-template-rows: auto auto 340px;
   }
-  .airt-monitor--top {
+  .airtMonitorTop {
     max-height: none;
   }
-  .airt-right {
+  .airtRight {
     grid-column: 1 / -1;
     grid-row: 2;
     height: 720px;
   }
-  .airt-channels {
+  .airtChannels {
     width: 76px;
     max-height: 820px;
   }
 }
 
 @media (max-width: 640px) {
-  .airt-header {
+  .airtHeader {
     grid-template-columns: 64px minmax(0, 1fr);
     height: auto;
     gap: 8px;
   }
-  .airt-header__logo {
+  .airtHeaderLogo {
     width: 60px;
     height: 60px;
   }
-  .airt-header__navigator {
+  .airtHeaderNavigator {
     grid-column: 1 / -1;
     height: 132px;
   }
-  .airt-header__title {
+  .airtHeaderTitle {
     font-size: 20px;
   }
-  .airt-header__subtitle {
+  .airtHeaderSubtitle {
     font-size: 10px;
   }
-  .airt-header__pretitle {
+  .airtHeaderPretitle {
     font-size: 8px;
   }
-  .airt-get {
+  .airtGet {
     gap: 4px;
     flex-wrap: wrap;
   }
-  .airt-get__label {
+  .airtGetLabel {
     font-size: 11px;
   }
-  .airt-get__input {
+  .airtGetInput {
     padding: 3px;
   }
-  .airt-clock__row {
+  .airtClockRow {
     font-size: 13px;
   }
-  .airt-main {
+  .airtMain {
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
-  .airt-left {
+  .airtLeft {
     flex: none;
     grid-template-rows: auto auto 330px;
     overflow: visible;
   }
-  .airt-channels {
+  .airtChannels {
     width: 100%;
     height: 90px;
     flex-direction: row;
   }
-  .airt-channels__title {
+  .airtChannelsTitle {
     width: 65px;
     font-size: 11px;
     padding: 10px 4px;
   }
-  .airt-channels__list {
+  .airtChannelsList {
     min-width: 0;
     display: grid;
     grid-auto-flow: column;
@@ -684,10 +680,10 @@ button {
     overflow-x: auto;
     overflow-y: hidden;
   }
-  .airt-channels__list .thirtybtn-channel {
+  .airtChannelsList .thirtybtnChannel {
     height: 100%;
   }
-  .airt-right {
+  .airtRight {
     flex: none;
     height: 740px;
   }
@@ -700,14 +696,14 @@ button {
   outline: 2px solid var(--airt-accent-hi);
   outline-offset: 2px;
 }
-.airt-video-playback {
+.airtVideoPlayback {
   position: absolute;
   inset: 0;
   z-index: 1;
   width: 100%;
   height: 100%;
 }
-.airt-dialog {
+.airtDialog {
   max-width: min(560px, calc(100vw - 32px));
   color: #ddd;
   background: #161819;
@@ -715,17 +711,17 @@ button {
   border-radius: 6px;
   padding: 24px;
 }
-.airt-dialog::backdrop {
+.airtDialog::backdrop {
   background: #000b;
 }
-.airt-dialog h2 {
+.airtDialog h2 {
   font: 18px var(--airt-font-display);
   color: var(--airt-accent-hi);
 }
-.airt-dialog form {
+.airtDialog form {
   float: right;
 }
-.airt-dialog input {
+.airtDialog input {
   width: 100%;
   margin-top: 12px;
   padding: 10px;
@@ -733,7 +729,7 @@ button {
   color: #ddd;
   border: 1px solid #555;
 }
-.mission-about {
+.missionAbout {
   box-sizing: border-box;
   position: fixed;
   z-index: 1000;
@@ -755,13 +751,13 @@ button {
   background-position: left bottom;
   background-size: cover;
 }
-body[data-mission="11"] .mission-about {
+body[data-mission="11"] .missionAbout {
   background-image: url("/11/img/bg_help.jpg");
 }
-body[data-mission="13"] .mission-about {
+body[data-mission="13"] .missionAbout {
   background-image: url("/13/img/bg_help.jpg");
 }
-body[data-mission="17"] .mission-about {
+body[data-mission="17"] .missionAbout {
   top: calc(var(--airt-header-h) + 12px);
   height: calc(100vh - var(--airt-header-h) - 12px);
   background-image: url("/17/img/bg_help.jpg");
@@ -769,26 +765,26 @@ body[data-mission="17"] .mission-about {
     1px 1px 1px #000,
     1px 1px 9px #000;
 }
-.mission-about__intro,
-.mission-about__credits {
+.missionAboutIntro,
+.missionAboutCredits {
   box-sizing: border-box;
   float: left;
   margin-top: 86px;
   padding: 0 20px;
 }
-.mission-about__intro {
+.missionAboutIntro {
   width: 55%;
   padding-left: 9%;
   text-align: right;
 }
-.mission-about__credits {
+.missionAboutCredits {
   width: 40%;
   padding-right: 0;
   text-align: left;
 }
-.mission-about h2,
-.mission-about h3,
-.mission-about h4 {
+.missionAbout h2,
+.missionAbout h3,
+.missionAbout h4 {
   clear: both;
   margin: 0 0 10px;
   color: #5e92a6;
@@ -796,7 +792,7 @@ body[data-mission="17"] .mission-about {
   font-weight: 400;
   text-transform: none;
 }
-.mission-about__intro h2 {
+.missionAboutIntro h2 {
   position: absolute;
   top: 35px;
   left: 0;
@@ -807,94 +803,94 @@ body[data-mission="17"] .mission-about {
   line-height: 1;
   text-align: center;
 }
-.mission-about h3 {
+.missionAbout h3 {
   font-size: 1.45em;
 }
-.mission-about__intro h3 {
+.missionAboutIntro h3 {
   margin-bottom: 5px;
 }
-.mission-about h4 {
+.missionAbout h4 {
   margin: 30px 0 6px;
   font-size: 1.1em;
 }
-.mission-about__intro p {
+.missionAboutIntro p {
   margin: 0 0 16px;
 }
-.mission-about__credits p {
+.missionAboutCredits p {
   margin: 0 0 30px;
 }
-.mission-about a {
+.missionAbout a {
   color: #5e92a6;
   text-decoration: none;
 }
-.mission-about a:hover {
+.missionAbout a:hover {
   text-decoration: underline;
 }
-.mission-about img {
+.missionAbout img {
   display: block;
   width: 100%;
   height: auto;
   margin: 0 0 20px;
 }
-.mission-about blockquote {
+.missionAbout blockquote {
   margin: 20px 0;
   color: #ddd;
   font: 0.8em/1.4 var(--airt-font-sans);
 }
-.mission-about blockquote footer {
+.missionAbout blockquote footer {
   margin-top: 20px;
   color: #999;
   font: 1.1em/1.2 var(--airt-font-sans);
 }
-body[data-mission="17"] .mission-about,
-body[data-mission="17"] .mission-about h3,
-body[data-mission="17"] .mission-about h4,
-body[data-mission="17"] .mission-about blockquote,
-body[data-mission="17"] .mission-about blockquote footer {
+body[data-mission="17"] .missionAbout,
+body[data-mission="17"] .missionAbout h3,
+body[data-mission="17"] .missionAbout h4,
+body[data-mission="17"] .missionAbout blockquote,
+body[data-mission="17"] .missionAbout blockquote footer {
   font-family: var(--airt-font-slab);
 }
-body[data-mission="11"] .mission-about__intro p,
-body[data-mission="13"] .mission-about__intro p {
+body[data-mission="11"] .missionAboutIntro p,
+body[data-mission="13"] .missionAboutIntro p {
   font-size: 0.89em;
 }
-body[data-mission="11"] .mission-about__intro h3,
-body[data-mission="13"] .mission-about__intro h3 {
+body[data-mission="11"] .missionAboutIntro h3,
+body[data-mission="13"] .missionAboutIntro h3 {
   font-size: 1.29em;
 }
-body[data-mission="11"] .mission-about blockquote,
-body[data-mission="13"] .mission-about blockquote {
+body[data-mission="11"] .missionAbout blockquote,
+body[data-mission="13"] .missionAbout blockquote {
   font-size: 0.712em;
 }
-body[data-mission="11"] .mission-about__credits,
-body[data-mission="13"] .mission-about__credits,
-body[data-mission="17"] .mission-about__credits {
+body[data-mission="11"] .missionAboutCredits,
+body[data-mission="13"] .missionAboutCredits,
+body[data-mission="17"] .missionAboutCredits {
   font-size: 0.89em;
 }
-body[data-mission="17"] .mission-about blockquote {
+body[data-mission="17"] .missionAbout blockquote {
   font-size: 1em;
 }
-body[data-mission="17"] .mission-about__intro h2 {
+body[data-mission="17"] .missionAboutIntro h2 {
   left: 4%;
   width: 92%;
 }
-body[data-mission="17"] .mission-about__intro h3 {
+body[data-mission="17"] .missionAboutIntro h3 {
   font-size: 1em;
 }
-body[data-mission="17"] .mission-about__intro {
+body[data-mission="17"] .missionAboutIntro {
   padding-right: 55px;
 }
-body[data-mission="17"] .mission-about__credits h3 {
+body[data-mission="17"] .missionAboutCredits h3 {
   color: #fff;
   font-size: 1.25em;
 }
-body[data-mission="17"] .mission-about__intro {
+body[data-mission="17"] .missionAboutIntro {
   margin-top: 135px;
 }
-body[data-mission="17"] .mission-about__credits {
+body[data-mission="17"] .missionAboutCredits {
   width: 38%;
   margin-top: 147px;
 }
-.mission-about__awards {
+.missionAboutAwards {
   position: absolute;
   right: 18px;
   bottom: 8px;
@@ -902,12 +898,12 @@ body[data-mission="17"] .mission-about__credits {
   align-items: flex-end;
   gap: 12px;
 }
-.mission-about__awards img {
+.missionAboutAwards img {
   width: auto;
   max-width: none;
   margin: 0;
 }
-.mission-about__header-help {
+.missionAboutHeaderHelp {
   position: fixed;
   z-index: 1001;
   top: 6px;
@@ -919,62 +915,62 @@ body[data-mission="17"] .mission-about__credits {
   color: #ddd;
   pointer-events: none;
 }
-.mission-about__legend {
+.missionAboutLegend {
   padding: 10px 45px 0 74px;
   background: #000;
   font: 17px/19px var(--airt-font-slab);
 }
-.mission-about__legend > div {
+.missionAboutLegend > div {
   white-space: nowrap;
 }
-.mission-about__legend ul {
+.missionAboutLegend ul {
   margin: 0;
   padding: 0;
   list-style: none;
   font-size: 0.85em;
 }
-.mission-about__legend li {
+.missionAboutLegend li {
   margin: 6px 0;
   color: #ccc;
   white-space: nowrap;
 }
-.mission-about__legend i {
+.missionAboutLegend i {
   display: inline-block;
   width: 5px;
   height: 20px;
   margin-right: 5px;
   vertical-align: bottom;
 }
-.mission-about__legend i + i {
+.missionAboutLegend i + i {
   margin-left: -3px;
 }
-.mission-about__legend .is-interest {
+.missionAboutLegend .isInterest {
   background: orange;
 }
-.mission-about__legend .is-photo {
+.missionAboutLegend .isPhoto {
   background: #00c000;
 }
-.mission-about__legend .is-crew {
+.missionAboutLegend .isCrew {
   background: cadetblue;
 }
-.mission-about__legend .is-mocr {
+.missionAboutLegend .isMocr {
   background: #8a95b6;
 }
-.mission-about__legend .is-pao {
+.missionAboutLegend .isPao {
   background: #535353;
 }
-.mission-about__legend .is-video,
-.mission-about__legend .is-animation {
+.missionAboutLegend .isVideo,
+.missionAboutLegend .isAnimation {
   width: 26px;
   border: 1px solid blue;
   background: #010047;
 }
-.mission-about__legend .is-animation {
+.missionAboutLegend .isAnimation {
   margin-left: 7px;
   border-color: #4d0062;
   background: #270047;
 }
-.mission-about__navigator-key {
+.missionAboutNavigatorKey {
   margin: 0;
   padding: 0 10px;
   background: rgba(0, 0, 0, 0.5);
@@ -982,12 +978,12 @@ body[data-mission="17"] .mission-about__credits {
   font: 16px/normal var(--airt-font-slab);
   text-align: center;
 }
-.mission-about__navigator-key li {
+.missionAboutNavigatorKey li {
   position: relative;
   border-right: 1px solid orange;
   border-left: 1px solid orange;
 }
-.mission-about__navigator-key li::before {
+.missionAboutNavigatorKey li::before {
   position: absolute;
   top: 50%;
   left: 0;
@@ -995,7 +991,7 @@ body[data-mission="17"] .mission-about__credits {
   border-top: 1px solid orange;
   content: "";
 }
-.mission-about__navigator-key span {
+.missionAboutNavigatorKey span {
   position: relative;
   padding: 1px 10px;
   background: rgba(0, 0, 0, 0.75);
@@ -1003,51 +999,51 @@ body[data-mission="17"] .mission-about__credits {
   border-left: 1px solid orange;
   font-family: var(--airt-font-slab);
 }
-.mission-about__navigator-key li:nth-child(1) {
+.missionAboutNavigatorKey li:nth-child(1) {
   height: 21px;
   margin-top: 13px;
   line-height: 1.6;
 }
-.mission-about__navigator-key li:nth-child(2) {
+.missionAboutNavigatorKey li:nth-child(2) {
   height: 27px;
   margin-top: 5px;
   line-height: 1.9;
 }
-.mission-about__navigator-key li:nth-child(3) {
+.missionAboutNavigatorKey li:nth-child(3) {
   height: 59px;
   margin-top: 7px;
   line-height: 3.75;
 }
-.mission-about__credits {
+.missionAboutCredits {
   border: 0;
 }
-.mission-about__credits strong {
+.missionAboutCredits strong {
   color: #eee;
   font-weight: 400;
 }
-.mission-about__credits h3 {
+.missionAboutCredits h3 {
   margin: 0;
 }
-.mission-about__credits p {
+.missionAboutCredits p {
   margin: 0.4em 0 30px;
   font-size: 1em;
   line-height: 1.5;
 }
-.mission-about__subheading {
+.missionAboutSubheading {
   color: #5e92a6;
   font-size: 1.1em;
 }
-.mission-about__legal {
+.missionAboutLegal {
   color: #999;
   font-size: 1em;
 }
-.mission-about form {
+.missionAbout form {
   position: absolute;
   z-index: 1;
   top: 7px;
   right: 15px;
 }
-.mission-about form .airt-btn {
+.missionAbout form .airtBtn {
   width: 31px;
   height: 31px;
   padding: 0;
@@ -1059,53 +1055,78 @@ body[data-mission="17"] .mission-about__credits {
     28px/24px Arial,
     sans-serif;
 }
-.mission-about form .airt-btn:hover,
-.mission-about form .airt-btn:focus-visible {
+.missionAbout form .airtBtn:hover,
+.missionAbout form .airtBtn:focus-visible {
   color: #7bbfd8;
   border-color: #7bbfd8;
 }
 @media (min-width: 1660px) {
-  .mission-about {
+  .missionAbout {
     font-size: 19px;
   }
-  body[data-mission="17"] .mission-about {
+  body[data-mission="17"] .missionAbout {
     font-size: 24px;
   }
 }
 @media (max-width: 767px) {
-  .mission-about {
+  .missionAbout {
     width: calc(100vw - 16px);
     height: calc(100vh - 16px);
     font-size: 13px;
   }
-  .mission-about__intro,
-  .mission-about__credits {
+  .missionAboutIntro,
+  .missionAboutCredits {
     float: none;
     width: 100%;
     margin-top: 0;
     padding: 20px;
     text-align: left;
   }
-  .mission-about__intro {
+  .missionAboutIntro {
     padding-top: 90px;
   }
-  .mission-about__intro h2 {
+  .missionAboutIntro h2 {
     top: 30px;
     padding: 0 55px 0 20px;
     font-size: 18px;
     text-align: left;
   }
-  body[data-mission="17"] .mission-about {
+  body[data-mission="17"] .missionAbout {
     top: 0;
     height: 100vh;
   }
-  body[data-mission="17"] .mission-about__intro,
-  body[data-mission="17"] .mission-about__credits {
+  body[data-mission="17"] .missionAboutIntro,
+  body[data-mission="17"] .missionAboutCredits {
     width: 100%;
     margin-top: 0;
   }
-  .mission-about__header-help,
-  .mission-about__awards {
+  .missionAboutHeaderHelp,
+  .missionAboutAwards {
     display: none;
+  }
+}
+
+body[data-mission="11"] .airtHeaderTitle {
+  letter-spacing: -0.01em;
+}
+
+body[data-mission="17"] .airtMain {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+}
+
+body[data-mission="17"] .airtChannels {
+  display: none !important;
+}
+
+@media (max-width: 1024px) {
+  body[data-mission="17"] .airtMain {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .airtRight.isMocrvizActive {
+    height: auto;
+    min-height: 1048px;
   }
 }

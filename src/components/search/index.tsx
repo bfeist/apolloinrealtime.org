@@ -3,6 +3,10 @@ import { useUtteranceData, useCommentaryData, usePhotoData } from "../../api/use
 import { timeIdToSeconds } from "../../shell/clock.js";
 import { useMissionStore } from "../../store/missionStore.js";
 import { buildSearchIndex, searchIndex } from "./model.js";
+import styles from "./SearchPanel.module.css";
+import transcriptStyles from "../transcript/TranscriptPanel.module.css";
+import { speakerClassName } from "../transcript/classNames.js";
+import { cx } from "../../styles/classNames.js";
 
 export function SearchPanel({ config }: { config: MissionConfig }) {
   const utterances = useUtteranceData(config).data;
@@ -34,7 +38,7 @@ export function SearchPanel({ config }: { config: MissionConfig }) {
   }, [query]);
   const hits = useMemo(() => searchIndex(index, debouncedQuery), [index, debouncedQuery]);
   return (
-    <div className="search_panel">
+    <div className={styles.searchPanel}>
       <input
         type="text"
         id="searchInputField"
@@ -49,7 +53,7 @@ export function SearchPanel({ config }: { config: MissionConfig }) {
           <tbody>
             {hits.map(({ item, matchStart, matchLength }, hitIndex) => (
               <tr
-                className={`utterance ${item.uttType}`}
+                className={cx(transcriptStyles.utterance, speakerClassName(item.uttType))}
                 data-key={`${item.kind}:${item.timeId}:${String(matchStart)}`}
                 key={hitIndex}
                 onClick={() => {
@@ -57,16 +61,18 @@ export function SearchPanel({ config }: { config: MissionConfig }) {
                   setSearchVisible(false);
                 }}
               >
-                <td className="timestamp">
+                <td className={transcriptStyles.timestamp}>
                   {item.timeStr}
                   <br />
                   {item.kind}
                 </td>
-                <td className={`who ${item.uttType}`}>{item.who}</td>
-                <td className={`spokenwords ${item.uttType}`}>
+                <td className={cx(transcriptStyles.who, speakerClassName(item.uttType))}>
+                  {item.who}
+                </td>
+                <td className={cx(transcriptStyles.spokenwords, speakerClassName(item.uttType))}>
                   {" "}
                   {item.words.slice(0, matchStart)}
-                  <span className="searchResultHighlight">
+                  <span className={transcriptStyles.searchResultHighlight}>
                     {item.words.slice(matchStart, matchStart + matchLength)}
                   </span>
                   {item.words.slice(matchStart + matchLength)}

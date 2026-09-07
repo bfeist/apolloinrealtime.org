@@ -4,6 +4,9 @@ import type { MocrMissionId } from "./urls.js";
 import { useMissionStore } from "../../store/missionStore.js";
 import { useMocrHover } from "./hoverStore.js";
 import { useChannelActivity } from "./queries.js";
+import layout from "../../styles/base.module.css";
+import controls from "../../styles/controls.module.css";
+import { cx } from "../../styles/classNames.js";
 
 /** Always mounted by the shell; the expensive room and recordings load on first opening. */
 export function ChannelStrip({ config }: { config: MissionConfig }) {
@@ -47,9 +50,17 @@ function ChannelButtons({
             key={id}
             type="button"
             id={`btn-ch${String(id)}`}
-            className={`thirtybtn-channel${selected ? " is-active" : ""}${speaking?.includes(id) ? " is-speaking" : ""}${hovered === id ? " is-hovered" : ""}`}
+            className={cx(
+              layout.thirtybtnChannel,
+              controls.thirtybtnChannel,
+              selected && layout.isActive,
+              speaking?.includes(id) && layout.isSpeaking,
+              hovered === id && layout.isHovered,
+            )}
             title={`${info.label}: ${info.description}`}
             aria-pressed={selected}
+            data-speaking={speaking?.includes(id) ?? undefined}
+            data-hovered={hovered === id || undefined}
             onClick={() => {
               selectChannel(id);
             }}

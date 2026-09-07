@@ -1,4 +1,6 @@
 import { computeTelemetryDisplay, type FrameOfReferenceRange } from "./data.js";
+import styles from "../dashboard/DashboardPanel.module.css";
+import { cx } from "../../styles/classNames.js";
 
 export * from "./data.js";
 
@@ -33,18 +35,20 @@ export function TelemetryPanel({
       ? "--"
       : `${format(display.distanceNm, distanceDecimals)} nm · ${format(display.distanceKm ?? 0, distanceDecimals)} km`;
   return (
-    <div className="telemetry_panel">
-      <div className="row">
-        <span className="label">
-          Velocity (<span className="frame velocity-frame">{display.frame}</span>):
+    <div className={styles.telemetryPanel}>
+      <div className={styles.row}>
+        <span className={styles.label}>
+          Velocity (<span className={cx(styles.frame, styles.velocityFrame)}>{display.frame}</span>
+          ):
         </span>
-        <span className="value velocity-value">{velocity}</span>
+        <span className={cx(styles.value, styles.velocityValue)}>{velocity}</span>
       </div>
-      <div className="row">
-        <span className="label">
-          Distance (<span className="frame distance-frame">{display.frame}</span>):
+      <div className={styles.row}>
+        <span className={styles.label}>
+          Distance (<span className={cx(styles.frame, styles.distanceFrame)}>{display.frame}</span>
+          ):
         </span>
-        <span className="value distance-value">{distance}</span>
+        <span className={cx(styles.value, styles.distanceValue)}>{distance}</span>
       </div>
     </div>
   );

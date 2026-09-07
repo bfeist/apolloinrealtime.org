@@ -1,4 +1,5 @@
 import { A17_AWWWARDS_NOMINEE, A17_WEBBY_AWARD } from "../../app/a17AwardImages.js";
+import styles from "../../styles/base.module.css";
 
 /** Historical help and credits retain each mission's original wording and markup. */
 export function MissionAboutContent({ config }: { config: MissionConfig }) {
@@ -22,7 +23,7 @@ export function MissionAboutContent({ config }: { config: MissionConfig }) {
 function About11() {
   return (
     <>
-      <div className="mission-about__intro">
+      <div className={styles.missionAboutIntro}>
         <h2>A real-time journey through the first landing on the Moon</h2>
         <h3>Introduction</h3>
         <p>
@@ -101,7 +102,7 @@ function About11() {
 
 function Credits11() {
   return (
-    <section className="mission-about__credits">
+    <section className={styles.missionAboutCredits}>
       <h3>Credits</h3>
       <p>
         <strong>Ben Feist</strong> Concept, research, mission data restoration, audio restoration,
@@ -153,19 +154,19 @@ function Credits11() {
         </a>
         <br />
         <br />
-        <span className="mission-about__subheading">Lunar and Planetary Institute</span>
+        <span className={styles.missionAboutSubheading}>Lunar and Planetary Institute</span>
         <br />
         <strong>Jamie Shumbera</strong> Operations Manager
         <br />
         <br />
-        <span className="mission-about__subheading">NASA Headquarters</span>
+        <span className={styles.missionAboutSubheading}>NASA Headquarters</span>
         <br />
         <strong>Dr. Bill Barry</strong> Chief Historian, NASA HQ
         <br />
         <strong>Dr. Jacob Bleacher</strong> Chief Exploration Scientist, NASA HQ
         <br />
         <br />
-        <span className="mission-about__subheading">NASA Johnson Space Center</span>
+        <span className={styles.missionAboutSubheading}>NASA Johnson Space Center</span>
         <br />
         <strong>Dr. Cindy Evans</strong> Division Chief, Astromaterials Research and Exploration
         Science (ARES) Division, NASA JSC
@@ -190,7 +191,7 @@ function Credits11() {
         , NASA JSC
         <br />
         <br />
-        <span className="mission-about__subheading">NASA Goddard Space Flight Center</span>
+        <span className={styles.missionAboutSubheading}>NASA Goddard Space Flight Center</span>
         <br />
         <strong>Dr. Noah Petro</strong> Project Scientist, Lunar Reconnaissance Orbiter. Planetary
         Geology, Geochemistry and Geophysics Lab, NASA Goddard
@@ -222,7 +223,7 @@ function Credits11() {
         <strong>The men and women of Mission Control</strong>
         <br />
         <br />
-        <span className="mission-about__subheading">Beta Testers</span>
+        <span className={styles.missionAboutSubheading}>Beta Testers</span>
         <br />
         <strong>Mike Dinn</strong>
         <br />
@@ -249,7 +250,7 @@ function Credits11() {
         <strong>Kevin Spencer</strong>
         <br />
         <br />
-        <span className="mission-about__legal">
+        <span className={styles.missionAboutLegal}>
           THIS WEBSITE IS THE COPYRIGHT OF BEN FEIST ©2019.
           <br />
           <br />
@@ -269,7 +270,7 @@ function Credits11() {
 function About13() {
   return (
     <>
-      <div className="mission-about__intro">
+      <div className={styles.missionAboutIntro}>
         <h2>A real-time journey through the Apollo 13 mission</h2>
         <h3>Introduction</h3>
         <p>
@@ -352,7 +353,7 @@ function About13() {
 
 function Credits13() {
   return (
-    <section className="mission-about__credits">
+    <section className={styles.missionAboutCredits}>
       <h3>Credits</h3>
       <p>
         <strong>Ben Feist</strong> Concept, research, mission data restoration, audio restoration,
@@ -409,14 +410,14 @@ function Credits13() {
         National Archives
         <br />
         <br />
-        <span className="mission-about__subheading">NASA Headquarters</span>
+        <span className={styles.missionAboutSubheading}>NASA Headquarters</span>
         <br />
         <strong>Dr. Bill Barry</strong> Chief Historian, NASA HQ
         <br />
         <strong>Dr. Jacob Bleacher</strong> Chief Exploration Scientist, NASA HQ
         <br />
         <br />
-        <span className="mission-about__subheading">NASA Johnson Space Center</span>
+        <span className={styles.missionAboutSubheading}>NASA Johnson Space Center</span>
         <br />
         <strong>Sandra Tetley</strong> Real Property Officer, Historic Preservation Officer, NASA
         JSC
@@ -430,13 +431,13 @@ function Credits13() {
         <strong>Dr. Paul Niles</strong> Assistant Chief Scientist, ARES NASA JSC
         <br />
         <br />
-        <span className="mission-about__subheading">NASA Goddard Space Flight Center</span>
+        <span className={styles.missionAboutSubheading}>NASA Goddard Space Flight Center</span>
         <br />
         <strong>Dr. Noah Petro</strong> Project Scientist, Lunar Reconnaissance Orbiter. Planetary
         Geology, Geophysics, and Geochemistry Lab, NASA GSFC
         <br />
         <br />
-        <span className="mission-about__subheading">
+        <span className={styles.missionAboutSubheading}>
           University of Texas – Dallas, Center for Robust Speech Systems (CRSS-UTDallas)
         </span>
         <br />
@@ -473,7 +474,7 @@ function Credits13() {
         film
         <br />
         <br />
-        <span className="mission-about__subheading">Lunar and Planetary Institute</span>
+        <span className={styles.missionAboutSubheading}>Lunar and Planetary Institute</span>
         <br />
         <strong>Jamie Shumbera</strong> Operations Manager
         <br />
@@ -493,7 +494,7 @@ function Credits13() {
         <strong>The men and women of Mission Control</strong>
         <br />
         <br />
-        <span className="mission-about__legal">
+        <span className={styles.missionAboutLegal}>
           THIS WEBSITE IS THE COPYRIGHT OF BEN FEIST ©2020.
           <br />
           <br />
@@ -513,7 +514,7 @@ function Credits13() {
 function About17() {
   return (
     <>
-      <div className="mission-about__intro">
+      <div className={styles.missionAboutIntro}>
         <h2>A real-time interactive journey through the last landing on the Moon.</h2>
         <blockquote>
           &quot;When I left the Moon and started up the ladder, I was really at a loss. I didn't
@@ -547,7 +548,7 @@ function About17() {
         </h3>
       </div>
       <Credits17 />
-      <div className="mission-about__awards">
+      <div className={styles.missionAboutAwards}>
         <img src={A17_WEBBY_AWARD} alt="Webby Awards nominee" />
         <img src={A17_AWWWARDS_NOMINEE} alt="Awwwards nominee" />
       </div>
@@ -557,7 +558,7 @@ function About17() {
 
 function Credits17() {
   return (
-    <section className="mission-about__credits">
+    <section className={styles.missionAboutCredits}>
       <h3>Credits</h3>
       <p>
         <strong>Ben Feist:</strong> Concept, research, mission data restoration, audio/video,
@@ -613,27 +614,28 @@ function Credits17() {
 
 function MissionAboutHeaderHelp() {
   return (
-    <div className="mission-about__header-help" aria-hidden="true">
-      <div className="mission-about__legend">
+    <div className={styles.missionAboutHeaderHelp} aria-hidden="true">
+      <div className={styles.missionAboutLegend}>
         <div>Mission Navigator Color Codes:</div>
         <ul>
           <li>
-            <i className="is-interest"></i>Point of interest (see Guided Tour)
+            <i className={styles.isInterest}></i>Point of interest (see Guided Tour)
           </li>
           <li>
-            <i className="is-photo"></i>Photograph Taken
+            <i className={styles.isPhoto}></i>Photograph Taken
           </li>
           <li>
-            <i className="is-crew"></i>
-            <i className="is-mocr"></i>
-            <i className="is-pao"></i>Crew / Mission Control speech
+            <i className={styles.isCrew}></i>
+            <i className={styles.isMocr}></i>
+            <i className={styles.isPao}></i>Crew / Mission Control speech
           </li>
           <li>
-            <i className="is-video"></i>Video Segment <i className="is-animation"></i>3D Animation
+            <i className={styles.isVideo}></i>Video Segment <i className={styles.isAnimation}></i>3D
+            Animation
           </li>
         </ul>
       </div>
-      <ol className="mission-about__navigator-key">
+      <ol className={styles.missionAboutNavigatorKey}>
         <li>
           <span>Entire mission (13 days)</span>
         </li>

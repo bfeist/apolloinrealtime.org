@@ -54,22 +54,22 @@ for (const mission of ["11", "13", "17"]) {
     }
     const liveRow = live.locator("#transcriptTab").locator("..").locator("..");
     if (mission !== "17") {
-      expect(await local.locator(".airt-channels__list button").allTextContents()).toEqual(
+      expect(await local.locator("#thirtytrack-container button").allTextContents()).toEqual(
         await live.locator("#thirtytrack-container button").allTextContents(),
       );
     }
     const captures: [string, Locator][] = [
       ["production-controls", liveRow],
-      ["local-controls", local.locator(".airt-tabs-wrapper")],
+      ["local-controls", local.locator("[data-testid=text-controls]")],
       ...(mission === "17"
         ? []
         : [["production-app-tabs", live.locator("#photoTab").locator("..")] as [string, Locator]]),
-      ["local-app-tabs", local.locator(".airt-right__tabs")],
+      ["local-app-tabs", local.locator("[data-testid=right-tabs]")],
       ...(mission === "17"
         ? []
         : [
             ["production-channels", live.locator("#thirtytrack-container")] as [string, Locator],
-            ["local-channels", local.locator(".airt-channels__list")] as [string, Locator],
+            ["local-channels", local.locator("#thirtytrack-container")] as [string, Locator],
           ]),
     ];
     for (const [name, locator] of captures) {

@@ -1,5 +1,7 @@
 import { useMissionStore } from "../../store/missionStore.js";
 import { realtimeGet } from "../../app/playback.js";
+import styles from "../../styles/controls.module.css";
+import { cx } from "../../styles/classNames.js";
 
 export function toggleFullscreen(): void {
   const action = document.fullscreenElement
@@ -27,10 +29,10 @@ export function TransportControls({
   const { setPlaying, setMuted, setSearchVisible, setDashboardVisible } =
     useMissionStore.getState();
   return (
-    <div className="airt-button-row airt-button-row--small">
+    <div className={cx(styles.airtButtonRow, styles.airtButtonRowSmall)}>
       <button
         id="searchBtn"
-        className={`airt-action-btn${searchVisible ? " is-active" : ""}`}
+        className={cx(styles.airtActionBtn, searchVisible && styles.isActive)}
         type="button"
         title="Search mission"
         aria-label="Search"
@@ -40,7 +42,7 @@ export function TransportControls({
       />
       <button
         id="realtimeBtn"
-        className="airt-action-btn"
+        className={styles.airtActionBtn}
         type="button"
         title="Sync to today's clock"
         aria-label="Sync to today's clock"
@@ -52,7 +54,7 @@ export function TransportControls({
       />
       <button
         id="aboutBtn"
-        className="airt-action-btn"
+        className={styles.airtActionBtn}
         type="button"
         title="How to explore"
         aria-label="How to explore"
@@ -60,7 +62,7 @@ export function TransportControls({
       />
       <button
         id="dashboardBtn"
-        className={`airt-action-btn${dashboardVisible ? " is-active" : ""}`}
+        className={cx(styles.airtActionBtn, dashboardVisible && styles.isActive)}
         type="button"
         title="Show/hide Mission Status"
         aria-label="Dashboard"
@@ -70,7 +72,7 @@ export function TransportControls({
       />
       <button
         id="soundBtn"
-        className="airt-action-btn"
+        className={styles.airtActionBtn}
         type="button"
         title={muted ? "Unmute sound" : "Mute sound"}
         aria-label="Sound"
@@ -81,7 +83,7 @@ export function TransportControls({
       />
       <button
         id="fullscreenBtn"
-        className="airt-action-btn"
+        className={styles.airtActionBtn}
         type="button"
         title="Fullscreen"
         aria-label="Fullscreen"
@@ -89,7 +91,7 @@ export function TransportControls({
       />
       <button
         id="shareBtn"
-        className="airt-action-btn airt-action-btn--labeled"
+        className={cx(styles.airtActionBtn, styles.airtActionBtnLabeled)}
         type="button"
         title="Share this moment"
         aria-label="Share this moment"
@@ -99,7 +101,7 @@ export function TransportControls({
       </button>
       <button
         id="playPauseBtn"
-        className="airt-action-btn airt-action-btn--labeled"
+        className={cx(styles.airtActionBtn, styles.airtActionBtnLabeled)}
         type="button"
         title="Play/Pause"
         aria-label={playing ? "Pause" : "Play"}

@@ -1,8 +1,9 @@
 /* Transcript / utterance table — mirrors the legacy `.utteranceTable` look
    used by `src/components/transcript/index.tsx`. */
 
-.transcript_container,
-.commentary_container {
+/* Component classes below are locally scoped. */
+.transcriptContainer,
+.commentaryContainer {
   width: 100%;
   font-family: var(--airt-font-mono);
   font-size: 13px;
@@ -64,33 +65,33 @@ tr.commentary > td {
 }
 
 /* Speaker color codes matching legacy styles.css exactly. */
-.utt_pao,
-.who.utt_pao {
+.uttPao,
+.who.uttPao {
   color: #535353; /* Public Affairs — very dark grey */
 }
-.utt_capcom,
-.who.utt_capcom {
+.uttCapcom,
+.who.uttCapcom {
   color: grey; /* CAPCOM */
 }
-.utt_crew,
-.who.utt_crew {
+.uttCrew,
+.who.uttCrew {
   color: #84b8d9; /* Crew — soft teal-blue */
 }
-.utt_mocr,
-.who.utt_mocr {
+.uttMocr,
+.who.uttMocr {
   color: #b86c75; /* MOCR — dusty rose */
 }
-.com_support {
+.comSupport {
   color: grey;
 }
-.com_crew {
+.comCrew {
   color: #84b8d9;
 }
 
 /* Active row highlight — driven by `setActiveTimeId`. */
-.airt-row-active,
-tr.utterance.airt-row-active,
-tr.commentary.airt-row-active {
+.airtRowActive,
+tr.utterance.airtRowActive,
+tr.commentary.airtRowActive {
   background: var(--airt-row-active);
 }
 

@@ -7,6 +7,8 @@ import {
   youtubePlayerVars,
 } from "../../engines/ytplayer/index.js";
 import { useMissionStore } from "../../store/missionStore.js";
+import styles from "../../styles/base.module.css";
+import { cx } from "../../styles/classNames.js";
 
 export function MissionVideo({ config }: { config: MissionConfig }) {
   const host = useRef<HTMLDivElement>(null);
@@ -22,7 +24,7 @@ export function MissionVideo({ config }: { config: MissionConfig }) {
     // YouTube replaces this leaf. React must not reconcile its iframe children.
     const target = document.createElement("div");
     target.id = "player";
-    target.className = "airt-player";
+    target.className = cx(styles.airtPlayer);
     host.current.append(target);
     void loadYouTubeIframeApi()
       .then((yt) => {
@@ -100,7 +102,7 @@ export function MissionVideo({ config }: { config: MissionConfig }) {
   return (
     <div
       id="player-iframe-wrapper"
-      className="airt-player-wrapper"
+      className={styles.airtPlayerWrapper}
       data-media-error={unavailable || undefined}
     >
       <div ref={host} style={{ width: "100%", height: "100%" }} />
@@ -111,7 +113,7 @@ export function MissionVideo({ config }: { config: MissionConfig }) {
       )}
       <button
         id="videoPlaybackBtn"
-        className="airt-video-playback"
+        className={styles.airtVideoPlayback}
         type="button"
         aria-label={playing ? "Pause mission video" : "Play mission video"}
         aria-pressed={playing}

@@ -1,6 +1,5 @@
-/* Design tokens for the AiRT2 typed shell.
-   All tokens are CSS custom properties; per-mission overrides live in
-   `missions/{N}.css` and key off `body[data-mission="{N}"]`.
+/* Global design tokens for the AiRT2 typed shell. Mission-specific values
+   key off `body[data-mission="{N}"]` in this file.
 
    Colors and typography match the production apolloinrealtime.org site:
    - Michroma for mission title / subtitle / overlay headings

@@ -4,6 +4,9 @@ import { findClosestUtteranceIndex } from "../../data/utteranceData.js";
 import { useMissionStore } from "../../store/missionStore.js";
 import { displaySpeakerLabel, utteranceItemId, utteranceTypeClass } from "./model.js";
 import { useFollowActiveRow } from "./useFollowActiveRow.js";
+import styles from "./TranscriptPanel.module.css";
+import { speakerClassName } from "./classNames.js";
+import { cx } from "../../styles/classNames.js";
 
 interface TranscriptWindow {
   center: number;
@@ -72,17 +75,22 @@ export function TranscriptPanel({ config }: { config: MissionConfig }) {
 
   if (error) return <>failed: {error.message}</>;
   return (
-    <div className="transcript_container utteranceDiv" id="utteranceDiv" ref={root}>
-      <table id="utteranceTable" className="utteranceTable">
+    <div
+      className={cx(styles.transcriptContainer, styles.utteranceDiv)}
+      id="utteranceDiv"
+      ref={root}
+    >
+      <table id="utteranceTable" className={styles.utteranceTable}>
         <tbody>
           {data?.entries.slice(range.start, range.end + 1).map((entry, offset) => {
             const index = range.start + offset;
             const type = utteranceTypeClass(entry.extra, entry.speaker);
+            const speakerStyle = speakerClassName(type);
             const id = utteranceItemId(entry.timeId);
             return (
               <tr
                 id={id}
-                className={`utterance ${type} ${id}`}
+                className={cx(styles.utterance, speakerStyle)}
                 data-timeid={entry.timeId}
                 data-index={index}
                 key={index}
@@ -91,11 +99,11 @@ export function TranscriptPanel({ config }: { config: MissionConfig }) {
                   seek(entry.seconds);
                 }}
               >
-                <td className="timestamp">{entry.timeStr}</td>
-                <td className={`who ${type}`}>
+                <td className={styles.timestamp}>{entry.timeStr}</td>
+                <td className={cx(styles.who, speakerStyle)} data-testid="transcript-speaker">
                   {displaySpeakerLabel(entry.speaker, config.speakerLabels)}
                 </td>
-                <td className={`spokenwords ${type}`}>{entry.words}</td>
+                <td className={cx(styles.spokenwords, speakerStyle)}>{entry.words}</td>
               </tr>
             );
           })}

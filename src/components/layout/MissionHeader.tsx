@@ -4,6 +4,8 @@ import { useMissionStore } from "../../store/missionStore.js";
 import { secondsToTimeStr } from "../../shell/clock.js";
 import { parseDeepLink } from "../../app/deepLink.js";
 import { MissionNavigator } from "../navigator/MissionNavigator.js";
+import styles from "../../styles/base.module.css";
+import { cx } from "../../styles/classNames.js";
 
 export function MissionHeader({ config }: { config: MissionConfig }) {
   const seconds = useMissionStore((s) => Math.trunc(s.seconds));
@@ -11,39 +13,40 @@ export function MissionHeader({ config }: { config: MissionConfig }) {
   const [draft, setDraft] = useState<string | null>(null);
   const date = new Date(Date.parse(config.launchDate) + seconds * 1000).toUTCString();
   return (
-    <header className="airt-header">
+    <header className={styles.airtHeader}>
       <Link
-        className="airt-header__logo"
+        className={styles.airtHeaderLogo}
+        data-testid="home-link"
         to="/"
         aria-label="Apollo in Real Time home"
         style={{ backgroundImage: `url('/${config.id}/img/Apollo_${config.id}-insignia100.png')` }}
       />
-      <div className="airt-header__info">
-        <p className="airt-header__pretitle">
+      <div className={styles.airtHeaderInfo}>
+        <p className={styles.airtHeaderPretitle}>
           {config.id === "11"
             ? "The First Landing on the Moon"
             : config.id === "13"
               ? "The Third Lunar Landing Attempt"
               : "The Last Landing on the Moon"}
         </p>
-        <h1 className="airt-header__title">{config.name}</h1>
-        <p className="airt-header__subtitle">Real-Time Mission Experience</p>
-        <div className="airt-clock">
-          <div className="airt-clock__row">
-            <span id="historicalDate" className="airt-clock__date">
+        <h1 className={styles.airtHeaderTitle}>{config.name}</h1>
+        <p className={styles.airtHeaderSubtitle}>Real-Time Mission Experience</p>
+        <div className={styles.airtClock}>
+          <div className={styles.airtClockRow}>
+            <span id="historicalDate" className={styles.airtClockDate}>
               {date.slice(0, 16)}
             </span>
-            <span id="historicalTime" className="airt-clock__time">
+            <span id="historicalTime" className={styles.airtClockTime}>
               {date.slice(17, 25)} UTC
             </span>
           </div>
-          <div className="airt-clock__row airt-clock__row--modern" hidden>
-            <span id="modernDate" className="airt-clock__date" />
-            <span id="modernTime" className="airt-clock__time" />
+          <div className={cx(styles.airtClockRow, styles.airtClockRowModern)} hidden>
+            <span id="modernDate" className={styles.airtClockDate} />
+            <span id="modernTime" className={styles.airtClockTime} />
           </div>
         </div>
         <form
-          className="airt-get"
+          className={styles.airtGet}
           onSubmit={(event) => {
             event.preventDefault();
             const input = event.currentTarget.elements.namedItem("get");
@@ -59,13 +62,13 @@ export function MissionHeader({ config }: { config: MissionConfig }) {
             }
           }}
         >
-          <label className="airt-get__label" htmlFor="missionElapsedTime">
+          <label className={styles.airtGetLabel} htmlFor="missionElapsedTime">
             Ground Elapsed Time (GET):
           </label>
           <input
             id="missionElapsedTime"
             name="get"
-            className="airt-get__input"
+            className={styles.airtGetInput}
             type="text"
             size={9}
             value={draft ?? secondsToTimeStr(seconds)}
@@ -75,12 +78,12 @@ export function MissionHeader({ config }: { config: MissionConfig }) {
               setDraft(event.currentTarget.value);
             }}
           />
-          <button id="GETBtn" className="airt-btn airt-btn--accent" type="submit">
+          <button id="GETBtn" className={cx(styles.airtBtn, styles.airtBtnAccent)} type="submit">
             GO
           </button>
         </form>
       </div>
-      <div className="airt-header__navigator">
+      <div className={styles.airtHeaderNavigator}>
         <MissionNavigator config={config} />
       </div>
     </header>

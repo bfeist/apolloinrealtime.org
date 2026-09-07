@@ -13,7 +13,9 @@ for (const mission of ["11", "13", "17"] as const) {
       const transcriptCells = transcriptTable.locator("tr").first().locator("td");
       await expect(transcriptTable).toHaveCSS("border-collapse", "collapse");
       await expect(transcriptCells.first()).toHaveCSS("font-size", "13px");
-      const visibleSpeakers = await transcriptTable.locator(".who").allTextContents();
+      const visibleSpeakers = await transcriptTable
+        .locator("[data-testid=transcript-speaker]")
+        .allTextContents();
       expect(visibleSpeakers).toContain(commanderNames[mission]);
       expect(visibleSpeakers).toContain("Public Affairs");
       if (mission !== "13") expect(visibleSpeakers).toContain("Mission Control");
@@ -40,17 +42,17 @@ for (const mission of ["11", "13", "17"] as const) {
           ({ borderLeft, borderRight }) => borderLeft === "0px" && borderRight === "0px",
         ),
       ).toBe(true);
-      const controls = page.locator(".airt-tabs-wrapper");
+      const controls = page.locator("[data-testid=text-controls]");
       await expect(controls).toBeVisible();
       await page.locator("#tocTab").hover();
       await expect(page.locator("#tocTab")).toBeVisible();
       await page.locator("#tocTab").click();
       await page.mouse.move(0, 0);
       await expect(page.locator("#tocTab")).toHaveAttribute("aria-selected", "true");
-      await expect(page.locator(".airt-right__tabs")).toBeVisible();
+      await expect(page.locator("[data-testid=right-tabs]")).toBeVisible();
       if (mission === "17") return;
-      const channels = page.locator(".airt-channels__list");
-      await expect(channels.locator(".is-speaking").first()).toBeAttached();
+      const channels = page.locator("#thirtytrack-container");
+      await expect(channels.locator("[data-speaking=true]").first()).toBeAttached();
       const clipped = await channels.locator("button").evaluateAll((buttons) =>
         buttons
           .filter((button) => {
@@ -63,7 +65,7 @@ for (const mission of ["11", "13", "17"] as const) {
           .map((button) => button.textContent),
       );
       expect(clipped).toEqual([]);
-      await expect(page.locator(".airt-channels")).toBeVisible();
+      await expect(page.locator("[data-testid=mission-channels]")).toBeVisible();
       const last = channels.locator("button").last();
       await last.click();
       await expect(last).toHaveAttribute("aria-pressed", "true");

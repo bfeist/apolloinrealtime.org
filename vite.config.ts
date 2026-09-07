@@ -2,6 +2,8 @@ import react from "@vitejs/plugin-react";
 import { resolve } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 
+const projectRoot = import.meta.dirname;
+
 /**
  * URL strategy
  * ------------
@@ -32,7 +34,7 @@ export default defineConfig({
   publicDir: "public",
   resolve: {
     alias: {
-      "@": resolve(__dirname, "src"),
+      "@": resolve(projectRoot, "src"),
     },
   },
   server: {
@@ -45,10 +47,10 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        landing: resolve(__dirname, "index.html"),
-        a11: resolve(__dirname, "11/index.html"),
-        a13: resolve(__dirname, "13/index.html"),
-        a17: resolve(__dirname, "17/index.html"),
+        landing: resolve(projectRoot, "index.html"),
+        a11: resolve(projectRoot, "11/index.html"),
+        a13: resolve(projectRoot, "13/index.html"),
+        a17: resolve(projectRoot, "17/index.html"),
       },
     },
   },

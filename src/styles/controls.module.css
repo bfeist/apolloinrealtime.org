@@ -2,27 +2,29 @@
    The rounded, inset button faces are part of the original console design. */
 @import "./control-icons.css";
 
-.airt-tabs-wrapper {
+/* Component classes below are locally scoped. */
+
+.airtTabsWrapper {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 1.666fr);
   gap: 2px;
   align-items: stretch;
 }
-.airt-button-row {
+.airtButtonRow {
   display: flex;
   gap: 2px;
   min-width: 0;
 }
-.airt-button-row--small {
+.airtButtonRowSmall {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   grid-template-rows: repeat(2, 18px);
   grid-template-areas: "search realtime about share play" "dashboard sound fullscreen share play";
   gap: 2px;
 }
-.airt-tab,
-.airt-app-tab,
-.airt-action-btn {
+.airtTab,
+.airtAppTab,
+.airtActionBtn {
   display: flex;
   align-items: flex-start;
   min-width: 0;
@@ -36,46 +38,45 @@
   color: #000;
   box-shadow: inset -1px -1px 7px 3px rgba(0, 0, 0, 0.25);
   font-family: var(--airt-font-oswald);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1;
   text-align: left;
   text-transform: uppercase;
   transition: background-color 150ms ease-in-out;
 }
-.airt-tab {
+.airtTab {
   flex: 1 1 0;
 }
-.airt-app-tab {
+.airtAppTab {
   flex: 0 1 auto;
-  padding-inline: 11px;
   white-space: nowrap;
 }
-.airt-tab:is(:hover, :active, .is-active),
-.airt-app-tab:is(:hover, :active, .is-active, .selected) {
+.airtTab:is(:hover, :active, .isActive),
+.airtAppTab:is(:hover, :active, .isActive, .selected) {
   background-color: #7bbfd8;
   text-shadow:
     1px 1px 1px rgba(255, 255, 255, 0.5),
     -1px -1px 1px rgba(255, 255, 255, 0.5);
 }
-.airt-action-btn {
+.airtActionBtn {
   height: 18px;
   background-size: 15px;
   background-repeat: no-repeat;
   background-position: center;
   background-origin: border-box;
 }
-.airt-action-btn--labeled {
+.airtActionBtnLabeled {
   height: 38px;
-  padding: 5px 0 0;
+  padding: 2.4px 0 0;
   text-align: center;
   justify-content: center;
   background-position: 50% 85%;
 }
-.airt-action-btn:is(:hover, :active, .is-active) {
+.airtActionBtn:is(:hover, :active, .isActive) {
   background-color: #ffc688;
 }
-:is(.airt-tab, .airt-app-tab, .airt-action-btn, .thirtybtn-channel):focus-visible {
+:is(.airtTab, .airtAppTab, .airtActionBtn, .thirtybtnChannel):focus-visible {
   outline: 2px solid #ffc688;
   outline-offset: -2px;
 }
@@ -105,19 +106,19 @@
 }
 
 @media (max-width: 640px) {
-  .airt-app-tab {
+  .airtAppTab {
     padding-inline: 8px;
   }
-  .airt-tabs-wrapper {
+  .airtTabsWrapper {
     grid-template-columns: minmax(0, 1fr);
   }
-  .airt-button-row--small {
+  .airtButtonRowSmall {
     grid-template-rows: repeat(2, 28px);
   }
-  .airt-action-btn {
+  .airtActionBtn {
     height: 28px;
   }
-  .airt-action-btn--labeled {
+  .airtActionBtnLabeled {
     height: 58px;
     padding-top: 7px;
     background-position: 50% 75%;

@@ -4,6 +4,8 @@ import { realtimeGet } from "../../app/playback.js";
 import { timeIdToSeconds } from "../../shell/clock.js";
 import { useMissionStore } from "../../store/missionStore.js";
 import { toggleFullscreen } from "./TransportControls.js";
+import styles from "./MissionSplash.module.css";
+import { cx } from "../../styles/classNames.js";
 
 export function MissionSplash({
   config,
@@ -24,6 +26,8 @@ export function MissionSplash({
     };
   }, []);
   const splash = config.splash;
+  const missionStyle =
+    config.id === "13" ? styles.missionSplash13 : config.id === "17" ? styles.missionSplash17 : "";
   const epoch = Date.parse(config.launchDate);
   const years = Math.max(0, Math.floor((now - epoch) / 31_556_952_000));
   const date = new Date(epoch + realtimeGet(epoch, 0, now) * 1000).toUTCString();
@@ -35,34 +39,38 @@ export function MissionSplash({
   };
   return (
     <section
-      className={`mission-splash mission-splash--${config.id}`}
+      className={cx(styles.missionSplash, missionStyle)}
       role="dialog"
       aria-modal="true"
       aria-labelledby="missionSplashTitle"
     >
-      <div className="mission-splash__about">
-        <div className="mission-splash__identity">
-          <Link className="mission-splash__patch" to="/" aria-label="Apollo in Real Time home" />
+      <div className={styles.missionSplashAbout}>
+        <div className={styles.missionSplashIdentity}>
+          <Link
+            className={styles.missionSplashPatch}
+            to="/"
+            aria-label="Apollo in Real Time home"
+          />
           <div>
-            <div className="mission-splash__heading-row">
-              <h1 id="missionSplashTitle" className="mission-splash__heading">
+            <div className={styles.missionSplashHeadingRow}>
+              <h1 id="missionSplashTitle" className={styles.missionSplashHeading}>
                 {config.name}
               </h1>
-              <span className="mission-splash__realtime">In Real Time</span>
+              <span className={styles.missionSplashRealtime}>In Real Time</span>
             </div>
-            <p className="mission-splash__subheading">{splash.tagline}</p>
-            <p className="mission-splash__description">{splash.description}</p>
-            <p className="mission-splash__description">
+            <p className={styles.missionSplashSubheading}>{splash.tagline}</p>
+            <p className={styles.missionSplashDescription}>{splash.description}</p>
+            <p className={styles.missionSplashDescription}>
               Relive the mission as it occurred in {splash.year}
             </p>
           </div>
         </div>
       </div>
-      <div className="mission-splash__actions">
-        <div className="mission-splash__section mission-splash__entry">
+      <div className={styles.missionSplashActions}>
+        <div className={cx(styles.missionSplashSection, styles.missionSplashEntry)}>
           <button
             autoFocus
-            className="mission-splash__button mission-splash__button--primary"
+            className={cx(styles.missionSplashButton, styles.missionSplashButtonPrimary)}
             type="button"
             data-enter="launch"
             onClick={() => {
@@ -73,9 +81,9 @@ export function MissionSplash({
           </button>
           <p>Join at 1 minute to launch</p>
         </div>
-        <div className="mission-splash__section mission-splash__entry">
+        <div className={cx(styles.missionSplashSection, styles.missionSplashEntry)}>
           <button
-            className="mission-splash__button"
+            className={styles.missionSplashButton}
             type="button"
             data-enter="now"
             onClick={() => {
@@ -90,16 +98,16 @@ export function MissionSplash({
               {config.id === "13" ? "~" : ""}
               {years} years ago
             </small>
-            <p className="mission-splash__historical">
+            <p className={styles.missionSplashHistorical}>
               <span data-historical-date>{date.slice(0, 16)}</span>
               <span data-historical-time>{date.slice(17, 25)} UTC</span>
               <small>Current time in {splash.year}</small>
             </p>
           </div>
         </div>
-        <div className="mission-splash__section mission-splash__fullscreen">
+        <div className={cx(styles.missionSplashSection, styles.missionSplashFullscreen)}>
           <button
-            className="mission-splash__icon-button"
+            className={styles.missionSplashIconButton}
             type="button"
             data-action="fullscreen"
             aria-label="Fullscreen"
@@ -111,7 +119,7 @@ export function MissionSplash({
             <small>(recommended)</small>
           </p>
         </div>
-        <div className="mission-splash__section mission-splash__included">
+        <div className={cx(styles.missionSplashSection, styles.missionSplashIncluded)}>
           <p>Included real-time elements:</p>
           <ul>
             {splash.included.map((item) => (
@@ -119,7 +127,7 @@ export function MissionSplash({
             ))}
           </ul>
           <button
-            className="mission-splash__button mission-splash__button--credits"
+            className={cx(styles.missionSplashButton, styles.missionSplashButtonCredits)}
             type="button"
             data-action="about"
             onClick={onAbout}
@@ -127,7 +135,7 @@ export function MissionSplash({
             Instructions / Credits
           </button>
         </div>
-        <div className="mission-splash__section mission-splash__forum">
+        <div className={cx(styles.missionSplashSection, styles.missionSplashForum)}>
           <p>Join our Forum:</p>
           <ul>
             <li>

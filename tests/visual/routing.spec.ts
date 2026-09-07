@@ -21,10 +21,10 @@ test("client mission navigation resets transport and channels without landing st
   const documentOrigin = await page.evaluate(() => performance.timeOrigin);
   await expect(page.locator("body")).toHaveCSS("background-image", /landing\/background_/);
   await expectNoHorizontalOverflow(page);
-  await page.locator('a.landing-mission[href="/13/"]').click();
+  await page.locator('a[data-mission-link][href="/13/"]').click();
   await expect(page.locator("#missionSplashTitle")).toHaveText("Apollo 13");
   await page.locator('[data-enter="launch"]').click();
-  await expect(page.locator(".mission-splash")).toHaveCount(0);
+  await expect(page.locator("[aria-labelledby=missionSplashTitle]")).toHaveCount(0);
   await expect(page.locator("#playPauseBtn")).toHaveAttribute("aria-pressed", "true");
   await page.locator("#playPauseBtn").click();
   await seek(page, "055:54:53");
@@ -38,14 +38,14 @@ test("client mission navigation resets transport and channels without landing st
   await page.locator("#playPauseBtn").click();
 
   // Leave with an active clock/channel, then enter another mission in the same document.
-  await page.locator(".airt-header__logo").click();
+  await page.locator("[data-testid=home-link]").click();
   await expect(page.locator("body")).toHaveCSS("background-image", /landing\/background_/);
-  await page.locator('a.landing-mission[href="/17/"]').click();
+  await page.locator('a[data-mission-link][href="/17/"]').click();
   await expect(page.locator("#missionSplashTitle")).toHaveText("Apollo 17");
   await expect(page.locator("#missionElapsedTime")).toHaveValue("-00:01:05");
   await expect(page.locator("#playPauseBtn")).toHaveAttribute("aria-pressed", "false");
   await expect(page.locator("#soundBtn")).toHaveAttribute("aria-pressed", "false");
-  await expect(page.locator(".airt-channels")).toBeHidden();
+  await expect(page.locator("[data-testid=mission-channels]")).toBeHidden();
   await expect(page.locator("#mocrviz-host")).toBeHidden();
   await page.locator('[data-enter="launch"]').click();
   await page.locator("#playPauseBtn").click();
@@ -66,15 +66,15 @@ test("browser back restores the mission deep link and initializes its channel ag
   await expect(page.locator("#btn-ch50")).toHaveAttribute("aria-pressed", "true");
   await seek(page, "001:00:00");
   await page.locator("#playPauseBtn").click();
-  await page.locator(".airt-header__logo").click();
-  await page.locator('a.landing-mission[href="/13/"]').click();
+  await page.locator("[data-testid=home-link]").click();
+  await page.locator('a[data-mission-link][href="/13/"]').click();
   await expect(page.locator("#missionSplashTitle")).toHaveText("Apollo 13");
   await page.goBack();
-  await expect(page.locator(".landing-missions")).toBeVisible();
+  await expect(page.locator("[aria-labelledby=mission-selection]")).toBeVisible();
   await page.goBack();
   await expect(page).toHaveURL(/\/11\/\?t=075:31:12&ch=50$/);
-  await expect(page.locator(".airt-header__title")).toHaveText("Apollo 11");
-  await expect(page.locator(".mission-splash")).toHaveCount(0);
+  await expect(page.locator("header h1")).toHaveText("Apollo 11");
+  await expect(page.locator("[aria-labelledby=missionSplashTitle]")).toHaveCount(0);
   await expect(page.locator("#missionElapsedTime")).toHaveValue("075:31:12");
   await expect(page.locator("#playPauseBtn")).toHaveAttribute("aria-pressed", "false");
   await expect(page.locator("#btn-ch50")).toHaveAttribute("aria-pressed", "true");
@@ -94,24 +94,24 @@ test("navigator, panels, and search share a single immutable mission data reques
   });
   await page.goto("/13/?t=055:54:53");
   await expect(page.locator("#utteranceTable tr").first()).toBeAttached();
-  await expect(page.locator("#photoGallery .selected")).toHaveCount(1);
+  await expect(page.locator("#photoGallery [aria-current=true]")).toHaveCount(1);
   await page.locator("#searchBtn").click();
   await page.locator("#searchInputField").fill("cryo tanks");
   await expect(page.locator("#searchResultsTable tr").first()).toBeVisible();
   await page.locator("#searchClose").click();
   await page.locator("#tocTab").click();
-  await expect(page.locator("#tocWrapper .tocitem").first()).toBeAttached();
+  await expect(page.locator("#tocWrapper li[data-timeid]").first()).toBeAttached();
   await page.locator("#commentaryTab").click();
   await expect(page.locator("#commentaryTable tr").first()).toBeAttached();
   expect(counts).toEqual({ photoData: 1, utteranceData: 1 });
 
   // Cached mission data also survives unmounting its page and returning through a Link.
-  await page.locator(".airt-header__logo").click();
-  await page.locator('a.landing-mission[href="/13/"]').click();
+  await page.locator("[data-testid=home-link]").click();
+  await page.locator('a[data-mission-link][href="/13/"]').click();
   await page.locator('[data-enter="launch"]').click();
   await page.locator("#playPauseBtn").click();
   await expect(page.locator("#utteranceTable tr").first()).toBeAttached();
-  await expect(page.locator("#photoGallery .selected")).toHaveCount(1);
+  await expect(page.locator("#photoGallery [aria-current=true]")).toHaveCount(1);
   expect(counts).toEqual({ photoData: 1, utteranceData: 1 });
 });
 
@@ -139,7 +139,7 @@ test("a delayed photo deep link cannot replace a newer manual GET seek", async (
     await photoFetched;
     await seek(page, "055:54:53");
     releasePhoto();
-    await expect(page.locator("#photoGallery .selected")).toHaveCount(1);
+    await expect(page.locator("#photoGallery [aria-current=true]")).toHaveCount(1);
     // Wait through the render/effect cycle that applies resolved photo links.
     await page.evaluate(
       () =>
@@ -152,8 +152,8 @@ test("a delayed photo deep link cannot replace a newer manual GET seek", async (
         }),
     );
     await expect(page.locator("#missionElapsedTime")).toHaveValue("055:54:53");
-    await expect(page.locator("#photodiv .selectedPhoto")).toBeAttached();
-    await expect(page.locator("#photodiv .selectedPhoto")).not.toHaveAttribute(
+    await expect(page.locator("#photodiv [data-testid=selected-photo]")).toBeAttached();
+    await expect(page.locator("#photodiv [data-testid=selected-photo]")).not.toHaveAttribute(
       "alt",
       "AS13-62-8880",
     );
@@ -171,8 +171,8 @@ test("navigator mouse seeks still work after a mission page remount", async ({ p
     await expect(page.locator("#missionElapsedTime")).not.toHaveValue("000:00:00");
   }).toPass();
 
-  await page.locator(".airt-header__logo").click();
-  await page.locator('a.landing-mission[href="/17/"]').click();
+  await page.locator("[data-testid=home-link]").click();
+  await page.locator('a[data-mission-link][href="/17/"]').click();
   await page.locator('[data-enter="launch"]').click();
   await page.locator("#playPauseBtn").click();
   await expect(page.locator("#playPauseBtn")).toHaveAttribute("aria-pressed", "false");
@@ -185,10 +185,10 @@ test("navigator mouse seeks still work after a mission page remount", async ({ p
 
 test("explicit static HTML entry URLs preserve mission and GET routing", async ({ page }) => {
   await page.goto("/index.html");
-  await expect(page.locator(".landing-missions")).toBeVisible();
+  await expect(page.locator("[aria-labelledby=mission-selection]")).toBeVisible();
   for (const mission of ["11", "13", "17"]) {
     await page.goto(`/${mission}/index.html?t=001:00:00`);
-    await expect(page.locator(".airt-header__title")).toHaveText(`Apollo ${mission}`);
+    await expect(page.locator("header h1")).toHaveText(`Apollo ${mission}`);
     await expect(page.locator("#missionElapsedTime")).toHaveValue("001:00:00");
   }
 });

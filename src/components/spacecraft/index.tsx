@@ -1,6 +1,6 @@
 /** Apollo 13's original educational copy and spacecraft rotation film. */
 import { useEffect, useRef, useState } from "react";
-import "../../styles/panels/spacecraft.css";
+import styles from "./SpacecraftPanel.module.css";
 
 export function SpacecraftPanel({
   config,
@@ -25,10 +25,11 @@ export function SpacecraftPanel({
   }, [visible]);
   return (
     <>
-      <figure className="spacecraft-panel__media">
+      <figure className={styles.spacecraftPanelMedia}>
         <video
           ref={videoRef}
-          className="spacecraft-panel__video"
+          className={styles.spacecraftPanelVideo}
+          data-testid="spacecraft-video"
           controls
           loop
           muted
@@ -49,13 +50,13 @@ export function SpacecraftPanel({
           Your browser does not support this spacecraft video.
         </video>
         <figcaption>Odyssey and Aquarius — Apollo 13</figcaption>
-        <p className="spacecraft-panel__media-status" hidden={!mediaError}>
+        <p className={styles.spacecraftPanelMediaStatus} hidden={!mediaError}>
           Spacecraft video is unavailable. The spacecraft information is below.
         </p>
       </figure>
-      <article className="spacecraft-panel__introduction">
+      <article className={styles.spacecraftPanelIntroduction}>
         <h2>The Apollo 13 Spacecraft</h2>
-        <div className="copy">
+        <div className={styles.copy}>
           <p>
             {" "}
             The Apollo lunar missions required two spacecraft - one to get them to the Moon, and
@@ -67,7 +68,7 @@ export function SpacecraftPanel({
           </p>
         </div>
         <h3>The Command and Service Module</h3>
-        <div className="copy">
+        <div className={styles.copy}>
           <p>
             {" "}
             The Command Module was a cone-shaped spacecraft that contained all the equipment and
@@ -91,7 +92,7 @@ export function SpacecraftPanel({
           </p>
         </div>
         <h3>The Lunar Module</h3>
-        <div className="copy">
+        <div className={styles.copy}>
           <p>
             {" "}
             The Lunar Module (LM) was a highly specialized spacecraft designed with the sole purpose

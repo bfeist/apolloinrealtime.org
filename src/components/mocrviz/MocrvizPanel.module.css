@@ -1,5 +1,6 @@
-﻿/* Scoped so mission chrome and legacy reference styles cannot change the room. */
-.mocrviz-panel {
+/* Scoped so mission chrome and legacy reference styles cannot change the room. */
+/* Component classes below are locally scoped. */
+.mocrvizPanel {
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -12,46 +13,46 @@
   font-size: 11px;
   box-sizing: border-box;
 }
-.mocrviz-panel[hidden] {
+.mocrvizPanel[hidden] {
   display: none;
 }
-.mocrviz-panel button {
+.mocrvizPanel button {
   font: inherit;
   cursor: pointer;
 }
-.mocrviz-timeline {
+.mocrvizTimeline {
   display: block;
   width: 100%;
   flex: none;
   cursor: crosshair;
 }
-.mocrviz-timeline:focus-visible {
+.mocrvizTimeline:focus-visible {
   outline: 1px solid #7cb7e0;
   outline-offset: -1px;
 }
-.mocrviz-bottom {
+.mocrvizBottom {
   display: grid;
   grid-template-columns: minmax(340px, 450px) minmax(0, 1fr);
   gap: 5px;
   flex: 1;
   min-height: 0;
 }
-.mocrviz-controls {
+.mocrvizControls {
   min-width: 0;
 }
-.mocrviz-room {
+.mocrvizRoom {
   position: relative;
   width: 100%;
   aspect-ratio: 746 / 419;
   container-type: inline-size;
 }
-.mocrviz-room-image {
+.mocrvizRoomImage {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
-.mocrviz-panel .mocrviz-console {
+.mocrvizPanel .mocrvizConsole {
   position: absolute;
   aspect-ratio: 1;
   border-radius: 50%;
@@ -65,41 +66,41 @@
   display: grid;
   place-items: center;
 }
-.mocrviz-panel .mocrviz-console.is-speaking {
+.mocrvizPanel .mocrvizConsole.isSpeaking {
   background: #737373;
   color: #080808;
 }
-.mocrviz-panel .mocrviz-console.is-active,
-.mocrviz-panel .mocrviz-console.is-hovered,
-.mocrviz-panel .mocrviz-console:hover {
+.mocrvizPanel .mocrvizConsole.isActive,
+.mocrvizPanel .mocrvizConsole.isHovered,
+.mocrvizPanel .mocrvizConsole:hover {
   background: #7cb7e0;
   color: #000;
   outline: 1px solid #c7e8ff;
 }
-.mocrviz-controller-details {
+.mocrvizControllerDetails {
   margin: 4px 5px 8px;
   color: #999;
   font-size: 11px;
   line-height: 1.25;
 }
-.mocrviz-channel-name {
+.mocrvizChannelName {
   color: #7cb7e0;
   font-weight: bold;
 }
-.mocrviz-channel-description {
+.mocrvizChannelDescription {
   color: #999;
 }
-.mocrviz-channel-details summary {
+.mocrvizChannelDetails summary {
   color: #aebac2;
   cursor: pointer;
   margin-bottom: 7px;
 }
-.mocrviz-panel .mocrviz-channel-grid {
+.mocrvizPanel .mocrvizChannelGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
   gap: 3px;
 }
-.mocrviz-panel .mocrviz-channel {
+.mocrvizPanel .mocrvizChannel {
   min-width: 0;
   padding: 4px 2px;
   background: #242424;
@@ -109,39 +110,39 @@
   font-size: 9px;
   overflow-wrap: anywhere;
 }
-.mocrviz-panel .mocrviz-channel.is-speaking {
+.mocrvizPanel .mocrvizChannel.isSpeaking {
   color: #eee;
   background: #414141;
 }
-.mocrviz-panel .mocrviz-channel.is-active,
-.mocrviz-panel .mocrviz-channel.is-hovered,
-.mocrviz-panel .mocrviz-channel:hover {
+.mocrvizPanel .mocrvizChannel.isActive,
+.mocrvizPanel .mocrvizChannel.isHovered,
+.mocrvizPanel .mocrvizChannel:hover {
   background: #7cb7e0;
   color: #000;
   border-color: #7cb7e0;
 }
-.mocrviz-transcript-panel {
+.mocrvizTranscriptPanel {
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
   max-height: none;
 }
-.mocrviz-transcript-title {
+.mocrvizTranscriptTitle {
   color: #ddd;
   font-size: 12px;
   margin: 7px 5px 5px;
 }
-.mocrviz-transcript-channel {
+.mocrvizTranscriptChannel {
   color: #7cb7e0;
   font-weight: bold;
 }
-.mocrviz-transcript-tabs {
+.mocrvizTranscriptTabs {
   display: flex;
   gap: 2px;
   margin: 0 5px 5px;
 }
-.mocrviz-panel .mocrviz-transcript-tab {
+.mocrvizPanel .mocrvizTranscriptTab {
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
@@ -157,14 +158,14 @@
   line-height: 1;
   text-align: left;
 }
-.mocrviz-panel .mocrviz-transcript-tab:first-child {
+.mocrvizPanel .mocrvizTranscriptTab:first-child {
   min-width: 90px;
 }
-.mocrviz-panel .mocrviz-transcript-tab:is(:hover, .is-active) {
+.mocrvizPanel .mocrvizTranscriptTab:is(:hover, .isActive) {
   background: #5d99b1;
   border-color: #5d99b1;
 }
-.mocrviz-transcript-monitor {
+.mocrvizTranscriptMonitor {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -175,7 +176,7 @@
   border: 2px solid rgb(255 255 255 / 10%);
   border-radius: 10px;
 }
-.mocrviz-transcript-search {
+.mocrvizTranscriptSearch {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -185,10 +186,10 @@
   padding: 7px;
   font: inherit;
 }
-.mocrviz-transcript-search[hidden] {
+.mocrvizTranscriptSearch[hidden] {
   display: none;
 }
-.mocrviz-transcript {
+.mocrvizTranscript {
   position: relative;
   flex: 1;
   min-height: 180px;
@@ -198,10 +199,10 @@
   color: #aaa;
   scrollbar-width: thin;
 }
-.mocrviz-transcript[hidden] {
+.mocrvizTranscript[hidden] {
   display: none;
 }
-.mocrviz-transcript-about {
+.mocrvizTranscriptAbout {
   flex: 1;
   overflow: auto;
   padding: 10px;
@@ -210,49 +211,49 @@
   font-size: 14px;
   line-height: 1.42857143;
 }
-.mocrviz-transcript-about[hidden] {
+.mocrvizTranscriptAbout[hidden] {
   display: none;
 }
-.mocrviz-transcript-about .title {
+.mocrvizTranscriptAbout .title {
   color: #5e92a6;
   font-size: 1.2em;
 }
-.mocrviz-transcript-about .subtitle {
+.mocrvizTranscriptAbout .subtitle {
   margin-top: 10px;
   color: #5e92a6;
 }
-.mocrviz-transcript-about .copy {
+.mocrvizTranscriptAbout .copy {
   color: #999;
 }
-.mocrviz-transcript-about .copy .highlighted {
+.mocrvizTranscriptAbout .copy .highlighted {
   color: #fff;
 }
-.mocrviz-transcript-about .copy p:first-child {
+.mocrvizTranscriptAbout .copy p:first-child {
   margin-top: 0;
 }
-.mocrviz-transcript-about .copy a {
+.mocrvizTranscriptAbout .copy a {
   color: #5e92a6;
 }
-.mocrviz-transcript-about .openAiLink {
+.mocrvizTranscriptAbout .openAiLink {
   position: relative;
   top: 4px;
   text-decoration: none;
 }
-.mocrviz-transcript-about .openAiLogo {
+.mocrvizTranscriptAbout .openAiLogo {
   width: 80px;
   fill: #fff;
 }
-.mocrviz-about-images {
+.mocrvizAboutImages {
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
 }
-.mocrviz-about-images img {
+.mocrvizAboutImages img {
   display: block;
   height: 70px;
   width: auto;
 }
-.mocrviz-panel .mocrviz-utterance {
+.mocrvizPanel .mocrvizUtterance {
   display: grid;
   grid-template-columns: 76px minmax(0, 1fr);
   gap: 6px;
@@ -267,18 +268,18 @@
   font-size: 10px;
   line-height: 1.45;
 }
-.mocrviz-utterance time {
+.mocrvizUtterance time {
   color: #7e8c95;
   white-space: nowrap;
 }
-.mocrviz-panel .mocrviz-utterance.is-active {
+.mocrvizPanel .mocrvizUtterance.isActive {
   background: #214557;
   color: #eee;
 }
-.mocrviz-panel .mocrviz-utterance:hover {
+.mocrvizPanel .mocrvizUtterance:hover {
   background: #222;
 }
-.mocrviz-panel .mocrviz-status {
+.mocrvizPanel .mocrvizStatus {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -289,28 +290,24 @@
   white-space: nowrap;
   border: 0;
 }
-.mocrviz-panel .mocrviz-audio {
+.mocrvizPanel .mocrvizAudio {
   display: none;
 }
 @media (max-width: 700px) {
-  .mocrviz-panel {
+  .mocrvizPanel {
     height: auto;
     min-height: 1000px;
     overflow: hidden;
   }
-  .airt-right.is-mocrviz-active {
-    height: auto;
-    min-height: 1000px;
-  }
-  .mocrviz-bottom {
+  .mocrvizBottom {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto 340px;
   }
-  .mocrviz-room {
+  .mocrvizRoom {
     max-width: 480px;
     margin: 0 auto;
   }
-  .mocrviz-transcript-panel {
+  .mocrvizTranscriptPanel {
     height: auto;
     flex: none;
   }

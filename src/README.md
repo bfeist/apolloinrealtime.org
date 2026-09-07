@@ -46,7 +46,7 @@ Specialized sample, biometric, and MOCR queries live alongside those components.
 
 | Change                                               | Start here                                               |
 | ---------------------------------------------------- | -------------------------------------------------------- |
-| Mission layout or visible controls                   | `pages/MissionPage.tsx`, `components/layout/`, `styles/` |
+| Mission layout or visible controls                   | `pages/MissionPage.tsx`, co-located `*.module.css` files |
 | Transcript, photography, dashboard, or another panel | Corresponding folder in `components/`                    |
 | A shared user action                                 | `store/missionStore.ts`                                  |
 | CSV format or time-indexed lookup                    | `data/` and its unit tests                               |

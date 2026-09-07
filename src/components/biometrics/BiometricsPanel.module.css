@@ -1,32 +1,33 @@
-.biometrics-panel {
+/* Component classes below are locally scoped. */
+.biometricsPanel {
   margin-top: 12px;
   padding-top: 8px;
   border-top: 1px solid #333;
   font-family: var(--airt-font-mono);
   font-size: 11px;
 }
-.biometrics-panel h3 {
+.biometricsPanel h3 {
   margin: 0 0 6px;
   color: #84b8d9;
   font-size: 11px;
   font-weight: 400;
   text-transform: uppercase;
 }
-.biometrics-row {
+.biometricsRow {
   display: grid;
   grid-template-columns: 1fr 1fr 1.25fr;
   gap: 8px;
   line-height: 1.6;
 }
-.biometrics-row > :not(:first-child) {
+.biometricsRow > :not(:first-child) {
   text-align: right;
   white-space: nowrap;
 }
-.biometrics-value {
+.biometricsValue {
   color: #eee;
   font-variant-numeric: tabular-nums;
 }
-.biometrics-note {
+.biometricsNote {
   margin: 5px 0 0;
   color: #999;
   font-size: 10px;

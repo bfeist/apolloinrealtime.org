@@ -1,0 +1,3 @@
+/* Deliberately global document tokens. Component styles live beside their
+   React owners as CSS Modules. */
+@import "./tokens.css";

@@ -1,5 +1,6 @@
-﻿/* A13's retained educational panel; deliberately separate from mission chrome. */
-.airt-mocrviz-host.spacecraft-panel {
+/* A13's retained educational panel; deliberately separate from mission chrome. */
+/* Component classes below are locally scoped. */
+.spacecraftPanel {
   height: 100%;
   min-height: 0;
   overflow: auto;
@@ -9,13 +10,13 @@
   background: #000;
   font-family: "Roboto", Arial, sans-serif;
 }
-.spacecraft-panel[hidden] {
+.spacecraftPanel[hidden] {
   display: none;
 }
-.spacecraft-panel__media {
+.spacecraftPanelMedia {
   margin: 0;
 }
-.spacecraft-panel__video {
+.spacecraftPanelVideo {
   display: block;
   width: 100%;
   max-height: 420px;
@@ -23,53 +24,53 @@
   object-fit: contain;
   background: #000;
 }
-.spacecraft-panel__media figcaption {
+.spacecraftPanelMedia figcaption {
   text-align: center;
   color: #888;
   font-size: 12px;
   padding: 6px 16px;
 }
-.spacecraft-panel__media-status {
+.spacecraftPanelMediaStatus {
   margin: 12px 24px;
 }
-.spacecraft-panel__introduction {
+.spacecraftPanelIntroduction {
   max-width: 850px;
   margin: 0 auto;
   padding: 18px 26px 32px;
 }
-.spacecraft-panel__introduction h2,
-.spacecraft-panel__introduction h3,
-.spacecraft-panel__introduction h4 {
+.spacecraftPanelIntroduction h2,
+.spacecraftPanelIntroduction h3,
+.spacecraftPanelIntroduction h4 {
   color: #7cb7e0;
   font-weight: 400;
   line-height: 1.25;
 }
-.spacecraft-panel__introduction h2 {
+.spacecraftPanelIntroduction h2 {
   margin: 0 0 14px;
   font-size: 22px;
 }
-.spacecraft-panel__introduction h3 {
+.spacecraftPanelIntroduction h3 {
   margin: 26px 0 10px;
   font-size: 19px;
 }
-.spacecraft-panel__introduction h4 {
+.spacecraftPanelIntroduction h4 {
   margin: 20px 0 10px;
   font-size: 16px;
 }
-.spacecraft-panel__introduction p {
+.spacecraftPanelIntroduction p {
   margin: 0 0 14px;
   font-size: 14px;
   line-height: 1.6;
 }
 @media (max-width: 700px) {
-  .airt-mocrviz-host.spacecraft-panel {
+  .spacecraftPanel {
     height: auto;
     min-height: 500px;
   }
-  .spacecraft-panel__introduction {
+  .spacecraftPanelIntroduction {
     padding: 16px 18px 28px;
   }
-  .spacecraft-panel__introduction h2 {
+  .spacecraftPanelIntroduction h2 {
     font-size: 20px;
   }
 }

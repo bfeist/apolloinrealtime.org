@@ -17,6 +17,10 @@ import { useMissionStore, type RightTab } from "../store/missionStore.js";
 import { useVideoSegmentData } from "../api/useMissionData.js";
 import { findVideoSegmentIndex } from "../data/videoSegmentData.js";
 import { secondsToTimeStr } from "../shell/clock.js";
+import layout from "../styles/base.module.css";
+import controls from "../styles/controls.module.css";
+import spacecraftStyles from "../components/spacecraft/SpacecraftPanel.module.css";
+import { cx } from "../styles/classNames.js";
 
 const MocrvizPanel = lazy(() =>
   import("../components/mocrviz/index.js").then((m) => ({ default: m.MocrvizPanel })),
@@ -106,25 +110,28 @@ function MissionExperience({ config }: { config: MissionConfig }) {
       <PageHead config={config} />
       <div id="mission-root">
         <div
-          className="airt-app"
+          className={layout.airtApp}
           role="application"
           aria-label={config.name}
           aria-hidden={splash || undefined}
         >
           <MissionHeader config={config} />
-          <main className="airt-main">
-            <section className="airt-left" aria-label="Mission video and transcript">
-              <div className="airt-monitor airt-monitor--top">
+          <main className={layout.airtMain}>
+            <section className={layout.airtLeft} aria-label="Mission video and transcript">
+              <div
+                className={cx(layout.airtMonitor, layout.airtMonitorTop)}
+                data-testid="mission-monitor"
+              >
                 <MissionVideo config={config} />
                 <div
-                  className="airt-dashboard-overlay"
+                  className={layout.airtDashboardOverlay}
                   data-overlay="dashboard"
                   hidden={!dashboardVisible}
                 >
-                  <div className="airt-overlay__head">
-                    <span className="airt-overlay__title">Mission Status</span>
+                  <div className={layout.airtOverlayHead}>
+                    <span className={layout.airtOverlayTitle}>Mission Status</span>
                     <button
-                      className="airt-overlay__close"
+                      className={layout.airtOverlayClose}
                       type="button"
                       data-close="dashboard"
                       aria-label="Close"
@@ -135,16 +142,20 @@ function MissionExperience({ config }: { config: MissionConfig }) {
                       ✕
                     </button>
                   </div>
-                  <div id="dashboardContent" className="airt-dashboard">
+                  <div id="dashboardContent" className={layout.airtDashboard}>
                     <DashboardPanel config={config} />
                   </div>
                 </div>
-                <div id="searchOverlay" className="airt-search-overlay" hidden={!searchVisible}>
-                  <div className="airt-overlay__head">
-                    <span className="airt-overlay__title">Search</span>
+                <div
+                  id="searchOverlay"
+                  className={layout.airtSearchOverlay}
+                  hidden={!searchVisible}
+                >
+                  <div className={layout.airtOverlayHead}>
+                    <span className={layout.airtOverlayTitle}>Search</span>
                     <button
                       id="searchClose"
-                      className="airt-overlay__close"
+                      className={layout.airtOverlayClose}
                       type="button"
                       aria-label="Close"
                       onClick={() => {
@@ -154,18 +165,18 @@ function MissionExperience({ config }: { config: MissionConfig }) {
                       ✕
                     </button>
                   </div>
-                  <div id="searchPanelHost" className="airt-search-overlay__results">
+                  <div id="searchPanelHost" className={layout.airtSearchOverlayResults}>
                     <SearchPanel config={config} />
                   </div>
                 </div>
               </div>
-              <div className="airt-tabs-wrapper">
-                <div className="airt-button-row" role="tablist" aria-label="Mission text">
+              <div className={controls.airtTabsWrapper} data-testid="text-controls">
+                <div className={controls.airtButtonRow} role="tablist" aria-label="Mission text">
                   {textTabs.map(({ id, label, title }) => (
                     <button
                       key={id}
                       id={`${id}Tab`}
-                      className={`airt-tab${textTab === id ? " is-active" : ""}`}
+                      className={cx(controls.airtTab, textTab === id && controls.isActive)}
                       type="button"
                       role="tab"
                       aria-selected={textTab === id}
@@ -186,12 +197,15 @@ function MissionExperience({ config }: { config: MissionConfig }) {
                   onShare={share}
                 />
               </div>
-              <div className="airt-monitor airt-monitor--text">
+              <div
+                className={cx(layout.airtMonitor, layout.airtMonitorText)}
+                data-testid="text-monitor"
+              >
                 {textTabs.map(({ id, Panel }) => (
                   <div
                     key={id}
                     id={`${id}Wrapper`}
-                    className="airt-text-panel"
+                    className={layout.airtTextPanel}
                     role="tabpanel"
                     aria-labelledby={`${id}Tab`}
                     hidden={textTab !== id}
@@ -202,25 +216,27 @@ function MissionExperience({ config }: { config: MissionConfig }) {
               </div>
             </section>
             <section
-              className="airt-channels"
+              className={layout.airtChannels}
+              data-testid="mission-channels"
               aria-label="Mission Control channels"
               hidden={config.id === "17"}
             >
-              <div className="airt-channels__title">Mission Control Channels</div>
-              <div id="thirtytrack-container" className="airt-channels__list">
+              <div className={layout.airtChannelsTitle}>Mission Control Channels</div>
+              <div id="thirtytrack-container" className={layout.airtChannelsList}>
                 <ChannelStrip config={config} />
               </div>
             </section>
             <section
-              className={`airt-right${rightTab === "mocr" ? " is-mocrviz-active" : ""}`}
+              className={cx(layout.airtRight, rightTab === "mocr" && layout.isMocrvizActive)}
+              data-testid="right-panel"
               aria-label="Photography"
             >
-              <div className="airt-right__tabs">
+              <div className={layout.airtRightTabs} data-testid="right-tabs">
                 {rightTabs.map(({ id, label }) => (
                   <button
                     key={id}
                     id={`${id}Tab`}
-                    className={`airt-app-tab${rightTab === id ? " is-active" : ""}`}
+                    className={cx(controls.airtAppTab, rightTab === id && controls.isActive)}
                     type="button"
                     aria-selected={rightTab === id}
                     onClick={() => {
@@ -231,11 +247,11 @@ function MissionExperience({ config }: { config: MissionConfig }) {
                   </button>
                 ))}
               </div>
-              <div className="airt-right__body">
+              <div className={layout.airtRightBody}>
                 <PhotoPanel config={config} />
                 <div
                   id="mocrviz-host"
-                  className="airt-mocrviz-host"
+                  className={layout.airtMocrvizHost}
                   style={{ padding: 0 }}
                   hidden={rightTab !== "mocr"}
                 >
@@ -248,7 +264,7 @@ function MissionExperience({ config }: { config: MissionConfig }) {
                 {config.id === "13" && (
                   <div
                     id="spacecraft-host"
-                    className="airt-mocrviz-host spacecraft-panel"
+                    className={cx(layout.airtMocrvizHost, spacecraftStyles.spacecraftPanel)}
                     hidden={rightTab !== "spacecraft"}
                   >
                     {opened.includes("spacecraft") && (
@@ -261,7 +277,7 @@ function MissionExperience({ config }: { config: MissionConfig }) {
                 {config.id === "11" && (
                   <div
                     id="samples-host"
-                    className="airt-mocrviz-host"
+                    className={layout.airtMocrvizHost}
                     style={{ padding: 0 }}
                     hidden={rightTab !== "samples"}
                   >
@@ -277,7 +293,7 @@ function MissionExperience({ config }: { config: MissionConfig }) {
           </main>
           <div
             id="debug-host"
-            className="airt-debug"
+            className={layout.airtDebug}
             hidden={!new URLSearchParams(window.location.search).has("debug")}
           >
             <h2>config</h2>

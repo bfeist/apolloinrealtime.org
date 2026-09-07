@@ -21,14 +21,16 @@ async function settle(page: Page, mission: boolean, mocr: boolean): Promise<void
     await expect(page.locator("#transcriptWrapper tr").first()).toBeAttached();
     await expect(page.locator("#photoGallery button").first()).toBeAttached();
     if (mocr) {
-      await expect(page.locator(".mocrviz-utterance").first()).toBeAttached({ timeout: 20_000 });
-      await expect(page.locator(".mocrviz-status")).not.toContainText("Loading");
+      await expect(page.locator("[data-testid=mocr-utterance]").first()).toBeAttached({
+        timeout: 20_000,
+      });
+      await expect(page.locator("[data-testid=mocr-status]")).not.toContainText("Loading");
     } else {
       await expect
         .poll(
           () =>
             page
-              .locator(".selectedPhoto")
+              .locator("[data-testid=selected-photo]")
               .evaluate((node) => (node as HTMLImageElement).naturalWidth),
           { timeout: 20_000 },
         )
@@ -100,9 +102,9 @@ async function selectPanel(page: Page, panel?: string): Promise<void> {
     await page.locator("#GETBtn").click();
   }
   if (panel === "samples")
-    await expect(page.locator(".samples-panel__collections-table tr").first()).toBeVisible();
+    await expect(page.locator("[data-testid=samples-collections] tr").first()).toBeVisible();
   if (panel === "spacecraft") {
-    const video = page.locator(".spacecraft-panel__video");
+    const video = page.locator("[data-testid=spacecraft-video]");
     await expect(video).toBeAttached();
     await video.evaluate((node) => {
       const media = node as HTMLVideoElement;

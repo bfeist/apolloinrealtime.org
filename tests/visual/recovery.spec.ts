@@ -40,10 +40,10 @@ for (const mission of ["11", "13", "17"]) {
           if (!element) throw new Error(`Missing ${selector}`);
           return element.getBoundingClientRect();
         };
-        const video = box(".airt-monitor--top");
-        const tabs = box(".airt-tabs-wrapper");
-        const text = box(".airt-monitor--text");
-        const photo = box(".airt-right");
+        const video = box("[data-testid=mission-monitor]");
+        const tabs = box("[data-testid=text-controls]");
+        const text = box("[data-testid=text-monitor]");
+        const photo = box("[data-testid=right-panel]");
         return {
           overflow: document.documentElement.scrollWidth > innerWidth,
           overlap: video.bottom > tabs.top + 1 || tabs.bottom > text.top + 1,
@@ -83,7 +83,7 @@ test("recovery A13 shared transport advances photography and both play controls 
   const get = page.locator("#missionElapsedTime");
   const mainPlay = page.locator("#playPauseBtn");
   const videoPlay = page.locator("#videoPlaybackBtn");
-  const selectedPhoto = page.locator("#photoGallery .selected");
+  const selectedPhoto = page.locator("#photoGallery [aria-current=true]");
 
   await expect(selectedPhoto).toHaveAttribute("id", "gallerytimeid0000000");
   await videoPlay.click();
@@ -103,20 +103,22 @@ test("recovery A13 shared transport advances photography and both play controls 
 for (const mission of ["11", "13"]) {
   test(`recovery A${mission} native Mission Control`, async ({ page }) => {
     await page.goto(`/${mission}/?t=000:00:00&ch=14`);
-    await expect(page.locator(".mocrviz-room-image")).toBeVisible();
-    await expect(page.locator(".mocrviz-timeline")).toBeVisible();
+    await expect(page.locator("[data-testid=mocr-room-image]")).toBeVisible();
+    await expect(page.locator("[data-testid=mocr-timeline]")).toBeVisible();
     await page.locator("#btn-ch50").click();
-    await expect(page.locator(".mocrviz-channel-name")).toHaveText("FLIGHT");
+    await expect(page.locator("[data-testid=mocr-channel-name]")).toHaveText("FLIGHT");
     await expect(page.locator("#btn-ch50")).toHaveAttribute("aria-pressed", "true");
-    await expect(page.locator(".mocrviz-audio")).toHaveAttribute(
+    await expect(page.locator("[data-testid=mocr-audio]")).toHaveAttribute(
       "src",
       new RegExp(`media.apolloinrealtime.org/A${mission}/MOCR_audio/`),
     );
     await page.getByRole("button", { name: "ABOUT", exact: true }).click();
-    await expect(page.locator(".mocrviz-transcript-about")).toContainText(
+    await expect(page.locator("[data-testid=mocr-about]")).toContainText(
       mission === "11" ? "11,000 hours" : "7,200 hours",
     );
-    await expect(page.locator(".mocrviz-about-images img")).toHaveCount(mission === "11" ? 5 : 6);
+    await expect(page.locator("[data-testid=mocr-about-images] img")).toHaveCount(
+      mission === "11" ? 5 : 6,
+    );
     await page.getByRole("button", { name: "Photography", exact: true }).click();
     await expect(page.locator("#mocrviz-host")).toBeHidden();
     await expect(page.locator("#photodiv")).toBeVisible();
@@ -137,21 +139,21 @@ test("recovery mission-specific panels and photo deep links", async ({ page }) =
   await expect(
     page.getByRole("heading", { name: "Astromaterial Sample Information", exact: true }),
   ).toBeVisible();
-  await expect(page.locator(".samples-panel__collections-table tr[role=button]")).toHaveCount(5);
+  await expect(page.locator("[data-testid=samples-collections] tr[role=button]")).toHaveCount(5);
   await page.getByRole("button", { name: "View Contingency Bag samples at 109:34:00" }).click();
   await expect(page.locator("#missionElapsedTime")).toHaveValue("109:34:00");
   await expect(page.locator("#samples-host")).toBeVisible();
   await page.getByRole("button", { name: "Photography", exact: true }).click();
   await expect(page.locator("#samples-host")).toBeHidden();
   await page.goto("/17/?t=110:08:50");
-  await expect(page.locator(".biometrics-row").first()).toBeAttached();
-  if (await page.locator(".airt-dashboard-overlay").isHidden())
+  await expect(page.locator("[data-testid=biometrics-row]").first()).toBeAttached();
+  if (await page.locator("[data-overlay=dashboard]").isHidden())
     await page.getByRole("button", { name: "Dashboard", exact: true }).click();
-  await expect(page.locator(".airt-dashboard-overlay")).toBeVisible();
-  await expect(page.locator(".biometrics-row").first()).toContainText("85 bpm");
+  await expect(page.locator("[data-overlay=dashboard]")).toBeVisible();
+  await expect(page.locator("[data-testid=biometrics-row]").first()).toContainText("85 bpm");
   await page.goto("/11/?t=075:31:12");
   await expect(page.locator("#dashMissionDay")).toHaveText("4");
-  await expect(page.locator(".airt-dashboard-overlay")).toBeVisible();
+  await expect(page.locator("[data-overlay=dashboard]")).toBeVisible();
 });
 
 test("recovery selected photos link to each mission's highest-resolution image", async ({
@@ -174,7 +176,7 @@ test("recovery selected photos link to each mission's highest-resolution image",
 
   for (const photoCase of cases) {
     await page.goto(photoCase.url);
-    const link = page.locator(".selectedPhotoLink");
+    const link = page.locator("[data-testid=selected-photo-link]");
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute("href", photoCase.expected);
     await expect(link).toHaveAttribute("target", "_blank");
@@ -182,7 +184,7 @@ test("recovery selected photos link to each mission's highest-resolution image",
   }
 
   await page.goto("/13/?img=AS13-62-8880");
-  const link = page.locator(".selectedPhotoLink");
+  const link = page.locator("[data-testid=selected-photo-link]");
   const expectedUrl = await link.getAttribute("href");
   const popupPromise = page.waitForEvent("popup");
   await link.click();
@@ -198,8 +200,10 @@ for (const mission of ["11", "13"]) {
       const waveform = page.waitForResponse((r) => r.url().endsWith(".dat") && r.ok());
       await page.goto(`/${mission}/?t=000:00:00&ch=14`);
       await waveform;
-      await expect(page.locator(".mocrviz-room-image")).toBeVisible();
-      await expect(page.locator(".mocrviz-utterance").first()).toBeAttached({ timeout: 20000 });
+      await expect(page.locator("[data-testid=mocr-room-image]")).toBeVisible();
+      await expect(page.locator("[data-testid=mocr-utterance]").first()).toBeAttached({
+        timeout: 20000,
+      });
       await page.waitForTimeout(1000);
       await expect(page.locator("#mocrviz-host")).toHaveScreenshot(
         `mocr-a${mission}-${String(width)}.png`,
@@ -217,7 +221,7 @@ test("recovery MOCR silent waveform retains the legacy blue baseline", async ({ 
     });
   });
   await page.goto("/13/?t=000:00:00&ch=14");
-  const canvas = page.locator(".mocrviz-timeline");
+  const canvas = page.locator("[data-testid=mocr-timeline]");
   await expect(canvas).toBeVisible();
   await expect
     .poll(async () =>
@@ -241,7 +245,7 @@ for (const mission of ["11", "13"]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(`/${mission}/?t=000:00:00&ch=14`);
       await page.getByRole("button", { name: "ABOUT", exact: true }).click();
-      const about = page.locator(".mocrviz-transcript-about");
+      const about = page.locator("[data-testid=mocr-about]");
       await expect(about.locator("img").first()).toBeVisible();
       await expect(about).toHaveScreenshot(`mocr-about-a${mission}-${String(width)}.png`, {
         animations: "disabled",
@@ -254,20 +258,24 @@ test("recovery MOCR timeline previews channel and GET before seeking smoothly", 
   page,
 }) => {
   await page.goto("/13/?t=055:54:53&ch=14");
-  const canvas = page.locator(".mocrviz-timeline");
+  const canvas = page.locator("[data-testid=mocr-timeline]");
   await expect(canvas).toBeVisible();
   await page.getByRole("button", { name: "ABOUT", exact: true }).click();
-  const about = page.locator(".mocrviz-transcript-about");
-  await expect(about.locator(".title").first()).toHaveText("About This Mission Control Audio");
+  const about = page.locator("[data-testid=mocr-about]");
+  await expect(about.locator("[data-testid=mocr-about-title]")).toHaveText(
+    "About This Mission Control Audio",
+  );
   await expect(about).toContainText("7,200 hours");
   await expect(about).toContainText("3,936,510 utterances");
-  await expect(about.locator(".mocrviz-about-images img")).toHaveCount(6);
+  await expect(about.locator("[data-testid=mocr-about-images] img")).toHaveCount(6);
   await expect(page.locator(".mocrviz-transcript-note")).toHaveCount(0);
   await page.getByRole("button", { name: "SEARCH", exact: true }).click();
   const channelSearch = page.getByRole("searchbox", { name: "Search this channel transcript" });
   await expect(channelSearch).toBeVisible();
   await channelSearch.fill("Doesn't matter");
-  await expect(page.locator(".mocrviz-utterance").first()).toContainText("Doesn't matter");
+  await expect(page.locator("[data-testid=mocr-utterance]").first()).toContainText(
+    "Doesn't matter",
+  );
   await page.getByRole("button", { name: "TRANSCRIPT", exact: true }).click();
   const box = await canvas.boundingBox();
   if (!box) throw new Error("MOCR timeline has no layout box");
@@ -276,8 +284,11 @@ test("recovery MOCR timeline previews channel and GET before seeking smoothly", 
   await page.mouse.move(box.x + box.width / 2 + 60, box.y + 17 * 5 + 2);
   await expect(canvas).toHaveAttribute("data-hover-channel", "21");
   await expect(canvas).toHaveAttribute("data-hover-get", "055:55:53");
-  await expect(page.locator("#btn-ch21")).toHaveClass(/is-hovered/);
-  await expect(page.locator('.mocrviz-console[data-channel-id="21"]')).toHaveClass(/is-hovered/);
+  await expect(page.locator("#btn-ch21")).toHaveAttribute("data-hovered", "true");
+  await expect(page.locator('[data-testid=mocr-console][data-channel-id="21"]')).toHaveAttribute(
+    "data-hovered",
+    "true",
+  );
   await expect(page.locator("#missionElapsedTime")).toHaveValue("055:54:53");
 
   const initialFrame = Number(await canvas.getAttribute("data-current-seconds"));
@@ -323,7 +334,7 @@ const splashCopy = {
 for (const mission of ["11", "13", "17"] as const) {
   test(`recovery A${mission} mission entry and deep-link bypass`, async ({ page }) => {
     await page.goto(`/${mission}/`);
-    const splash = page.locator(".mission-splash");
+    const splash = page.locator("[aria-labelledby=missionSplashTitle]");
     await expect(splash).toBeVisible();
     await expect(splash).toContainText(splashCopy[mission][0]);
     await expect(splash).toContainText(splashCopy[mission][1]);
@@ -334,7 +345,7 @@ for (const mission of ["11", "13", "17"] as const) {
       "https://forum.apolloinrealtime.org",
     );
     await page.getByRole("button", { name: "Instructions / Credits", exact: true }).click();
-    await expect(page.locator("#aboutDialog .mission-about__intro h2")).toBeVisible();
+    await expect(page.locator("#aboutDialog h2").first()).toBeVisible();
     await page.getByRole("button", { name: "Close instructions and credits", exact: true }).click();
     // A17 opens help beneath the mission header and dismisses its splash.
     if (mission === "17") await page.locator("#playPauseBtn").click();
@@ -343,14 +354,14 @@ for (const mission of ["11", "13", "17"] as const) {
     await expect(page.locator("#playPauseBtn")).toHaveAttribute("aria-pressed", "true");
 
     await page.goto(`/${mission}/?t=000:00:00`);
-    await expect(page.locator(".mission-splash")).toHaveCount(0);
+    await expect(page.locator("[aria-labelledby=missionSplashTitle]")).toHaveCount(0);
     await expect(page.locator("#missionElapsedTime")).toHaveValue("000:00:00");
   });
 
   test(`recovery A${mission} mission entry remains usable on a phone`, async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/${mission}/`);
-    const splash = page.locator(".mission-splash");
+    const splash = page.locator("[aria-labelledby=missionSplashTitle]");
     await expect(splash).toBeVisible();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth),

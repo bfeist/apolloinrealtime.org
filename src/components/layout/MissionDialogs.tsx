@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import { MissionAboutContent } from "./MissionAboutContent.js";
+import styles from "../../styles/base.module.css";
+import { cx } from "../../styles/classNames.js";
 
 export function MissionDialogs({
   config,
@@ -33,9 +35,9 @@ export function MissionDialogs({
   }, [shareUrl]);
   return (
     <>
-      <dialog ref={shareRef} id="shareDialog" className="airt-dialog" onClose={onClose}>
+      <dialog ref={shareRef} id="shareDialog" className={styles.airtDialog} onClose={onClose}>
         <form method="dialog">
-          <button className="airt-btn" aria-label="Close share dialog">
+          <button className={styles.airtBtn} aria-label="Close share dialog">
             Close
           </button>
         </form>
@@ -48,11 +50,11 @@ export function MissionDialogs({
       <dialog
         ref={aboutRef}
         id="aboutDialog"
-        className="airt-dialog mission-about"
+        className={cx(styles.airtDialog, styles.missionAbout)}
         onClose={onClose}
       >
         <form method="dialog">
-          <button className="airt-btn" aria-label="Close instructions and credits">
+          <button className={styles.airtBtn} aria-label="Close instructions and credits">
             ×
           </button>
         </form>

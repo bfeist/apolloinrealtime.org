@@ -9,7 +9,7 @@ import {
   type SamplePublication,
 } from "./data.js";
 import { useSamplePhotos, useSamplesData } from "./useSamplesData.js";
-import "../../styles/panels/samples.css";
+import styles from "./SamplesPanel.module.css";
 
 function ExternalLink({ url, children }: { url: string; children: ReactNode }) {
   return (
@@ -56,15 +56,15 @@ function SampleCard({
   const references = papers.filter((paper) => paper.samples.includes(sample));
   return (
     <details
-      className="samples-panel__sample"
+      className={styles.samplesPanelSample}
       open={open}
       onToggle={(event) => {
         setOpen(event.currentTarget.open);
       }}
     >
       <summary>Sample {sample}</summary>
-      <div className="samples-panel__sample-content">
-        <nav className="samples-panel__links" aria-label={`Sample ${sample} records`}>
+      <div className={styles.samplesPanelSampleContent}>
+        <nav className={styles.samplesPanelLinks} aria-label={`Sample ${sample} records`}>
           {sampleCatalogLinks(catalog, sample).map((item) => (
             <ExternalLink key={item.url} url={item.url}>
               {item.label}
@@ -72,7 +72,7 @@ function SampleCard({
           ))}
         </nav>
         <h3>Sample Photography</h3>
-        <div className="samples-panel__gallery">
+        <div className={styles.samplesPanelGallery}>
           {photos.isError
             ? "No photography indexed for this sample. NASA's curation record may include additional images."
             : photos.isPending
@@ -82,7 +82,7 @@ function SampleCard({
                 : "No photography indexed for this sample."}
         </div>
         {references.length > 0 && (
-          <details className="samples-panel__papers">
+          <details className={styles.samplesPanelPapers}>
             <summary>Published scientific papers ({references.length})</summary>
             <ol>
               {references.map((paper, index) => (
@@ -116,7 +116,7 @@ export function SamplesPanel({ config }: { config: MissionConfig }) {
     setCollection(item);
   };
   return (
-    <div className="samples-panel" ref={rootRef}>
+    <div className={styles.samplesPanel} ref={rootRef}>
       {query.isError ? (
         <p>The sample collection index could not be loaded.</p>
       ) : !query.data ? (
@@ -124,7 +124,7 @@ export function SamplesPanel({ config }: { config: MissionConfig }) {
       ) : collection ? (
         <>
           <button
-            className="samples-panel__back"
+            className={styles.samplesPanelBack}
             type="button"
             onClick={() => {
               setCollection(null);
@@ -135,7 +135,7 @@ export function SamplesPanel({ config }: { config: MissionConfig }) {
           <h2>{collection.name}</h2>
           {collection.seconds !== null ? (
             <button
-              className="samples-panel__seek"
+              className={styles.samplesPanelSeek}
               type="button"
               onClick={() => {
                 if (collection.seconds !== null) seek(collection.seconds);
@@ -160,8 +160,8 @@ export function SamplesPanel({ config }: { config: MissionConfig }) {
         </>
       ) : (
         <>
-          <h2 className="samples-panel__title">Astromaterial Sample Information</h2>
-          <h3 className="samples-panel__section-heading">Apollo 11 Lunar Samples</h3>
+          <h2 className={styles.samplesPanelTitle}>Astromaterial Sample Information</h2>
+          <h3 className={styles.samplesPanelSectionHeading}>Apollo 11 Lunar Samples</h3>
           <p>
             Apollo 11 carried the first geologic samples from the Moon to Earth. The crew collected
             22 kilograms of geologic material, including 50 rocks, samples of the fine-grained lunar
@@ -173,14 +173,17 @@ export function SamplesPanel({ config }: { config: MissionConfig }) {
             lunar samples collected by the Apollo 11 crew were deposited in bulk into sample
             containers for return to Earth.
           </p>
-          <h3 className="samples-panel__section-heading">Jump to Sample Collection Moments:</h3>
+          <h3 className={styles.samplesPanelSectionHeading}>Jump to Sample Collection Moments:</h3>
           <p>
             The table below contains links to the moment each sample container was being filled,
             referencing the sample numbers that were assigned when the samples were returned to
             Earth.
           </p>
-          <div className="samples-panel__collections">
-            <table className="samples-panel__collections-table">
+          <div className={styles.samplesPanelCollections}>
+            <table
+              className={styles.samplesPanelCollectionsTable}
+              data-testid="samples-collections"
+            >
               <tbody>
                 <tr>
                   {["Time", "Container", "Sample Numbers"].map((label) => (
@@ -206,15 +209,15 @@ export function SamplesPanel({ config }: { config: MissionConfig }) {
                       }}
                     >
                       <td>{secondsToTimeStr(item.seconds ?? 0)}</td>
-                      <td className="samples-panel__collection-link">{item.name}</td>
+                      <td className={styles.samplesPanelCollectionLink}>{item.name}</td>
                       <td>{item.samples.join(", ")}</td>
                     </tr>
                   ))}
               </tbody>
             </table>
           </div>
-          <section className="samples-panel__curation">
-            <h3 className="samples-panel__section-heading">Lunar Sample Curation</h3>
+          <section className={styles.samplesPanelCuration}>
+            <h3 className={styles.samplesPanelSectionHeading}>Lunar Sample Curation</h3>
             <img
               src={`/${config.id}/img/ares2.jpg`}
               alt="NASA lunar sample curation facility"

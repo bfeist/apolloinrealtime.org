@@ -1,29 +1,31 @@
 /* Dashboard / telemetry / crew status panels. */
 
-.dashboard_panel,
-.telemetry_panel,
-.crewstatus_panel {
+/* Component classes below are locally scoped. */
+.dashboardPanel,
+.telemetryPanel,
+.crewstatusPanel {
   font-family: var(--airt-font-mono);
   font-size: 12px;
   color: var(--airt-fg-primary);
 }
 
-.dash-row {
+.dashRow {
   display: block;
   padding: 3px 0;
 }
-.dash-row .label {
+.dashRow .label {
   display: block;
   color: #999;
   font-size: 12px;
 }
-.dash-row .value {
+.dashRow .value,
+.dashRow :global(.value) {
   color: var(--airt-fg-primary);
   font-weight: 400;
   text-align: left;
 }
-.dash-row:first-child,
-.dash-row:first-child .label {
+.dashRow:first-child,
+.dashRow:first-child .label {
   display: inline;
 }
 
@@ -32,12 +34,12 @@
   align-items: center;
   gap: 4px;
 }
-.velocity-value,
-.distance-value {
+.velocityValue,
+.distanceValue {
   color: var(--airt-accent);
 }
-.velocity-frame,
-.distance-frame {
+.velocityFrame,
+.distanceFrame {
   color: var(--airt-fg-muted);
   font-size: var(--airt-fs-xs);
 }
@@ -47,10 +49,10 @@
   color: #84b8d9; /* production heading color */
 }
 
-.crewstatus_text {
+.crewstatusText {
   color: var(--airt-fg-primary);
 }
-.crewstatus_wake {
+.crewstatusWake {
   margin-top: var(--airt-sp-1);
   color: var(--airt-utt-pao);
   font-size: var(--airt-fs-xs);

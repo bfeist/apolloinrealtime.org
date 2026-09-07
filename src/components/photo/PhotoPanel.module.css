@@ -7,6 +7,7 @@
    - selected: border green / overlay darkgreen
 */
 
+/* Component classes below are locally scoped. */
 .imageBlock {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto auto;
@@ -73,7 +74,7 @@
   border-color: var(--airt-accent-hi);
 }
 .galleryItemContainer.selected,
-.galleryItemContainer.airt-row-active {
+.galleryItemContainer.airtRowActive {
   border: 1px solid green;
 }
 
@@ -102,7 +103,7 @@ img.galleryImage {
   opacity: 0.9;
 }
 .galleryItemContainer.selected .galleryOverlay,
-.galleryItemContainer.airt-row-active .galleryOverlay {
+.galleryItemContainer.airtRowActive .galleryOverlay {
   background: darkgreen;
   opacity: 0.9;
 }
