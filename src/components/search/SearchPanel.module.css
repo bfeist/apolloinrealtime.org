@@ -7,7 +7,7 @@
   gap: var(--airt-sp-2);
 }
 
-#searchInputField {
+.searchInputField {
   width: 100%;
   padding: 6px 10px;
   background: var(--airt-bg-monitor);
@@ -17,25 +17,25 @@
   font-family: var(--airt-font-sans);
   font-size: var(--airt-fs-md);
 }
-#searchInputField:focus {
+.searchInputField:focus {
   outline: 2px solid var(--airt-accent);
   outline-offset: 1px;
 }
 
-#searchResultsTable {
+.searchResultsTable {
   width: 100%;
   border-collapse: collapse;
   font-family: var(--airt-font-mono);
   font-size: var(--airt-fs-sm);
 }
-#searchResultsTable tr {
+.searchResultsTable tr {
   cursor: pointer;
   border-bottom: 1px solid #1a1a1a;
 }
-#searchResultsTable tr:hover {
+.searchResultsTable tr:hover {
   background: var(--airt-bg-surface-hi);
 }
-#searchResultsTable td {
+.searchResultsTable tr > td {
   padding: 4px 6px;
   vertical-align: top;
 }

@@ -135,7 +135,8 @@ export class NavigatorRenderer {
       this.navCursorGroup = new this.paper.Group();
 
       this.paper.view.onResize = (): void => {
-        this.render(this.currentSeconds);
+        // The previous pointer belongs to the old canvas coordinate system.
+        this.handleMouseLeave();
       };
       const tool = new this.paper.Tool();
       tool.onMouseMove = (event): void => {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { realtimeGet } from "../../app/playback.js";
+import { missionRealtimeGet } from "../../app/playback.js";
+import { missionAnniversary } from "../../app/anniversary.js";
 import { timeIdToSeconds } from "../../shell/clock.js";
 import { useMissionStore } from "../../store/missionStore.js";
 import { toggleFullscreen } from "./TransportControls.js";
@@ -29,8 +30,8 @@ export function MissionSplash({
   const missionStyle =
     config.id === "13" ? styles.missionSplash13 : config.id === "17" ? styles.missionSplash17 : "";
   const epoch = Date.parse(config.launchDate);
-  const years = Math.max(0, Math.floor((now - epoch) / 31_556_952_000));
-  const date = new Date(epoch + realtimeGet(epoch, 0, now) * 1000).toUTCString();
+  const { years, isAnniversary } = missionAnniversary(config, now);
+  const date = new Date(epoch + missionRealtimeGet(config, 0, now) * 1000).toUTCString();
   const enter = (seconds: number): void => {
     const state = useMissionStore.getState();
     state.seek(seconds);
@@ -87,15 +88,15 @@ export function MissionSplash({
             type="button"
             data-enter="now"
             onClick={() => {
-              enter(realtimeGet(epoch, 0));
+              enter(missionRealtimeGet(config, 0));
             }}
           >
             Now
           </button>
           <div>
             <p>Join in-progress</p>
-            <small>
-              {config.id === "13" ? "~" : ""}
+            <small data-testid="mission-anniversary">
+              {isAnniversary ? "Exactly " : ""}
               {years} years ago
             </small>
             <p className={styles.missionSplashHistorical}>

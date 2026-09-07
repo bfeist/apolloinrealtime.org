@@ -16,7 +16,7 @@ export const a13Config: MissionConfig = {
   missionDurationSeconds: 547200, // 152 hours
   countdownSeconds: 127048,
   defaultStartTimeId: "-000102",
-  launchDate: "1970-04-11 19:13:00 GMT",
+  launchDate: "1970-04-11T19:13:00Z",
   launchDateModernSuffix: "-04-11 19:13:00 GMT",
   countdownStartDate: "1970-04-10 7:55:50 GMT",
   countdownStartDateModernSuffix: "-04-10 7:55:50 GMT",

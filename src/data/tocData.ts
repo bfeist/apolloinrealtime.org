@@ -28,6 +28,7 @@
  */
 
 import { loadCsv } from "./csvLoader.js";
+import { createTimeIndex } from "./timeIndex.js";
 import { timeIdToSeconds, timeIdToTimeStr } from "../shell/clock.js";
 
 /**
@@ -36,16 +37,15 @@ import { timeIdToSeconds, timeIdToTimeStr } from "../shell/clock.js";
  */
 export function parseTocData(rows: readonly string[][]): TocData {
   const entries: TocEntry[] = [];
-  const timeIds: string[] = [];
-  const byTimeId = new Map<string, number>();
 
   for (const row of rows) {
-    const timeId = row[0];
+    // A13 includes "046.4338": normalize its stray hours separator before
+    // the fixed-width clock parser can misread it as 046:00:43.
+    const timeId = row[0]?.replace(/^(\d{3})\.(\d{4})$/, "$1$2");
     if (timeId === undefined || timeId === "") continue;
     const levelRaw = row[1] ?? "";
     const label = row[2] ?? "";
     const level: TocLevel = levelRaw === "1" ? 1 : 2;
-    const idx = entries.length;
     entries.push({
       timeId,
       timeStr: timeIdToTimeStr(timeId),
@@ -53,11 +53,9 @@ export function parseTocData(rows: readonly string[][]): TocData {
       level,
       label,
     });
-    timeIds.push(timeId);
-    byTimeId.set(timeId, idx);
   }
 
-  return { entries, timeIds, byTimeId };
+  return createTimeIndex(entries);
 }
 
 /**
@@ -77,12 +75,8 @@ export async function loadTocData(mediaRoot: string, options?: LoadCsvOptions): 
  * &le; `seconds`. Returns `-1` if `seconds` precedes the first entry, or
  * if the TOC is empty.
  *
- * Mirrors `scrollToClosestTOC` semantics: walk forward; the answer is the
- * entry *before* the first one whose timeId exceeds the search time. The
- * legacy code did a linear scan; this uses binary search since `timeIds`
- * is monotonically increasing (timeIds are zero-padded so lexical = numeric
- * for same-sign rows, but we compare on parsed seconds to be safe across
- * the negative→positive boundary).
+ * The parser sorts source rows chronologically, so binary search can compare
+ * numeric seconds across both the countdown and post-launch mission.
  */
 export function findClosestTocIndex(toc: TocData, seconds: number): number {
   const { entries } = toc;

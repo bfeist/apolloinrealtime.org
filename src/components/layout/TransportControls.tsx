@@ -1,5 +1,6 @@
 import { useMissionStore } from "../../store/missionStore.js";
-import { realtimeGet } from "../../app/playback.js";
+import { missionRealtimeGet } from "../../app/playback.js";
+import "../../styles/control-icons.css";
 import styles from "../../styles/controls.module.css";
 import { cx } from "../../styles/classNames.js";
 
@@ -48,7 +49,7 @@ export function TransportControls({
         aria-label="Sync to today's clock"
         onClick={() => {
           const state = useMissionStore.getState();
-          state.seek(realtimeGet(Date.parse(config.launchDate), state.seconds));
+          state.seek(missionRealtimeGet(config, state.seconds));
           state.setPlaying(true);
         }}
       />

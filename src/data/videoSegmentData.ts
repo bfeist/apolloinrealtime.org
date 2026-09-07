@@ -40,6 +40,7 @@ export function parseVideoSegmentData(rows: readonly string[][]): VideoSegmentsD
       extra: row[2] ?? "",
     });
   }
+  segments.sort((a, b) => a.startSeconds - b.startSeconds);
   return { segments };
 }
 
@@ -60,10 +61,8 @@ export async function loadVideoSegmentData(
  * Find the index of the segment containing `seconds` (start <= seconds <
  * end). Returns `-1` if no segment contains the time or the list is empty.
  *
- * Segments are assumed monotonic in start time; the corpus satisfies this.
- * Uses binary search on `startSeconds`, then verifies `endSeconds` (segments
- * are non-overlapping in the corpus but may have gaps, so a found-by-start
- * candidate must still be range-checked).
+ * Parsed segments are sorted by start time. Source intervals can overlap,
+ * so earlier intervals must also be checked when the latest one has ended.
  */
 export function findVideoSegmentIndex(data: VideoSegmentsData, seconds: number): number {
   const { segments } = data;
@@ -79,10 +78,9 @@ export function findVideoSegmentIndex(data: VideoSegmentsData, seconds: number):
       hi = mid;
     }
   }
-  const idx = lo - 1;
-  if (idx < 0) return -1;
-  const seg = segments[idx];
-  if (!seg) return -1;
-  if (Number.isNaN(seg.endSeconds)) return idx; // unknown end -> assume open-ended
-  return seconds < seg.endSeconds ? idx : -1;
+  for (let idx = lo - 1; idx >= 0; idx--) {
+    const seg = segments[idx];
+    if (seg && (Number.isNaN(seg.endSeconds) || seconds < seg.endSeconds)) return idx;
+  }
+  return -1;
 }

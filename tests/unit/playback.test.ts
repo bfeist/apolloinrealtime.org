@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { MissionPlayback, realtimeGet } from "../../src/app/playback.js";
+import { MissionPlayback, missionRealtimeGet, realtimeGet } from "../../src/app/playback.js";
+import { a11Config } from "../../src/missions/11.config.js";
+import { a13Config } from "../../src/missions/13.config.js";
+import { a17Config } from "../../src/missions/17.config.js";
 
 describe("shared mission playback", () => {
   it("advances from elapsed time, preserves seeks while playing, and freezes on pause", () => {
@@ -32,5 +35,22 @@ describe("shared mission playback", () => {
     const launch = Date.UTC(1970, 3, 11, 19, 13);
     const now = Date.UTC(2026, 8, 5, 20, 13);
     expect(realtimeGet(launch, 0, now)).toBe(3600);
+  });
+
+  it.each([a11Config, a13Config, a17Config])(
+    "$name NOW preserves the mission day during its anniversary",
+    (config) => {
+      const launch = new Date(config.launchDate);
+      launch.setUTCFullYear(2026);
+      const now = launch.getTime() + 3 * 86400 * 1000;
+      expect(missionRealtimeGet(config, 0, now)).toBe(3 * 86400);
+      expect(missionRealtimeGet(config, 12345, now)).toBe(3 * 86400);
+    },
+  );
+
+  it("keeps nearest mission-day behavior outside the anniversary", () => {
+    const now = Date.UTC(2026, 8, 5, 20, 13);
+    expect(missionRealtimeGet(a13Config, 0, now)).toBe(3600);
+    expect(missionRealtimeGet(a13Config, 86400, now)).toBe(90000);
   });
 });

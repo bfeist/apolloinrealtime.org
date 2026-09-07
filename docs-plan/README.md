@@ -60,6 +60,15 @@ another. Future missions opt in only when real datasets are available.
   subscribe through Zustand selectors and do not create local clocks. Route
   initialization happens before mounting, so data requests cannot overwrite
   a newer user seek.
+- Mission entry anniversaries begin at the first prelaunch recording and end at
+  the mission's final covered GET, including post-splashdown recordings. The
+  elapsed-year label increments at that start and reads “Exactly N years ago”
+  until the coverage endpoint. During it, Now follows the historical calendar
+  date; outside it, Now aligns the selected mission day with today's time of day.
+  UTC boundaries are the anniversary launch instant minus `countdownSeconds`
+  and plus `missionDurationSeconds`, using the shared clock's mission-specific
+  recording bounds. This follows the original sync's coverage-window logic;
+  its inconsistent countdown date literals are not used.
 - TanStack Query owns remote data. `src/api/dataFetchers.ts` calls the existing
   typed adapters, and `src/api/useMissionData.ts` exposes mission-keyed query
   hooks, following the fetcher/hook pattern in `../issirt`. Static mission

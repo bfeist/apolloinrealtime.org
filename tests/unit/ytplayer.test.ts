@@ -8,7 +8,7 @@
  *   - the cached-promise behavior
  *   - the `_resetForTests` seam
  */
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   loadYouTubeIframeApi,
   syncYouTubePlayback,
@@ -39,6 +39,8 @@ interface MinimalWindow {
   onYouTubeIframeAPIReady?: () => void;
 }
 const g = globalThis as unknown as { window: MinimalWindow };
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe("loadYouTubeIframeApi (already-loaded path)", () => {
   beforeEach(() => {
@@ -73,6 +75,41 @@ describe("loadYouTubeIframeApi (already-loaded path)", () => {
     const second = await loadYouTubeIframeApi();
     expect(second).toBe(yt2);
     expect(second).not.toBe(yt1);
+  });
+});
+
+describe("loadYouTubeIframeApi failure recovery", () => {
+  it("retries a failed script load on a later mission visit", async () => {
+    _resetForTests();
+    const previous = vi.fn();
+    g.window = { onYouTubeIframeAPIReady: previous };
+    const scripts: { onerror: (() => void) | null; remove: () => void }[] = [];
+    vi.stubGlobal("document", {
+      createElement: () => {
+        const script = { onerror: null as (() => void) | null, remove: vi.fn() };
+        scripts.push(script);
+        return script;
+      },
+      getElementsByTagName: () => [],
+      head: { appendChild: vi.fn() },
+    });
+    const first = loadYouTubeIframeApi();
+    const rejected = expect(first).rejects.toThrow("Failed to load youtube.com/iframe_api");
+    scripts[0]?.onerror?.();
+    await rejected;
+    expect(scripts[0]?.remove).toHaveBeenCalledOnce();
+    expect(g.window.onYouTubeIframeAPIReady).toBe(previous);
+
+    const retry = loadYouTubeIframeApi();
+    expect(retry).not.toBe(first);
+    expect(scripts).toHaveLength(2);
+    const yt = fakeYT();
+    g.window.YT = yt;
+    g.window.onYouTubeIframeAPIReady?.();
+    await expect(retry).resolves.toBe(yt);
+    expect(previous).toHaveBeenCalledOnce();
+    expect(g.window.onYouTubeIframeAPIReady).toBe(previous);
+    expect(loadYouTubeIframeApi()).toBe(retry);
   });
 });
 

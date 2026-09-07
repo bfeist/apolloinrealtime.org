@@ -1,8 +1,25 @@
 import react from "@vitejs/plugin-react";
 import { resolve } from "node:path";
-import { defineConfig, type Plugin } from "vite";
+import { defineConfig, normalizePath, type Plugin } from "vite";
+import { pageHeadTags } from "./src/app/pageMetadata.js";
+import { a11Config } from "./src/missions/11.config.js";
+import { a13Config } from "./src/missions/13.config.js";
+import { a17Config } from "./src/missions/17.config.js";
 
 const projectRoot = import.meta.dirname;
+
+/** Crawlers receive the same metadata as a browser navigating between routes. */
+const pageMetadata = (): Plugin => ({
+  name: "page-metadata",
+  transformIndexHtml(_html, context) {
+    const mission = [a11Config, a13Config, a17Config].find(
+      (config) =>
+        normalizePath(context.filename) ===
+        normalizePath(resolve(projectRoot, config.id, "index.html")),
+    );
+    return pageHeadTags(mission);
+  },
+});
 
 /**
  * URL strategy
@@ -41,7 +58,7 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
-  plugins: [react(), trailingSlashRedirect()],
+  plugins: [react(), trailingSlashRedirect(), pageMetadata()],
   build: {
     outDir: ".local/dist",
     emptyOutDir: true,

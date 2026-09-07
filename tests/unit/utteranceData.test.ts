@@ -9,7 +9,7 @@ describe("parseUtteranceData", () => {
   it("parses rows into typed utterance entries", () => {
     const rows = [
       ["-044959", "PAO", "This is Apollo Saturn...", "P"],
-      ["000:01:00", "CDR", "Roger that", ""],
+      ["0000100", "CDR", "Roger that", ""],
     ];
     const data = parseUtteranceData(rows);
     expect(data.entries).toHaveLength(2);
@@ -27,11 +27,11 @@ describe("parseUtteranceData", () => {
   it("skips empty timeId rows", () => {
     const rows = [
       ["", "PAO", "Skipped", ""],
-      ["000:01:00", "CDR", "Kept", ""],
+      ["0000100", "CDR", "Kept", ""],
     ];
     const data = parseUtteranceData(rows);
     expect(data.entries).toHaveLength(1);
-    expect(data.entries[0]?.timeId).toBe("000:01:00");
+    expect(data.entries[0]?.timeId).toBe("0000100");
   });
 });
 
@@ -58,7 +58,7 @@ describe("loadUtteranceData", () => {
   it("fetches and parses csv", async () => {
     const fetchFn = vi.fn((url: string) => {
       expect(url).toBe("/13/indexes/utteranceData.csv");
-      return Promise.resolve(new Response("001:00:00|PAO|Hello World|\n", { status: 200 }));
+      return Promise.resolve(new Response("0010000|PAO|Hello World|\n", { status: 200 }));
     });
     const data = await loadUtteranceData("/13/", {
       fetchFn: fetchFn as unknown as typeof fetch,

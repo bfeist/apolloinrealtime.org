@@ -16,6 +16,7 @@
  */
 
 import { loadCsv } from "./csvLoader.js";
+import { createTimeIndex } from "./timeIndex.js";
 import { timeIdToSeconds, timeIdToTimeStr } from "../shell/clock.js";
 
 /**
@@ -24,8 +25,6 @@ import { timeIdToSeconds, timeIdToTimeStr } from "../shell/clock.js";
  */
 export function parseCommentaryData(rows: readonly string[][]): CommentaryData {
   const entries: CommentaryEntry[] = [];
-  const timeIds: string[] = [];
-  const byTimeId = new Map<string, number>();
 
   for (const row of rows) {
     const timeId = row[0];
@@ -45,7 +44,6 @@ export function parseCommentaryData(rows: readonly string[][]): CommentaryData {
       text = row[3] ?? "";
     }
 
-    const idx = entries.length;
     entries.push({
       timeId,
       timeStr: timeIdToTimeStr(timeId),
@@ -54,11 +52,9 @@ export function parseCommentaryData(rows: readonly string[][]): CommentaryData {
       speaker,
       text,
     });
-    timeIds.push(timeId);
-    byTimeId.set(timeId, idx);
   }
 
-  return { entries, timeIds, byTimeId };
+  return createTimeIndex(entries);
 }
 
 /**

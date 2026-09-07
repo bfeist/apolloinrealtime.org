@@ -312,6 +312,27 @@ describe("NavigatorRenderer", () => {
     expect(label?.point.x).toBe(-20);
   });
 
+  it("clears hover coordinates on resize and seeks using the new view dimensions", () => {
+    const paper = makeFakePaper(A13.width, A13.height);
+    const onSeek = vi.fn();
+    const renderer = new NavigatorRenderer(paper, { ...A13, onSeek });
+    renderer.mount(CANVAS);
+    renderer.render(3600);
+    paper.lastTool?.onMouseMove?.({ point: { x: 1000, y: 5 } });
+    expect(groupAt(paper, 6).children.length).toBeGreaterThan(0);
+
+    paper.view.size.width = 390;
+    paper.view.size.height = 160;
+    paper.view.onResize?.();
+    expect(groupAt(paper, 6).children).toHaveLength(0);
+    expect(onSeek).not.toHaveBeenCalled();
+
+    const point = { x: 230, y: 5 };
+    const layout = computeLayout({ ...A13, width: 390, height: 160 });
+    paper.lastTool?.onMouseUp?.({ point });
+    expect(onSeek).toHaveBeenLastCalledWith(hitTestMouseClick(layout, point, 0, 0).seconds);
+  });
+
   it("destroy() removes groups and detaches handlers", () => {
     const paper = makeFakePaper(A13.width, A13.height);
     const r = new NavigatorRenderer(paper, {

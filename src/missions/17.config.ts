@@ -17,7 +17,7 @@ export const a17Config: MissionConfig = {
   countdownSeconds: 9442,
   defaultStartTimeId: "-000105",
   fontLoaderDelay: 3,
-  launchDate: "1972-12-07 0:33 -500",
+  launchDate: "1972-12-07T05:33:00Z",
   launchDateModernSuffix: "-12-07 0:33 -500",
   countdownStartDate: "1972-12-06 9:55:39pm -500",
   countdownStartDateModernSuffix: "-12-06 9:55:39pm -500",

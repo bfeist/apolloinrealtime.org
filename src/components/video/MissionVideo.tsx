@@ -44,6 +44,7 @@ export function MissionVideo({ config }: { config: MissionConfig }) {
           const offset = Math.max(0, state.seconds - entry.startSeconds);
           if (nextKey !== key) {
             key = nextKey;
+            setUnavailable(false);
             if (state.playing) player.loadVideoById(entry.videoId, offset);
             else player.cueVideoById(entry.videoId, offset);
           } else if ((state.playing || forceSeek) && Math.abs(player.getCurrentTime() - offset) > 2)

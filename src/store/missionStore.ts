@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { parseDeepLink } from "../app/deepLink.js";
-import { MissionPlayback, realtimeGet } from "../app/playback.js";
+import { MissionPlayback, missionRealtimeGet } from "../app/playback.js";
 import { timeIdToSeconds } from "../shell/clock.js";
 import { channelsFor } from "../components/mocrviz/channels.js";
 
@@ -51,7 +51,7 @@ export const useMissionStore = create<MissionState>((set) => ({
       link.seek?.kind === "seconds"
         ? link.seek.seconds
         : link.seek?.kind === "rt"
-          ? realtimeGet(Date.parse(config.launchDate), start)
+          ? missionRealtimeGet(config, start)
           : start;
     clock = new MissionPlayback(seconds, -config.countdownSeconds, config.missionDurationSeconds);
     const catalog = channelsFor(config.id);

@@ -84,6 +84,7 @@ export function MissionNavigator({ config }: { config: MissionConfig }) {
       <canvas
         ref={canvas}
         id="navCanvas"
+        data-paper-resize="true"
         width={1200}
         height={160}
         aria-label="Mission navigator timeline"

@@ -33,7 +33,7 @@ interface MissionConfig {
   fontLoaderDelay: number;
 
   // --- Mission timing ---
-  /** Total mission duration in seconds (`cMissionDurationSeconds`). */
+  /** Final covered GET in seconds, including post-splashdown recordings (`cMissionDurationSeconds`). */
   missionDurationSeconds: number;
   /** Pre-launch countdown duration in seconds (`cCountdownSeconds`). */
   countdownSeconds: number;

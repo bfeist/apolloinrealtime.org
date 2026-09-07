@@ -44,6 +44,43 @@ for (const mission of ["11", "13", "17"] as const) {
       ).toBe(true);
       const controls = page.locator("[data-testid=text-controls]");
       await expect(controls).toBeVisible();
+      const positions = await page
+        .locator("#searchBtn, #dashboardBtn, #shareBtn, #playPauseBtn")
+        .evaluateAll((buttons) =>
+          Object.fromEntries(
+            buttons.map((button) => {
+              const box = button.getBoundingClientRect();
+              return [button.id, { top: box.top, bottom: box.bottom, left: box.left }];
+            }),
+          ),
+        );
+      if (
+        !positions.searchBtn ||
+        !positions.dashboardBtn ||
+        !positions.shareBtn ||
+        !positions.playPauseBtn
+      )
+        throw new Error("Missing action control");
+      expect(positions.searchBtn.left).toBe(positions.dashboardBtn.left);
+      expect(positions.searchBtn.bottom).toBeLessThan(positions.dashboardBtn.top);
+      expect(positions.shareBtn.top).toBe(positions.searchBtn.top);
+      expect(positions.shareBtn.bottom).toBe(positions.dashboardBtn.bottom);
+      expect(positions.playPauseBtn.bottom).toBe(positions.dashboardBtn.bottom);
+      for (const id of [
+        "search",
+        "realtime",
+        "about",
+        "dashboard",
+        "sound",
+        "fullscreen",
+        "share",
+        "playPause",
+      ]) {
+        await expect(page.locator(`#${id}Btn`)).toHaveCSS(
+          "background-image",
+          /data:image\/svg\+xml/,
+        );
+      }
       await page.locator("#tocTab").hover();
       await expect(page.locator("#tocTab")).toBeVisible();
       await page.locator("#tocTab").click();

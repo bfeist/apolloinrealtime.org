@@ -1,6 +1,5 @@
 /* Measured against live A11/A13/A17, September 2026.
    The rounded, inset button faces are part of the original console design. */
-@import "./control-icons.css";
 
 /* Component classes below are locally scoped. */
 
@@ -80,28 +79,28 @@
   outline: 2px solid #ffc688;
   outline-offset: -2px;
 }
-#searchBtn {
+:global(#searchBtn) {
   grid-area: search;
 }
-#dashboardBtn {
+:global(#dashboardBtn) {
   grid-area: dashboard;
 }
-#realtimeBtn {
+:global(#realtimeBtn) {
   grid-area: realtime;
 }
-#soundBtn {
+:global(#soundBtn) {
   grid-area: sound;
 }
-#aboutBtn {
+:global(#aboutBtn) {
   grid-area: about;
 }
-#fullscreenBtn {
+:global(#fullscreenBtn) {
   grid-area: fullscreen;
 }
-#shareBtn {
+:global(#shareBtn) {
   grid-area: share;
 }
-#playPauseBtn {
+:global(#playPauseBtn) {
   grid-area: play;
 }
 

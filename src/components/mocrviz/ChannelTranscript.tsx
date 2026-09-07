@@ -22,6 +22,7 @@ export const ChannelTranscript = memo(function ChannelTranscript({
   label: string;
 }) {
   const seek = useMissionStore((state) => state.seek);
+  const rightTab = useMissionStore((state) => state.rightTab);
   const transcript = useChannelTranscript(mission, root, channel);
   const [mode, setMode] = useState<"transcript" | "search" | "about">("transcript");
   const [search, setSearch] = useState("");
@@ -47,12 +48,12 @@ export const ChannelTranscript = memo(function ChannelTranscript({
   );
 
   useEffect(() => {
-    if (query || mode === "about") return;
+    if (query || mode === "about" || rightTab !== "mocr") return;
     const host = list.current;
-    const row = host?.querySelector<HTMLElement>(".is-active");
-    if (host && row)
+    const row = host?.querySelector<HTMLElement>('[aria-current="true"]');
+    if (host?.clientHeight && row)
       host.scrollTop += row.getBoundingClientRect().top - host.getBoundingClientRect().top - 30;
-  }, [active, query, mode, transcript.data]);
+  }, [active, query, mode, transcript.data, rightTab]);
 
   return (
     <section className={styles.mocrvizTranscriptPanel}>
@@ -114,6 +115,7 @@ export const ChannelTranscript = memo(function ChannelTranscript({
                       className={cx(styles.mocrvizUtterance, index === active && styles.isActive)}
                       data-testid="mocr-utterance"
                       data-index={index}
+                      aria-current={index === active ? "true" : undefined}
                       onClick={() => {
                         setSearch("");
                         setExtraRows(0);

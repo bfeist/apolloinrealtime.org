@@ -42,6 +42,20 @@ in another. Components render query loading/error states and derive current
 entries from query data plus GET. Do not copy query results into Zustand.
 Specialized sample, biometric, and MOCR queries live alongside those components.
 
+Source CSV row order is not guaranteed. Text adapters build chronological
+indexes and rebuild their matching time-ID maps; records with unusable
+timestamps are omitted from timed views. Telemetry is sorted before deriving
+its intervals, and footage lookup handles overlapping intervals. These
+normalizations leave the preserved source assets unchanged.
+
+[`app/anniversary.ts`](app/anniversary.ts) derives calendar anniversary copy
+from the mission's UTC launch date and shared clock bounds (`-countdownSeconds`
+through `missionDurationSeconds`), including prelaunch and post-splashdown
+coverage. The year increments at the first recording's anniversary. During that window,
+`missionRealtimeGet` aligns Now and realtime links with the historical date.
+[`app/pageMetadata.ts`](app/pageMetadata.ts) supplies both the static HTML head
+through Vite and the metadata applied during React Router navigation.
+
 ## Where to make changes
 
 | Change                                               | Start here                                               |

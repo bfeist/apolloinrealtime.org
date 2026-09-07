@@ -59,6 +59,9 @@ export function parseTelemetryData(
     });
   }
 
+  // Original indexes contain rows out of order; backfill only after sorting.
+  partial.sort((a, b) => a.startSeconds - b.startSeconds);
+
   const entries: TelemetryEntry[] = partial.map((item, idx) => {
     const next = partial[idx + 1];
     const endSeconds = next?.startSeconds ?? options.missionDurationSeconds;

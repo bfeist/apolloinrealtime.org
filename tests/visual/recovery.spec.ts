@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { secondsToTimeStr } from "../../src/shell/clock.js";
 
 function silentWaveform(length = 1_000_000): Buffer {
   const buffer = Buffer.alloc(20 + length * 2);
@@ -298,8 +299,11 @@ test("recovery MOCR timeline previews channel and GET before seeking smoothly", 
     .toBeGreaterThan(initialFrame + 0.1);
   await page.locator("#playPauseBtn").click();
 
+  const expectedSeek = secondsToTimeStr(
+    Math.round(Number(await canvas.getAttribute("data-current-seconds")) + 60),
+  );
   await page.mouse.click(box.x + box.width / 2 + 60, box.y + 17 * 5 + 2);
-  await expect(page.locator("#missionElapsedTime")).toHaveValue("055:55:53");
+  await expect(page.locator("#missionElapsedTime")).toHaveValue(expectedSeek);
   await expect(page.locator("#btn-ch21")).toHaveAttribute("aria-pressed", "true");
 });
 

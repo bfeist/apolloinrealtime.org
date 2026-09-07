@@ -54,7 +54,21 @@ export function loadYouTubeIframeApi(): Promise<YTNamespace> {
   loadPromise = new Promise<YTNamespace>((resolve, reject) => {
     // Chain onto any existing onYouTubeIframeAPIReady so we don't clobber it.
     const previous = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = (): void => {
+    const tag = document.createElement("script");
+    const cleanup = (): void => {
+      tag.onerror = null;
+      if (window.onYouTubeIframeAPIReady === onReady) {
+        if (previous) window.onYouTubeIframeAPIReady = previous;
+        else delete window.onYouTubeIframeAPIReady;
+      }
+    };
+    const fail = (message: string): void => {
+      cleanup();
+      tag.remove();
+      reject(new Error(message));
+    };
+    const onReady = (): void => {
+      cleanup();
       if (typeof previous === "function") {
         try {
           previous();
@@ -62,18 +76,18 @@ export function loadYouTubeIframeApi(): Promise<YTNamespace> {
           console.error("[ytplayer] previous onYouTubeIframeAPIReady threw", e);
         }
       }
-      if (window.YT) {
+      if (window.YT?.Player) {
         resolve(window.YT);
       } else {
-        reject(new Error("YT global missing after iframe_api ready callback"));
+        fail("YT global missing after iframe_api ready callback");
       }
     };
+    window.onYouTubeIframeAPIReady = onReady;
 
-    const tag = document.createElement("script");
     tag.src = "https://www.youtube.com/iframe_api";
     tag.async = true;
     tag.onerror = (): void => {
-      reject(new Error("Failed to load youtube.com/iframe_api"));
+      fail("Failed to load youtube.com/iframe_api");
     };
     const firstScript = document.getElementsByTagName("script")[0];
     if (firstScript?.parentNode) {
@@ -81,6 +95,10 @@ export function loadYouTubeIframeApi(): Promise<YTNamespace> {
     } else {
       document.head.appendChild(tag);
     }
+  }).catch((error: unknown) => {
+    // A transient network failure must not disable later mission visits.
+    loadPromise = null;
+    throw error;
   });
 
   return loadPromise;

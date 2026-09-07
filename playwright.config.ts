@@ -53,7 +53,7 @@ export default defineConfig({
     },
     {
       name: "visual",
-      testMatch: /(?:visual|recovery|controls|routing)\.spec\.ts$/,
+      testMatch: /(?:visual|recovery|controls|routing|metadata)\.spec\.ts$/,
       use: {
         baseURL: LOCAL_BASE,
         ...devices["Desktop Chrome"],

@@ -42,6 +42,7 @@ export function SearchPanel({ config }: { config: MissionConfig }) {
       <input
         type="text"
         id="searchInputField"
+        className={styles.searchInputField}
         placeholder="Search transcript, commentary, photos..."
         value={query}
         onChange={(event) => {
@@ -49,7 +50,7 @@ export function SearchPanel({ config }: { config: MissionConfig }) {
         }}
       />
       <div id="searchResultsDiv">
-        <table id="searchResultsTable">
+        <table id="searchResultsTable" className={styles.searchResultsTable}>
           <tbody>
             {hits.map(({ item, matchStart, matchLength }, hitIndex) => (
               <tr
