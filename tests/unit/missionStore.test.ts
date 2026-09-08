@@ -3,6 +3,7 @@ import { a11Config } from "../../src/missions/11.config.js";
 import { a13Config } from "../../src/missions/13.config.js";
 import { a17Config } from "../../src/missions/17.config.js";
 import { timeIdToSeconds } from "../../src/shell/clock.js";
+import { missionRealtimeGet } from "../../src/app/playback.js";
 import { useMissionStore } from "../../src/store/missionStore.js";
 
 const state = useMissionStore.getState;
@@ -34,10 +35,10 @@ describe("mission route initialization", () => {
     },
   );
 
-  it("resolves NOW to a nearby mission day, independently of the current calendar year", () => {
-    vi.spyOn(Date, "now").mockReturnValue(Date.UTC(2026, 8, 6, 20, 13));
+  it("resolves NOW to the scheduled replay before the anniversary", () => {
+    vi.spyOn(Date, "now").mockReturnValue(Date.parse("2026-04-08T07:55:32Z"));
     state().initialize(a13Config, "?t=rt");
-    expect(state().seconds).toBe(3600);
+    expect(state()).toMatchObject({ seconds: -127048 + 6 * 86400, realtime: true });
   });
 
   it.each([a11Config, a13Config])("$name validates channel links and selections", (config) => {
@@ -135,5 +136,107 @@ describe("shared playback and UI state", () => {
     state().setDashboardVisible(false);
     state().seek(600);
     expect(state()).toMatchObject({ seconds: 600, dashboardOverride: null });
+  });
+});
+
+describe("scheduled playback", () => {
+  for (const [config, startIso, endIso, repeatDays] of [
+    [a11Config, "2026-07-15T16:45:52Z", "2026-07-24T19:40:31Z", 10],
+    [a13Config, "2026-04-10T07:55:32Z", "2026-04-18T03:13:00Z", 8],
+    [a17Config, "2026-12-07T02:55:38Z", "2026-12-19T20:42:40Z", 13],
+  ] as const) {
+    it(`${config.name} cuts over automatically and keeps playing through the anniversary end`, () => {
+      let now = Date.parse(startIso) - 1000;
+      vi.spyOn(Date, "now").mockImplementation(() => now);
+      state().initialize(config, "?t=rt");
+      state().setPlaying(true);
+      expect(state()).toMatchObject({ realtime: true, playing: true });
+      const revision = state().seekRevision;
+      now += 1000;
+      elapsed += 1000;
+      state().tick();
+      expect(state()).toMatchObject({
+        seconds: -config.countdownSeconds,
+        playing: true,
+        realtime: true,
+        seekRevision: revision + 1,
+      });
+      now += 1000;
+      elapsed += 1000;
+      state().tick();
+      expect(state()).toMatchObject({
+        seconds: -config.countdownSeconds + 1,
+        seekRevision: revision + 1,
+      });
+      now = Date.parse(endIso) - 1000;
+      state().tick();
+      expect(state().seconds).toBe(config.missionDurationSeconds - 1);
+      now += 1000;
+      elapsed += 1000;
+      state().tick();
+      expect(state()).toMatchObject({
+        seconds: missionRealtimeGet(config, now),
+        playing: true,
+        realtime: true,
+      });
+      expect(state().seconds).toBeLessThan(config.missionDurationSeconds);
+    });
+
+    it(`${config.name} repeats at scheduled boundaries and catches up after a suspended tab`, () => {
+      let now = Date.parse(endIso) - repeatDays * 86400000 - 1000;
+      vi.spyOn(Date, "now").mockImplementation(() => now);
+      state().initialize(config, "");
+      state().syncRealtime();
+      expect(state().seconds).toBe(config.missionDurationSeconds - 1);
+      now += 1000;
+      elapsed += 1000;
+      state().tick();
+      expect(state()).toMatchObject({
+        seconds: missionRealtimeGet(config, now),
+        playing: true,
+        seekRevision: 2,
+      });
+      now += (repeatDays + 1) * 86400000;
+      state().tick();
+      expect(state()).toMatchObject({ seconds: missionRealtimeGet(config, now), playing: true });
+    });
+
+    it(`${config.name} respects pause and manual seeks across the anniversary cutover`, () => {
+      let now = Date.parse(startIso) - 1000;
+      vi.spyOn(Date, "now").mockImplementation(() => now);
+      state().initialize(config, "");
+      state().syncRealtime();
+      state().setPlaying(false);
+      const paused = state().seconds;
+      now += 1000;
+      elapsed += 1000;
+      state().tick();
+      expect(state()).toMatchObject({ seconds: paused, playing: false, realtime: false });
+      state().setPlaying(true);
+      elapsed += 1000;
+      state().tick();
+      expect(state().seconds).toBe(paused + 1);
+      state().syncRealtime();
+      state().seek(3600);
+      now += 86400000;
+      elapsed += 1000;
+      state().tick();
+      expect(state()).toMatchObject({ seconds: 3601, realtime: false });
+      state().syncRealtime();
+      expect(state()).toMatchObject({ seconds: missionRealtimeGet(config, now), realtime: true });
+    });
+  }
+
+  it("advances Apollo 17 through its historical GET reset in manual playback", () => {
+    state().initialize(a17Config, "?t=064:59:59");
+    state().setPlaying(true);
+    elapsed = 1000;
+    state().tick();
+    expect(state().seconds).toBe(67 * 3600 + 40 * 60);
+    elapsed = 2000;
+    state().tick();
+    expect(state().seconds).toBe(67 * 3600 + 40 * 60 + 1);
+    state().seek(66 * 3600);
+    expect(state().seconds).toBe(67 * 3600 + 40 * 60);
   });
 });

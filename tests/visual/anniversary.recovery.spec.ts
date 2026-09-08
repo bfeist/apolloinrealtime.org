@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 for (const [mission, coverageStart, firstGet, coverageEnd, years, finalGet] of [
   ["11", "2026-07-15T16:45:52Z", "-20:46:08", "2026-07-24T19:40:31Z", 57, "198:08:30"],
   ["13", "2026-04-10T07:55:32Z", "-35:17:28", "2026-04-18T03:13:00Z", 56, "151:59:59"],
-  ["17", "2026-12-07T02:55:38Z", "-02:37:22", "2026-12-19T23:22:40Z", 54, "305:49:39"],
+  ["17", "2026-12-07T02:55:38Z", "-02:37:22", "2026-12-19T20:42:40Z", 54, "305:49:39"],
 ] as const) {
   test(`A${mission} anniversary copy updates at the recording boundaries without reloading`, async ({
     page,

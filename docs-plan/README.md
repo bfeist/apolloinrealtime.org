@@ -64,11 +64,22 @@ another. Future missions opt in only when real datasets are available.
   the mission's final covered GET, including post-splashdown recordings. The
   elapsed-year label increments at that start and reads “Exactly N years ago”
   until the coverage endpoint. During it, Now follows the historical calendar
-  date; outside it, Now aligns the selected mission day with today's time of day.
-  UTC boundaries are the anniversary launch instant minus `countdownSeconds`
-  and plus `missionDurationSeconds`, using the shared clock's mission-specific
-  recording bounds. This follows the original sync's coverage-window logic;
-  its inconsistent countdown date literals are not used.
+  date. Outside it, scheduled repeats preserve today's UTC time of day and
+  cover the full recording window. The replay period rounds coverage up to
+  whole days (A11: 10, A13: 8, A17: 13); unused hours repeat part of the final
+  day. Repeats are anchored to the next anniversary's coverage start, when
+  playback resets to the first recording. After anniversary coverage ends,
+  the next year's schedule may be joined partway through a replay.
+  Now, Sync, and playing a realtime link follow this schedule continuously,
+  including while crossing its boundaries. Pause or any manual seek leaves
+  the schedule; Sync rejoins it. Month ends, New Year, DST, and viewer time
+  zones do not change the UTC schedule.
+  UTC boundaries derive from the shared clock's full recording bounds.
+  Apollo 17's GET advances from 065:00:00 to 067:40:00; convert GET to true
+  elapsed time before calculating UTC dates, recording duration, or media
+  offsets. Its final GET 305:49:40 corresponds to December 19 at 20:42:40 UTC.
+  This retains the original sync's coverage-window and UTC-clock intent
+  without its inconsistent countdown literals and day-of-month folding.
 - TanStack Query owns remote data. `src/api/dataFetchers.ts` calls the existing
   typed adapters, and `src/api/useMissionData.ts` exposes mission-keyed query
   hooks, following the fetcher/hook pattern in `../issirt`. Static mission

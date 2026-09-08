@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useMissionStore } from "../../store/missionStore.js";
 import { secondsToTimeStr } from "../../shell/clock.js";
 import { parseDeepLink } from "../../app/deepLink.js";
+import { missionGetToElapsed } from "../../app/missionTime.js";
 import { MissionNavigator } from "../navigator/MissionNavigator.js";
 import styles from "../../styles/base.module.css";
 import { cx } from "../../styles/classNames.js";
@@ -11,7 +12,9 @@ export function MissionHeader({ config }: { config: MissionConfig }) {
   const seconds = useMissionStore((s) => Math.trunc(s.seconds));
   const seek = useMissionStore((s) => s.seek);
   const [draft, setDraft] = useState<string | null>(null);
-  const date = new Date(Date.parse(config.launchDate) + seconds * 1000).toUTCString();
+  const date = new Date(
+    Date.parse(config.launchDate) + missionGetToElapsed(config, seconds) * 1000,
+  ).toUTCString();
   return (
     <header className={styles.airtHeader}>
       <Link

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useVideoUrlData } from "../../api/useMissionData.js";
 import { findVideoUrlIndex } from "../../data/videoUrlData.js";
+import { missionGetToElapsed } from "../../app/missionTime.js";
 import {
   loadYouTubeIframeApi,
   syncYouTubePlayback,
@@ -41,7 +42,11 @@ export function MissionVideo({ config }: { config: MissionConfig }) {
             return;
           }
           const nextKey = `${entry.videoId}:${String(entry.startSeconds)}`;
-          const offset = Math.max(0, state.seconds - entry.startSeconds);
+          const offset = Math.max(
+            0,
+            missionGetToElapsed(config, state.seconds) -
+              missionGetToElapsed(config, entry.startSeconds),
+          );
           if (nextKey !== key) {
             key = nextKey;
             setUnavailable(false);
@@ -99,7 +104,7 @@ export function MissionVideo({ config }: { config: MissionConfig }) {
       player?.destroy?.();
       element.replaceChildren();
     };
-  }, [data]);
+  }, [config, data]);
   return (
     <div
       id="player-iframe-wrapper"

@@ -1,4 +1,5 @@
 import { missionAnniversary } from "./anniversary.js";
+import { missionElapsedToGet, missionGetToElapsed } from "./missionTime.js";
 
 /** One mission clock. Media and panels consume this state; they never own GET. */
 export class MissionPlayback {
@@ -37,23 +38,25 @@ export class MissionPlayback {
   }
 }
 
-/** Replay the mission day nearest today's time of day. */
-export function realtimeGet(launchEpoch: number, currentGet: number, now = Date.now()): number {
-  const day = 86400;
-  const historicTime = launchEpoch / 1000 + currentGet;
-  const delta = (((now / 1000 - historicTime) % day) + day) % day;
-  return currentGet + (delta > day / 2 ? delta - day : delta);
-}
-
-/** During the anniversary, NOW follows the actual mission calendar day. */
-export function missionRealtimeGet(
-  config: MissionConfig,
-  currentGet: number,
-  now = Date.now(),
-): number {
+/** Calendar-day repeats preserve UTC time of day and reset at anniversary start. */
+export function missionRealtimeGet(config: MissionConfig, now = Date.now()): number {
   const anniversary = missionAnniversary(config, now);
-  const seconds = anniversary.isAnniversary
-    ? (now - anniversary.launchEpoch) / 1000
-    : realtimeGet(Date.parse(config.launchDate), currentGet, now);
-  return Math.max(-config.countdownSeconds, Math.min(config.missionDurationSeconds, seconds));
+  if (anniversary.isAnniversary)
+    return missionElapsedToGet(config, (now - anniversary.launchEpoch) / 1000);
+
+  const nextLaunch = new Date(anniversary.launchEpoch);
+  const start = nextLaunch.getTime() - config.countdownSeconds * 1000;
+  if (now >= start) nextLaunch.setUTCFullYear(nextLaunch.getUTCFullYear() + 1);
+  const nextStart = nextLaunch.getTime() - config.countdownSeconds * 1000;
+  const duration =
+    (config.countdownSeconds + missionGetToElapsed(config, config.missionDurationSeconds)) * 1000;
+  const day = 86400000;
+  const period = Math.ceil(duration / day) * day;
+  // Whole-day shifts retain today's UTC clock time. Each regular repeat plays
+  // all coverage, then repeats part of the final day to fill the remaining hours.
+  // Anchor to the upcoming anniversary so New Year/month changes cannot reset
+  // playback. After anniversary end, changing the anchor can join a partial replay.
+  let offset = (((now - nextStart) % period) + period) % period;
+  if (offset >= duration) offset -= day;
+  return missionElapsedToGet(config, -config.countdownSeconds + offset / 1000);
 }

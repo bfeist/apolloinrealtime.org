@@ -1,5 +1,4 @@
 import { useMissionStore } from "../../store/missionStore.js";
-import { missionRealtimeGet } from "../../app/playback.js";
 import "../../styles/control-icons.css";
 import styles from "../../styles/controls.module.css";
 import { cx } from "../../styles/classNames.js";
@@ -14,17 +13,16 @@ export function toggleFullscreen(): void {
 }
 
 export function TransportControls({
-  config,
   dashboardVisible,
   onAbout,
   onShare,
 }: {
-  config: MissionConfig;
   dashboardVisible: boolean;
   onAbout: () => void;
   onShare: () => void;
 }) {
   const playing = useMissionStore((s) => s.playing);
+  const realtime = useMissionStore((s) => s.realtime);
   const muted = useMissionStore((s) => s.muted);
   const searchVisible = useMissionStore((s) => s.searchVisible);
   const { setPlaying, setMuted, setSearchVisible, setDashboardVisible } =
@@ -43,14 +41,13 @@ export function TransportControls({
       />
       <button
         id="realtimeBtn"
-        className={styles.airtActionBtn}
+        className={cx(styles.airtActionBtn, realtime && styles.isActive)}
         type="button"
         title="Sync to today's clock"
         aria-label="Sync to today's clock"
+        aria-pressed={realtime}
         onClick={() => {
-          const state = useMissionStore.getState();
-          state.seek(missionRealtimeGet(config, state.seconds));
-          state.setPlaying(true);
+          useMissionStore.getState().syncRealtime();
         }}
       />
       <button

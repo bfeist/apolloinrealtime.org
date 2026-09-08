@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { missionRealtimeGet } from "../../app/playback.js";
 import { missionAnniversary } from "../../app/anniversary.js";
+import { missionGetToElapsed } from "../../app/missionTime.js";
 import { timeIdToSeconds } from "../../shell/clock.js";
 import { useMissionStore } from "../../store/missionStore.js";
 import { toggleFullscreen } from "./TransportControls.js";
@@ -31,7 +32,9 @@ export function MissionSplash({
     config.id === "13" ? styles.missionSplash13 : config.id === "17" ? styles.missionSplash17 : "";
   const epoch = Date.parse(config.launchDate);
   const { years, isAnniversary } = missionAnniversary(config, now);
-  const date = new Date(epoch + missionRealtimeGet(config, 0, now) * 1000).toUTCString();
+  const date = new Date(
+    epoch + missionGetToElapsed(config, missionRealtimeGet(config, now)) * 1000,
+  ).toUTCString();
   const enter = (seconds: number): void => {
     const state = useMissionStore.getState();
     state.seek(seconds);
@@ -88,7 +91,8 @@ export function MissionSplash({
             type="button"
             data-enter="now"
             onClick={() => {
-              enter(missionRealtimeGet(config, 0));
+              useMissionStore.getState().syncRealtime();
+              onDismiss();
             }}
           >
             Now

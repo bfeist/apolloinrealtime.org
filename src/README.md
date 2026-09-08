@@ -29,7 +29,10 @@ const seek = useMissionStore((state) => state.seek);
 A timestamp button calls `seek(seconds)`. The store updates, and subscribed
 components derive their current transcript row, photo, telemetry, and media
 position from that same time. The route owns the ticker; the pure
-[`app/playback.ts`](app/playback.ts) clock measures elapsed time. Components
+[`app/playback.ts`](app/playback.ts) clock measures elapsed time. In realtime
+mode the same store follows the UTC replay schedule on each tick and seeks
+media when that schedule wraps. Pausing or seeking exits realtime mode;
+`syncRealtime()` joins it again. Components
 must not start independent mission clocks. Keep drafts, disclosure state,
 and other component-only interactions in `useState`.
 
@@ -53,6 +56,22 @@ from the mission's UTC launch date and shared clock bounds (`-countdownSeconds`
 through `missionDurationSeconds`), including prelaunch and post-splashdown
 coverage. The year increments at the first recording's anniversary. During that window,
 `missionRealtimeGet` aligns Now and realtime links with the historical date.
+Outside it, `missionRealtimeGet` projects onto whole-day replay cycles anchored
+to the next anniversary start. It rounds coverage up to whole days and repeats
+part of the final day to fill the gap, preserving UTC time of day. Unlike the
+original `getNearestHistoricalMissionTimeId` day-of-month tables in the adjacent
+mission `index.js` files, it has no month-end overflow or calendar-month resets.
+The first replay after an anniversary may be partial when the yearly anchor
+changes; regular cycles include all recordings. The anniversary start always
+resets scheduled playback to the first prelaunch recording.
+
+[`app/missionTime.ts`](app/missionTime.ts) converts historical GET to true elapsed
+time. Apollo 17's original `setAutoScrollPoller` and transcript at GET 064:33:06
+establish the clock advance at 65 elapsed hours to GET 067:40:00. The shared
+clock, dates, schedule, and media offsets use this conversion; datasets and
+links retain historical GET. Seeks into the skipped interval canonicalize to
+067:40:00. The original date helper's 64-hour threshold is not used.
+
 [`app/pageMetadata.ts`](app/pageMetadata.ts) supplies both the static HTML head
 through Vite and the metadata applied during React Router navigation.
 

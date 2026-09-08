@@ -8,7 +8,7 @@ import { a17Config } from "../../src/missions/17.config.js";
 for (const [config, coverageStart, coverageEnd, historicYear] of [
   [a11Config, "2026-07-15T16:45:52Z", "2026-07-24T19:40:31Z", 1969],
   [a13Config, "2026-04-10T07:55:32Z", "2026-04-18T03:13:00Z", 1970],
-  [a17Config, "2026-12-07T02:55:38Z", "2026-12-19T23:22:40Z", 1972],
+  [a17Config, "2026-12-07T02:55:38Z", "2026-12-19T20:42:40Z", 1972],
 ] as const) {
   describe(`${config.name} calendar anniversary`, () => {
     for (const year of [2026, 2027, 2028, 2100]) {
@@ -24,10 +24,10 @@ for (const [config, coverageStart, coverageEnd, historicYear] of [
         });
       });
     }
-    it("syncs to the first prelaunch recording independently of the selected GET", () => {
+    it("syncs to the first prelaunch recording", () => {
       const start = Date.parse(coverageStart);
-      expect(missionRealtimeGet(config, 0, start)).toBe(-config.countdownSeconds);
-      expect(missionRealtimeGet(config, 86400, start + 1000)).toBe(-config.countdownSeconds + 1);
+      expect(missionRealtimeGet(config, start)).toBe(-config.countdownSeconds);
+      expect(missionRealtimeGet(config, start + 1000)).toBe(-config.countdownSeconds + 1);
     });
     it("keeps Exactly until the full recording coverage endpoint", () => {
       const end = Date.parse(coverageEnd);
@@ -46,7 +46,7 @@ for (const [config, coverageStart, coverageEnd, historicYear] of [
     });
     it("keeps Now in the post-splashdown coverage instead of wrapping to launch day", () => {
       const now = Date.parse(coverageEnd) - 1000;
-      expect(missionRealtimeGet(config, 0, now)).toBe(config.missionDurationSeconds - 1);
+      expect(missionRealtimeGet(config, now)).toBe(config.missionDurationSeconds - 1);
     });
   });
 }

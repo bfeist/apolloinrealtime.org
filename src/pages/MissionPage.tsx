@@ -83,7 +83,8 @@ function MissionExperience({ config }: { config: MissionConfig }) {
     }, 100);
     return () => {
       window.clearInterval(timer);
-      useMissionStore.getState().setPlaying(false);
+      // The next route loader replaces the clock. Do not pause that new clock
+      // from the outgoing page's cleanup (including its realtime selection).
     };
   }, []);
   const showAbout = (): void => {
@@ -191,7 +192,6 @@ function MissionExperience({ config }: { config: MissionConfig }) {
                   ))}
                 </div>
                 <TransportControls
-                  config={config}
                   dashboardVisible={dashboardVisible}
                   onAbout={showAbout}
                   onShare={share}
