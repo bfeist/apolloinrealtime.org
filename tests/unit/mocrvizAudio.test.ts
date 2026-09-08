@@ -100,6 +100,16 @@ describe("MocrvizAudioController.tick", () => {
     expect(audio.currentTime).toBe(100);
   });
 
+  it("reports the real audio playhead as mission GET for recording visuals", () => {
+    const c = controller(audio);
+    c.tick(100, true);
+    audio.currentTime = 98.75;
+    expect(c.playbackGetSeconds()).toBe(98.75);
+
+    audio.duration = Number.NaN;
+    expect(c.playbackGetSeconds()).toBeNull();
+  });
+
   it("does NOT seek while playing if drift within tolerance", () => {
     const c = controller(audio);
     c.tick(0, true);

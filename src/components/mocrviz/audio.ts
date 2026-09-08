@@ -117,6 +117,25 @@ export class MocrvizAudioController {
     };
   }
 
+  /**
+   * Mission GET represented by the audio element's real playhead.
+   *
+   * While playing, the audio is intentionally allowed a small amount of drift
+   * from the shared clock to avoid audible seek corrections. Visualizations
+   * that depict the recording itself should therefore follow this value rather
+   * than the desired clock offset.
+   */
+  playbackGetSeconds(): number | null {
+    if (
+      this.tape === null ||
+      !Number.isFinite(this.audio.duration) ||
+      !Number.isFinite(this.audio.currentTime)
+    ) {
+      return null;
+    }
+    return this.tape.startSeconds + this.audio.currentTime;
+  }
+
   /** Stop playback and clear src. Called when the panel unmounts. */
   destroy(): void {
     try {

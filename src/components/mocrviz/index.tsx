@@ -63,6 +63,10 @@ function MissionControl({
   const tape = tapes.data ? findTapeForGet(tapes.data, channel, seconds) : null;
   const waveform = useRecordingWaveform(mission, root, channel, tape);
   const activity = useChannelActivity(mission, root, seconds, Math.ceil(width / 2) + 2);
+  const waveformSeconds =
+    playing && rightTab === "mocr"
+      ? (controller.current?.playbackGetSeconds() ?? seconds)
+      : seconds;
   const labels = useMemo(
     () => new Map(catalog.all.map((entry) => [entry.id, displayLabel(entry.id, entry.label)])),
     [catalog],
@@ -112,6 +116,7 @@ function MissionControl({
     if (!canvas.current || rightTab !== "mocr") return;
     drawTimeline(canvas.current, {
       seconds,
+      waveformSeconds,
       channel,
       channels: ordered,
       labels,
@@ -125,6 +130,7 @@ function MissionControl({
     });
   }, [
     seconds,
+    waveformSeconds,
     channel,
     ordered,
     labels,
@@ -166,6 +172,7 @@ function MissionControl({
         tabIndex={0}
         aria-label="Recorded channel activity and audio waveform. Click to select a channel and seek in mission time."
         data-current-seconds={seconds.toFixed(3)}
+        data-waveform-seconds={waveformSeconds.toFixed(3)}
         data-hover-channel={hovered ?? undefined}
         data-hover-get={timelineHover ? secondsToTimeStr(timelineHover.seconds) : undefined}
         onPointerMove={(event) => {

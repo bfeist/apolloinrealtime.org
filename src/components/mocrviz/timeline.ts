@@ -18,6 +18,8 @@ export interface TimelineHover {
 
 export interface TimelineState {
   seconds: number;
+  /** Actual audio playhead GET; the other timeline tracks use the shared clock. */
+  waveformSeconds: number;
   channel: number;
   channels: readonly number[];
   labels: ReadonlyMap<number, string>;
@@ -94,7 +96,7 @@ export function drawTimeline(canvas: HTMLCanvasElement, state: TimelineState): v
     let lastX = -1;
     const halfHeight = TIMELINE.waveformHeight / 2;
     for (let x = 0; x < width; x++) {
-      const tapeSecond = state.seconds - state.tapeStart + (x - width / 2) / waveRate;
+      const tapeSecond = state.waveformSeconds - state.tapeStart + (x - width / 2) / waveRate;
       const peak = waveformPeak(state.waveform, tapeSecond, tapeSecond + 1 / waveRate);
       if (!peak) continue;
       // The legacy Paper.js path always left a one-pixel body at zero amplitude.
