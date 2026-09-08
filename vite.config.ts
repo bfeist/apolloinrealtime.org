@@ -1,6 +1,6 @@
 import react from "@vitejs/plugin-react";
 import { resolve } from "node:path";
-import { defineConfig, normalizePath, type Plugin } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import { pageHeadTags } from "./src/app/pageMetadata.js";
 import { a11Config } from "./src/missions/11.config.js";
 import { a13Config } from "./src/missions/13.config.js";
@@ -8,15 +8,18 @@ import { a17Config } from "./src/missions/17.config.js";
 
 const projectRoot = import.meta.dirname;
 
-/** Crawlers receive the same metadata as a browser navigating between routes. */
+const missionConfigs = [a11Config, a13Config, a17Config];
+
+function configForPath(path: string | undefined) {
+  const missionId = /^\/(11|13|17)(?:\/|$)/.exec(path ?? "")?.[1];
+  return missionConfigs.find((config) => config.id === missionId);
+}
+
+/** Development requests receive route metadata; React updates it during client navigation. */
 const pageMetadata = (): Plugin => ({
   name: "page-metadata",
   transformIndexHtml(_html, context) {
-    const mission = [a11Config, a13Config, a17Config].find(
-      (config) =>
-        normalizePath(context.filename) ===
-        normalizePath(resolve(projectRoot, config.id, "index.html")),
-    );
+    const mission = configForPath(context.originalUrl ?? context.path);
     return pageHeadTags(mission);
   },
 });
@@ -62,13 +65,5 @@ export default defineConfig({
   build: {
     outDir: ".local/dist",
     emptyOutDir: true,
-    rollupOptions: {
-      input: {
-        landing: resolve(projectRoot, "index.html"),
-        a11: resolve(projectRoot, "11/index.html"),
-        a13: resolve(projectRoot, "13/index.html"),
-        a17: resolve(projectRoot, "17/index.html"),
-      },
-    },
   },
 });

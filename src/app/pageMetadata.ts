@@ -1,4 +1,4 @@
-/** Shared by Vite's static HTML entries and client-side route changes. */
+/** Shared by Vite's HTML entry and client-side route changes. */
 export interface PageHeadTag {
   tag: "title" | "meta" | "link";
   attrs: Record<string, string>;

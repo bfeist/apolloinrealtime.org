@@ -72,8 +72,9 @@ clock, dates, schedule, and media offsets use this conversion; datasets and
 links retain historical GET. Seeks into the skipped interval canonicalize to
 067:40:00. The original date helper's 64-hour threshold is not used.
 
-[`app/pageMetadata.ts`](app/pageMetadata.ts) supplies both the static HTML head
-through Vite and the metadata applied during React Router navigation.
+[`app/pageMetadata.ts`](app/pageMetadata.ts) supplies the single HTML entry's
+head and the route metadata applied during React Router navigation. Production
+uses `public/.htaccess` to serve that entry for every application route.
 
 ## Where to make changes
 

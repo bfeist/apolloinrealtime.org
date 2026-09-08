@@ -37,10 +37,10 @@ async function expectMetadata(page: Page, config?: MissionConfig) {
   }
 }
 
-test.describe("static metadata for crawlers without JavaScript", () => {
+test.describe("route metadata without JavaScript in development", () => {
   test.use({ javaScriptEnabled: false });
   for (const config of [undefined, a11Config, a13Config, a17Config]) {
-    test(`${config?.name ?? "landing"} serves mission metadata in both static entry URLs`, async ({
+    test(`${config?.name ?? "landing"} serves metadata at both public entry URLs`, async ({
       page,
     }) => {
       const route = config ? `/${config.id}/` : "/";

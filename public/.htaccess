@@ -1,0 +1,17 @@
+Options -MultiViews
+DirectoryIndex index.html
+
+RewriteEngine On
+
+# Retired applications now enter the corresponding responsive mission route.
+RewriteRule ^(11|13|17)/mobile(?:/.*)?$ /$1/ [R=301,L,NE]
+RewriteRule ^13/spacecraft_dev(?:/.*)?$ /13/ [R=301,L,NE]
+RewriteRule ^17/nominee(?:/.*)?$ /17/ [R=301,L,NE]
+
+# Mission asset directories really exist, so route their entry URLs explicitly.
+RewriteRule ^(?:11|13|17)(?:/index\.html|/)?$ /index.html [L]
+
+# Preserve real assets and send all other application routes to React Router.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ /index.html [L]

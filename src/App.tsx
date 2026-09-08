@@ -20,7 +20,7 @@ const router = createBrowserRouter([
       },
       element: <MissionPage key={config.id} config={config} />,
     };
-    // Preserve explicit static entry URLs as well as the public mission routes.
+    // Preserve explicit index.html URLs as well as the public mission routes.
     return [
       { path: `/${config.id}/`, ...route },
       { path: `/${config.id}/index.html`, ...route },

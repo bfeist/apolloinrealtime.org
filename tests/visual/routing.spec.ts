@@ -183,7 +183,7 @@ test("navigator mouse seeks still work after a mission page remount", async ({ p
   }).toPass();
 });
 
-test("explicit static HTML entry URLs preserve mission and GET routing", async ({ page }) => {
+test("explicit index.html URLs preserve mission and GET routing", async ({ page }) => {
   await page.goto("/index.html");
   await expect(page.locator("[aria-labelledby=mission-selection]")).toBeVisible();
   for (const mission of ["11", "13", "17"]) {
