@@ -75,6 +75,16 @@
 .airtActionBtn:is(:hover, :active, .isActive) {
   background-color: #ffc688;
 }
+.blinkMeOrange {
+  animation: blinkerOrange 0.2s step-start infinite;
+}
+@keyframes blinkerOrange {
+  60% {
+    background-color: #ffc688;
+    border-right: 1px solid rgba(215, 160, 108, 1);
+    border-bottom: 1px solid rgba(215, 160, 108, 1);
+  }
+}
 :is(.airtTab, .airtAppTab, .airtActionBtn, .thirtybtnChannel):focus-visible {
   outline: 2px solid #ffc688;
   outline-offset: -2px;

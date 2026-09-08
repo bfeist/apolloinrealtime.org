@@ -99,7 +99,11 @@ export function TransportControls({
       </button>
       <button
         id="playPauseBtn"
-        className={cx(styles.airtActionBtn, styles.airtActionBtnLabeled)}
+        className={cx(
+          styles.airtActionBtn,
+          styles.airtActionBtnLabeled,
+          !playing && styles.blinkMeOrange,
+        )}
         type="button"
         title="Play/Pause"
         aria-label={playing ? "Pause" : "Play"}

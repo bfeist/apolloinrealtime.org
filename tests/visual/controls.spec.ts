@@ -81,6 +81,17 @@ for (const mission of ["11", "13", "17"] as const) {
           /data:image\/svg\+xml/,
         );
       }
+      const playPause = page.locator("#playPauseBtn");
+      await expect(playPause).toHaveAttribute("aria-pressed", "false");
+      await expect(playPause).toHaveCSS("animation-duration", "0.2s");
+      await expect(playPause).toHaveCSS("animation-timing-function", "steps(1, start)");
+      await expect(playPause).toHaveCSS("animation-iteration-count", "infinite");
+      await playPause.click();
+      await expect(playPause).toHaveAttribute("aria-pressed", "true");
+      await expect(playPause).toHaveCSS("animation-name", "none");
+      await playPause.click();
+      await expect(playPause).toHaveAttribute("aria-pressed", "false");
+      await expect(playPause).toHaveCSS("animation-duration", "0.2s");
       await page.locator("#tocTab").hover();
       await expect(page.locator("#tocTab")).toBeVisible();
       await page.locator("#tocTab").click();
