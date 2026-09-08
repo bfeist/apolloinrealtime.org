@@ -183,9 +183,16 @@ function makeFakePaper(width: number, height: number): FakePaper {
 
 const canvasAdd = vi.fn();
 const canvasRemove = vi.fn();
+const documentAdd = vi.fn();
+const documentRemove = vi.fn();
+const OWNER_DOCUMENT = {
+  addEventListener: documentAdd,
+  removeEventListener: documentRemove,
+} as unknown as Document;
 const CANVAS = {
   addEventListener: canvasAdd,
   removeEventListener: canvasRemove,
+  ownerDocument: OWNER_DOCUMENT,
 } as unknown as HTMLCanvasElement;
 
 /** Group accessor that throws on out-of-range index (keeps tests strict-safe). */
@@ -219,6 +226,8 @@ describe("NavigatorRenderer", () => {
     expect(paper.view.onResize).toBeTypeOf("function");
     // DOM mouseleave is wired to the canvas.
     expect(canvasAdd).toHaveBeenCalledWith("mouseleave", expect.any(Function));
+    // The legacy page-level fallback is also restored.
+    expect(documentAdd).toHaveBeenCalledWith("mouseout", expect.any(Function));
   });
 
   it("mount() is idempotent", () => {
@@ -333,6 +342,38 @@ describe("NavigatorRenderer", () => {
     expect(onSeek).toHaveBeenLastCalledWith(hitTestMouseClick(layout, point, 0, 0).seconds);
   });
 
+  it("clears hover when the pointer leaves the page", () => {
+    const paper = makeFakePaper(A13.width, A13.height);
+    const renderer = new NavigatorRenderer(paper, A13);
+    renderer.mount(CANVAS);
+    paper.lastTool?.onMouseMove?.({ point: { x: 500, y: 5 } });
+    expect(groupAt(paper, 6).children.length).toBeGreaterThan(0);
+
+    const listener = documentAdd.mock.calls.find(([type]) => type === "mouseout")?.[1] as
+      ((event: MouseEvent) => void) | undefined;
+    expect(listener).toBeTypeOf("function");
+    listener?.({ relatedTarget: null } as MouseEvent);
+
+    expect(groupAt(paper, 6).children).toHaveLength(0);
+  });
+
+  it("does not let a trailing out-of-bounds Paper move restore stale hover", () => {
+    const paper = makeFakePaper(A13.width, A13.height);
+    const renderer = new NavigatorRenderer(paper, A13);
+    renderer.mount(CANVAS);
+    paper.lastTool?.onMouseMove?.({ point: { x: 500, y: 5 } });
+    expect(groupAt(paper, 6).children.length).toBeGreaterThan(0);
+
+    const listener = canvasAdd.mock.calls.find(([type]) => type === "mouseleave")?.[1] as
+      (() => void) | undefined;
+    listener?.();
+    paper.lastTool?.onMouseMove?.({ point: { x: 500, y: -1 } });
+    renderer.render(3600);
+
+    expect(groupAt(paper, 6).children).toHaveLength(0);
+    expect(labelsIn(paper, 5)).toContain("001:00:00");
+  });
+
   it("destroy() removes groups and detaches handlers", () => {
     const paper = makeFakePaper(A13.width, A13.height);
     const r = new NavigatorRenderer(paper, {
@@ -349,6 +390,7 @@ describe("NavigatorRenderer", () => {
     expect(paper.activeTool).toBeNull();
     expect(paper.view.onResize).toBeNull();
     expect(canvasRemove).toHaveBeenCalledWith("mouseleave", expect.any(Function));
+    expect(documentRemove).toHaveBeenCalledWith("mouseout", expect.any(Function));
   });
 
   it("a remount activates the new tool and old cleanup cannot clear its handlers", () => {

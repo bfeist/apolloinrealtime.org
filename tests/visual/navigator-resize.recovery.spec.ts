@@ -57,3 +57,47 @@ for (const config of [a11Config, a13Config, a17Config]) {
     }
   });
 }
+
+test("navigator clears its hover preview when the pointer leaves the page", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/13/?t=055:54:53");
+  const canvas = page.locator("#navCanvas");
+  await expect(canvas).toBeVisible();
+  await expect
+    .poll(() =>
+      canvas.evaluate((element: HTMLCanvasElement) => {
+        const bounds = element.getBoundingClientRect();
+        const paper = (window as unknown as { paper?: PaperScopeLike }).paper;
+        if (!paper?.view) return Number.POSITIVE_INFINITY;
+        return Math.max(
+          Math.abs(paper.view.size.width - bounds.width),
+          Math.abs(paper.view.size.height - bounds.height),
+          Math.abs(element.width / devicePixelRatio - bounds.width),
+          Math.abs(element.height / devicePixelRatio - bounds.height),
+        );
+      }),
+    )
+    .toBeLessThanOrEqual(1);
+  const bounds = await canvas.boundingBox();
+  if (!bounds) throw new Error("Navigator canvas is not visible");
+
+  const navCursorChildren = () =>
+    page.evaluate(() => {
+      const paper = (
+        window as unknown as {
+          paper?: {
+            project?: { activeLayer?: { children?: { children?: unknown[] }[] } };
+          };
+        }
+      ).paper;
+      return paper?.project?.activeLayer?.children?.[6]?.children?.length ?? -1;
+    });
+
+  await page.mouse.move(bounds.x + bounds.width * 0.7, bounds.y + 5);
+  await expect.poll(navCursorChildren).toBeGreaterThan(0);
+
+  // The navigator sits against the top of the page, so a user can leave it
+  // directly into the browser chrome without entering another page element.
+  await page.mouse.move(bounds.x + bounds.width * 0.7, -1);
+  await expect.poll(navCursorChildren).toBe(0);
+});

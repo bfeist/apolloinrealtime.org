@@ -95,9 +95,19 @@ export class NavigatorRenderer {
   private _view: PaperView | null = null;
   /** Canvas element stored for removing the DOM `mouseleave` listener. */
   private _canvas: HTMLCanvasElement | null = null;
+  /** Owning document stored for removing the page-level mouse-out fallback. */
+  private _document: Document | null = null;
   /** Stable bound reference so `removeEventListener` matches `addEventListener`. */
   private readonly _onMouseLeave = (): void => {
     this.handleMouseLeave();
+  };
+  /**
+   * Leaving the page can bypass a canvas `mouseleave`, particularly while the
+   * mission layout is settling. jQuery implemented the legacy document-level
+   * `mouseleave` listener with `mouseout`, so preserve that behavior here.
+   */
+  private readonly _onDocumentMouseOut = (event: MouseEvent): void => {
+    if (event.relatedTarget === null) this.handleMouseLeave();
   };
 
   constructor(paper: PaperScopeLike, options: NavigatorRendererOptions) {
@@ -145,9 +155,11 @@ export class NavigatorRenderer {
       tool.onMouseUp = (event): void => {
         this.handleMouseUp(event.point);
       };
-      canvas.addEventListener("mouseleave", this._onMouseLeave);
-      this._tool = tool;
       this._canvas = canvas;
+      this._document = canvas.ownerDocument;
+      canvas.addEventListener("mouseleave", this._onMouseLeave);
+      this._document.addEventListener("mouseout", this._onDocumentMouseOut);
+      this._tool = tool;
 
       this.mounted = true;
       this.render(this.currentSeconds);
@@ -200,7 +212,9 @@ export class NavigatorRenderer {
       this._tool = null;
     }
     this._canvas?.removeEventListener("mouseleave", this._onMouseLeave);
+    this._document?.removeEventListener("mouseout", this._onDocumentMouseOut);
     this._canvas = null;
+    this._document = null;
     this._project?.remove();
     this._project = null;
     this._view = null;
@@ -212,12 +226,21 @@ export class NavigatorRenderer {
 
   private handleMouseMove(point: { x: number; y: number }): void {
     if (!this.navCursorGroup) return;
-    this.hoverPoint = point;
     const layout = this.layout();
-    this.navCursorGroup.removeChildren();
-
+    if (point.x < 0 || point.x > layout.width || point.y < 0 || point.y > layout.height) {
+      this.handleMouseLeave();
+      return;
+    }
     const hit = hitTestMouseMove(layout, point, this.tier2StartSeconds, this.tier3StartSeconds);
-    if (hit === null) return;
+    if (hit === null) {
+      // Paper.js can deliver a final move outside the view after the DOM leave
+      // event. Treat it as another leave instead of restoring stale hover state.
+      this.handleMouseLeave();
+      return;
+    }
+
+    this.hoverPoint = point;
+    this.navCursorGroup.removeChildren();
 
     if (hit.tier === 1) {
       this.tier2StartSeconds = this.drawTier1NavBox(layout, hit.seconds);
