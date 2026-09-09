@@ -97,11 +97,11 @@ function MissionExperience({ config }: { config: MissionConfig }) {
   const share = (): void => {
     const state = useMissionStore.getState();
     const url = new URL(window.location.href);
-    url.search = "";
-    url.searchParams.set("t", secondsToTimeStr(state.seconds));
-    if (state.rightTab === "mocr" && state.selectedChannel !== null)
-      url.searchParams.set("ch", String(state.selectedChannel));
-    setShareUrl(url.toString());
+    const channel =
+      state.rightTab === "mocr" && state.selectedChannel !== null
+        ? `&ch=${encodeURIComponent(String(state.selectedChannel))}`
+        : "";
+    setShareUrl(`${url.origin}/${config.id}/?t=${secondsToTimeStr(state.seconds)}${channel}`);
   };
   const rightTabs: { id: RightTab; label: string }[] = [
     { id: "photo", label: "Photography" },

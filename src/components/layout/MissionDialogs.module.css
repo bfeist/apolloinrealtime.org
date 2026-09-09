@@ -1,0 +1,147 @@
+.shareDialog {
+  box-sizing: border-box;
+  /* jquery-modal centers within a 20px-padded blocker; preserve its 90% sizing. */
+  width: calc(90% - 36px);
+  max-width: 500px;
+  max-height: calc(100dvh - 40px);
+  margin: auto;
+  padding: 15px 30px 10px;
+  overflow: visible;
+  color: #999;
+  background: #0f0f0f;
+  border: 2px solid #5e92a6;
+  border-radius: 8px;
+  box-shadow: 0 0 10px #000;
+  font: 16px/normal var(--airt-font-sans);
+}
+
+.shareDialog::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.closeForm {
+  position: absolute;
+  top: -12.5px;
+  right: -12.5px;
+  width: 30px;
+  height: 30px;
+}
+
+.closeButton {
+  position: relative;
+  display: block;
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+  color: transparent;
+  background: #151515;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 1px #000;
+  text-indent: -9999px;
+}
+
+.closeButton::before,
+.closeButton::after {
+  position: absolute;
+  top: 11px;
+  left: 5px;
+  width: 14px;
+  height: 3px;
+  background: #fff;
+  content: "";
+}
+
+.closeButton::before {
+  transform: rotate(45deg);
+}
+
+.closeButton::after {
+  transform: rotate(-45deg);
+}
+
+.shareModalWrapper {
+  display: flow-root;
+}
+
+.headline {
+  clear: both;
+  margin: 0;
+  padding: 0 0 10px;
+  color: #5e92a6;
+  font: 400 1.5em/normal var(--airt-font-display);
+  text-align: left;
+}
+
+.body {
+  display: flow-root;
+  clear: both;
+  width: 100%;
+  padding-bottom: 10px;
+  font: 1em/normal var(--airt-font-sans);
+}
+
+.monitor {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 43px;
+  margin: 0 0 18px;
+  padding: 5px;
+  overflow: hidden;
+  color: #fff;
+  background: #000;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  font:
+    13.3333px/normal Arial,
+    sans-serif;
+  resize: none;
+}
+
+.valueItem {
+  color: #fff;
+}
+
+.copyButton {
+  position: relative;
+  display: block;
+  float: right;
+  box-sizing: border-box;
+  width: 11em;
+  min-height: 50px;
+  margin: 0;
+  padding: 0.5em 1em 1em;
+  color: #000;
+  background: rgba(215, 160, 108, 0.9);
+  border-right: 1px solid rgb(215, 160, 108);
+  border-bottom: 1px solid rgb(215, 160, 108);
+  border-radius: 4px;
+  box-shadow: inset -1px -1px 7px 3px rgba(0, 0, 0, 0.25);
+  font: 400 1em/normal var(--airt-font-oswald);
+  text-align: left;
+  transition: all 0.15s ease-in-out;
+}
+
+.copyButton:hover,
+.copyButton:active,
+.copyButton:focus-visible {
+  background: #ffc688;
+}
+
+.body a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+@media (max-height: 650px) {
+  .shareDialog {
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .shareDialog {
+    max-height: calc(100dvh - 24px);
+  }
+}
