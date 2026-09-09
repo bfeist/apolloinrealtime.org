@@ -45,7 +45,7 @@ reference is [apolloinrealtime.org](https://apolloinrealtime.org/) itself.
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Apollo 11 | Its own MOCR positions, channel catalog, tapes, activity, and transcripts; lunar photography and astromaterial/sample content.                                 |
 | Apollo 13 | Its own MOCR positions, channel catalog, tapes, activity, and transcripts; mission-specific trajectory/dashboard and spacecraft information; no lunar geology. |
-| Apollo 17 | No current MOCR dataset or channel strip; lunar-surface content plus Cernan/Schmitt heart-rate and metabolic-rate data.                                        |
+| Apollo 17 | No current MOCR dataset or channel strip; lunar-surface content plus Cernan/Schmitt heart-rate and metabolic-rate data. Transcript bag-number links open the original geology sample overlay with returned samples, NASA metadata, photography, catalogs, and papers. |
 
 The discarded A13 `spacecraft_dev/` prototype is not the production spacecraft
 information panel. Shared code must never substitute one mission's data for

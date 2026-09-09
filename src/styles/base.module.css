@@ -449,6 +449,7 @@ button {
 
 /* Right column: photo viewer and thumbnail rail. */
 .airtRight {
+  position: relative;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: var(--airt-sp-2);

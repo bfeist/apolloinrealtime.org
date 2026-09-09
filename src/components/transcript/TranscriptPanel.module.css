@@ -56,6 +56,22 @@ tr.commentary > td {
 .spokenwords {
   color: var(--airt-fg-primary);
 }
+.bagLink {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  color: #fff;
+  font: inherit;
+  line-height: inherit;
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.bagLink:focus-visible {
+  outline: 1px solid var(--airt-accent-hi);
+  outline-offset: 1px;
+}
 .attribution {
   display: block;
   color: var(--airt-fg-muted);

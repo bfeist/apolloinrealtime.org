@@ -21,6 +21,8 @@ import layout from "../styles/base.module.css";
 import controls from "../styles/controls.module.css";
 import spacecraftStyles from "../components/spacecraft/SpacecraftPanel.module.css";
 import { cx } from "../styles/classNames.js";
+import { GeoSampleOverlay } from "../components/geosamples/GeoSampleOverlay.js";
+import type { GeoSampleBag } from "../components/geosamples/data.js";
 
 const MocrvizPanel = lazy(() =>
   import("../components/mocrviz/index.js").then((m) => ({ default: m.MocrvizPanel })),
@@ -64,6 +66,7 @@ function MissionExperience({ config }: { config: MissionConfig }) {
   const [splash, setSplash] = useState(() => window.location.search === "");
   const [about, setAbout] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [sampleBag, setSampleBag] = useState<GeoSampleBag | null>(null);
   const textTab = useMissionStore((s) => s.textTab);
   const rightTab = useMissionStore((s) => s.rightTab);
   const searchVisible = useMissionStore((s) => s.searchVisible);
@@ -210,7 +213,21 @@ function MissionExperience({ config }: { config: MissionConfig }) {
                     aria-labelledby={`${id}Tab`}
                     hidden={textTab !== id}
                   >
-                    <Panel config={config} />
+                    {id === "transcript" ? (
+                      config.id === "17" ? (
+                        <TranscriptPanel
+                          config={config}
+                          onOpenSampleBag={(bag) => {
+                            useMissionStore.getState().setRightTab("photo");
+                            setSampleBag(bag);
+                          }}
+                        />
+                      ) : (
+                        <TranscriptPanel config={config} />
+                      )
+                    ) : (
+                      <Panel config={config} />
+                    )}
                   </div>
                 ))}
               </div>
@@ -289,6 +306,15 @@ function MissionExperience({ config }: { config: MissionConfig }) {
                   </div>
                 )}
               </div>
+              {config.id === "17" && sampleBag && (
+                <GeoSampleOverlay
+                  config={config}
+                  bag={sampleBag}
+                  onClose={() => {
+                    setSampleBag(null);
+                  }}
+                />
+              )}
             </section>
           </main>
           <div

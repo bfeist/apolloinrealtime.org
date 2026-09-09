@@ -7,6 +7,8 @@ import { useFollowActiveRow } from "./useFollowActiveRow.js";
 import styles from "./TranscriptPanel.module.css";
 import { speakerClassName } from "./classNames.js";
 import { cx } from "../../styles/classNames.js";
+import { transcriptBagSegments, type GeoSampleBag } from "../geosamples/data.js";
+import { useGeoSampleIndex } from "../geosamples/useGeoSampleData.js";
 
 interface TranscriptWindow {
   center: number;
@@ -16,8 +18,15 @@ interface TranscriptWindow {
 
 /** A small row window keeps the 30,000-line transcript responsive. Scrolling expands
  * it in either direction; the next mission-time selection recenters it. */
-export function TranscriptPanel({ config }: { config: MissionConfig }) {
+export function TranscriptPanel({
+  config,
+  onOpenSampleBag,
+}: {
+  config: MissionConfig;
+  onOpenSampleBag?: (bag: GeoSampleBag) => void;
+}) {
   const { data, error } = useUtteranceData(config);
+  const geology = useGeoSampleIndex(config);
   const activeIndex = useMissionStore((state) =>
     data ? findClosestUtteranceIndex(data, state.seconds) : -1,
   );
@@ -103,7 +112,28 @@ export function TranscriptPanel({ config }: { config: MissionConfig }) {
                 <td className={cx(styles.who, speakerStyle)} data-testid="transcript-speaker">
                   {displaySpeakerLabel(entry.speaker, config.speakerLabels)}
                 </td>
-                <td className={cx(styles.spokenwords, speakerStyle)}>{entry.words}</td>
+                <td className={cx(styles.spokenwords, speakerStyle)}>
+                  {transcriptBagSegments(
+                    entry.words,
+                    geology.data?.byTimeId.get(entry.timeId) ?? [],
+                  ).map((segment, segmentIndex) => {
+                    const linkedBag = segment.bag;
+                    return linkedBag && onOpenSampleBag ? (
+                      <button
+                        className={styles.bagLink}
+                        type="button"
+                        key={`${linkedBag.bagNumber}:${String(segmentIndex)}`}
+                        onClick={() => {
+                          onOpenSampleBag(linkedBag);
+                        }}
+                      >
+                        {segment.text}
+                      </button>
+                    ) : (
+                      segment.text
+                    );
+                  })}
+                </td>
               </tr>
             );
           })}

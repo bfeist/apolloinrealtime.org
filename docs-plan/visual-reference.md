@@ -130,6 +130,13 @@ container. Mission-specific geology/sample/biometric/spacecraft content
 needs a feature audit against production; the presence of a legacy selector
 is a source clue, not proof that a feature has been implemented or retired.
 
+Apollo 17 transcript bag numbers are white underlined links. They replace the
+entire right/photo pane with the production geology overlay: black background,
+white rounded border and close control, blue-bordered sample cards, orange
+sample headings, NASA metadata tables, optional sample photography, catalog
+links, and published-paper tables. The overlay scrolls independently and the
+close control or Escape restores photography.
+
 ## MOCRviz is a visualization and listening experience
 
 Inspect production with MOCR Audio open on both A11 and A13. Preserve:

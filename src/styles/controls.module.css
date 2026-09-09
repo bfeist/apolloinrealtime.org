@@ -68,6 +68,7 @@
 .airtActionBtnLabeled {
   height: 38px;
   padding: 2.4px 0 0;
+  line-height: normal;
   text-align: center;
   justify-content: center;
   background-position: 50% 85%;

@@ -66,6 +66,13 @@ for (const mission of ["11", "13", "17"] as const) {
       expect(positions.shareBtn.top).toBe(positions.searchBtn.top);
       expect(positions.shareBtn.bottom).toBe(positions.dashboardBtn.bottom);
       expect(positions.playPauseBtn.bottom).toBe(positions.dashboardBtn.bottom);
+      for (const id of ["share", "playPause"]) {
+        const labeledControl = page.locator(`#${id}Btn`);
+        await expect(labeledControl).toHaveCSS("font-family", /Oswald/);
+        await expect(labeledControl).toHaveCSS("font-size", "12px");
+        await expect(labeledControl).toHaveCSS("font-weight", "400");
+        await expect(labeledControl).toHaveCSS("line-height", "normal");
+      }
       for (const id of [
         "search",
         "realtime",

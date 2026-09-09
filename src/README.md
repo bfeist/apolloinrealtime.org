@@ -44,6 +44,10 @@ Fetched data follows the pattern used by `../issirt`: typed fetchers in
 in another. Components render query loading/error states and derive current
 entries from query data plus GET. Do not copy query results into Zustand.
 Specialized sample, biometric, and MOCR queries live alongside those components.
+Apollo 17's transcript geology links join `geoData.csv` to utterances by time ID
+and literal transcript token. The geology overlay reuses the local sample photo,
+compendium, and paper indexes while fetching current specimen metadata from
+NASA's lunar sample API through TanStack Query.
 
 Source CSV row order is not guaranteed. Text adapters build chronological
 indexes and rebuild their matching time-ID maps; records with unusable
