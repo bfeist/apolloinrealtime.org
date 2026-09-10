@@ -194,6 +194,26 @@ test("recovery selected photos link to each mission's highest-resolution image",
   await popup.close();
 });
 
+test("recovery historical photo caption markup is rendered safely", async ({ page }) => {
+  await page.goto("/11/?t=001:06:59");
+  const a11Caption = page.getByTestId("photo-caption");
+  await expect(a11Caption).toContainText('writes, "We were listening');
+  await expect(a11Caption).not.toContainText("&quot;");
+  await expect(a11Caption.getByRole("link")).toHaveCount(2);
+  await expect(a11Caption.getByRole("link", { name: "Morgan", exact: true })).toHaveAttribute(
+    "rel",
+    "noopener noreferrer",
+  );
+
+  await page.goto("/13/?t=078:02:15");
+  const a13Caption = page.getByTestId("photo-caption");
+  await expect(a13Caption).not.toContainText("</a>");
+  await expect(a13Caption.getByRole("link")).toHaveCount(2);
+  await expect(
+    a13Caption.getByRole("link", { name: "read about SIVB impacts on the Moon", exact: true }),
+  ).toHaveAttribute("href", "http://lroc.sese.asu.edu/posts/364");
+});
+
 for (const mission of ["11", "13"]) {
   for (const width of [1440, 768, 390]) {
     test(`recovery MOCR screenshot A${mission} at ${String(width)}`, async ({ page }) => {

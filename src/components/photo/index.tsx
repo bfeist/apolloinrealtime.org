@@ -3,6 +3,7 @@ import { usePhotoData } from "../../api/useMissionData.js";
 import { findClosestPhotoIndex } from "../../data/photoData.js";
 import { useMissionStore } from "../../store/missionStore.js";
 import { galleryItemId, photoResolverFor } from "./model.js";
+import { sanitizePhotoCaption } from "./caption.js";
 import styles from "./PhotoPanel.module.css";
 import layout from "../../styles/base.module.css";
 import { cx } from "../../styles/classNames.js";
@@ -59,7 +60,12 @@ export function PhotoPanel({ config }: { config: MissionConfig }) {
                 data-testid="selected-photo"
               />
             </a>
-            <div className={styles.photodivcaption}>{entry.description}</div>
+            <div
+              className={styles.photodivcaption}
+              data-testid="photo-caption"
+              // Historical captions contain links; the allowlist keeps only safe anchors and text.
+              dangerouslySetInnerHTML={{ __html: sanitizePhotoCaption(entry.description) }}
+            />
             <div className={styles.photoMeta}>
               {entry.timeStr} · {entry.photoId}
               {entry.credit === "" ? "" : ` · ${entry.credit}`}
